@@ -1,0 +1,7 @@
+{
+  "name": "expo-pose-detector",
+  "version": "0.0.1",
+  "main": "index.js",
+  "react-native": "index.js",
+  "expo-module": true
+}
