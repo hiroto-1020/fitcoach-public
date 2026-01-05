@@ -1,5 +1,3 @@
-﻿// components/gotore/ComingSoon.tsx
-// ゴウトレの現在準備中の画面（ローカル/リモート背景・ぼかし・ディム対応＋多言語）
 
 import React from "react";
 import {
@@ -15,24 +13,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-/** =========================
- *  型
- * ========================= */
 type Props = {
-  /** ローカル画像（require(...) や import img from '...'） */
   background?: ImageSourcePropType;
-  /** リモート画像URL（CDN等） */
   backgroundUrl?: string;
-  /** ぼかし強度（0で無効） */
   bgBlur?: number;
-  /** 暗めのスクリーン（0〜1） */
   dim?: number;
 };
 
-/** =========================
- *  デフォルト背景（ローカル画像）
- *  ComingSoon.tsx からの相対パス: ../../image/～ 
- * ========================= */
 const DEFAULT_BG = require("../../image/Image_fx (82) (1).jpg");
 
 export default function ComingSoon({
@@ -44,13 +31,11 @@ export default function ComingSoon({
   const router = useRouter();
   const { t } = useTranslation();
 
-  // 優先順位: props.backgroundUrl > props.background > DEFAULT_BG（なければグラデ）
   const bgSource: ImageSourcePropType | undefined =
     backgroundUrl ? { uri: backgroundUrl } : background ?? DEFAULT_BG;
 
   return (
     <View style={{ flex: 1 }}>
-      {/* 背景（画像 or グラデ） */}
       {bgSource ? (
         <ImageBackground
           source={bgSource}
@@ -65,7 +50,6 @@ export default function ComingSoon({
         />
       )}
 
-      {/* うっすら暗くするスクリーン & 下方向のトーン */}
       <View
         pointerEvents="none"
         style={[
@@ -83,7 +67,6 @@ export default function ComingSoon({
         style={StyleSheet.absoluteFill}
       />
 
-      {/* コンテンツ */}
       <View style={styles.center}>
         <View style={styles.card}>
           <Text style={styles.title}>
@@ -154,9 +137,6 @@ export default function ComingSoon({
   );
 }
 
-/** =========================
- *  スタイル
- * ========================= */
 const styles = StyleSheet.create({
   center: {
     flex: 1,

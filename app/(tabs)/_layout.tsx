@@ -1,4 +1,3 @@
-// app/(tabs)/_layout.tsx
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -47,9 +46,7 @@ export default function TabsLayout() {
           tabBarLabelStyle: { fontWeight: "600", fontSize: 11, lineHeight: 13 },
         }}
       >
-        {/* ====== 表示したい 5 個のタブ ====== */}
 
-        {/* 1. ホーム */}
         <Tabs.Screen
           name="home"
           options={{
@@ -58,7 +55,6 @@ export default function TabsLayout() {
           }}
         />
 
-        {/* 2. 記録ハブ */}
         <Tabs.Screen
           name="record/index"
           options={{
@@ -67,7 +63,6 @@ export default function TabsLayout() {
           }}
         />
 
-        {/* 3. 探索 */}
         <Tabs.Screen
           name="explore/index"
           options={{
@@ -76,7 +71,6 @@ export default function TabsLayout() {
           }}
         />
 
-        {/* 4. 合トレ */}
         <Tabs.Screen
           name="gotore"
           options={{
@@ -85,7 +79,6 @@ export default function TabsLayout() {
           }}
         />
 
-        {/* 5. マイページ */}
         <Tabs.Screen
           name="me"
           options={{
@@ -94,9 +87,7 @@ export default function TabsLayout() {
           }}
         />
 
-        {/* ====== ここから下は「タブには出さない」ルート ====== */}
 
-        {/* 旧タブたち */}
         <Tabs.Screen
           name="training"
           options={{ href: null}}
@@ -118,7 +109,6 @@ export default function TabsLayout() {
           options={{ href: null }}
         />
 
-        {/* ヘルプ / 設定（マイページなどからだけ開く） */}
         <Tabs.Screen
           name="help/index"
           options={{ href: null }}
@@ -133,7 +123,6 @@ export default function TabsLayout() {
         />
       </Tabs>
 
-      {/* “その他” シート（今はトリガー無しだけど一応残しておく） */}
       <Modal
         visible={moreOpen}
         animationType="fade"

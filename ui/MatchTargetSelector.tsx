@@ -1,4 +1,3 @@
-// ui/MatchTargetSelector.tsx
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import type { Gender, MatchTarget } from '../lib/gotore/types';

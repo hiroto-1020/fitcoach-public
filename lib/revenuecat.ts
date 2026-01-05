@@ -1,4 +1,3 @@
-// lib/revenuecat.ts
 import Purchases, {
   Offerings,
   PurchasesPackage,
@@ -16,7 +15,6 @@ const isNative = Platform.OS === 'ios' || Platform.OS === 'android';
 
 function pickSdkKey(): string {
   if (!isNative) return '';
-  // Expo Go では Test Store を使う
   if (Constants?.appOwnership === 'expo') return RC_TEST;
   return Platform.OS === 'ios' ? RC_IOS : RC_ANDROID;
 }
@@ -39,17 +37,14 @@ export async function initRevenueCat() {
       try {
         await Purchases.logIn(uid);
       } catch {
-        /* noop */
       }
     }
   } catch {
-    /* noop */
   }
 }
 
 export const canUsePurchases = () => isNative;
 
-// Test Store でも毎回一意になるよう nonce を必ず付ける
 function buildTxId(result: any, pack: number, uid?: string) {
   const base =
     result?.storeTransaction?.transactionIdentifier ??
@@ -92,7 +87,6 @@ export async function purchaseLikesPack(opts: { pack: 10 | 30 | 50 | 100 }) {
 
     return { txId, ok: true as const };
   } catch (e: any) {
-    // ユーザーキャンセルは成功扱いにしないがエラーは投げない
     if (e?.code === PurchasesErrorCode.PurchaseCancelledError) {
       return { cancelled: true as const };
     }

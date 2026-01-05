@@ -22,7 +22,6 @@ const PROFILE_COLS = `
   updated_at
 ` as const;
 
-/* ================= 互換判定 ================= */
 export function isCompatible(buddyMode: BuddyMode, otherGender: Gender) {
   if (buddyMode === 'any') return true;
   if (buddyMode === 'male_only') return otherGender === 'male';
@@ -35,7 +34,6 @@ export function isPairCompatible(
   return isCompatible(myMode, otherGender) && isCompatible(otherMode, myGender);
 }
 
-/* ================= Auth / 自分情報 ================= */
 export async function getMe() {
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) return undefined;
@@ -91,7 +89,6 @@ export async function setSeekingBuddyOn() {
   if (error) throw error;
 }
 
-/* ================= オンボーディング要否 ================= */
 export async function needsGotoreOnboarding() {
   const me = await getMe();
   if (!me) throw new Error('not_authenticated');
@@ -111,7 +108,6 @@ export async function needsGotoreOnboarding() {
   return { required: missing.length > 0, missing };
 }
 
-/* ================= ブロック補助 ================= */
 async function getBlockSetsForMe(meId: string) {
   const [{ data: myBlocks }, { data: blocksMe }] = await Promise.all([
     supabase.from('blocks').select('blocked').eq('blocker', meId),
@@ -134,12 +130,11 @@ async function getBlockedSet(): Promise<Set<string>> {
   return ids;
 }
 
-/* ================= フィード（地域 + 各種フィルタ） ================= */
 export type FeedFilters = {
-  tagsAny?: string[];          // 例: ["ベンチ","減量"]
-  gymQuery?: string;           // 例: "博多"（ホームジム部分一致）
-  hideLiked?: boolean;         // 自分がいいね済みを除外
-  verifiedOnly?: boolean;      // 本人確認済みだけ表示
+  tagsAny?: string[];
+  gymQuery?: string;
+  hideLiked?: boolean;
+  verifiedOnly?: boolean;
 };
 
 export async function fetchBuddyFeedWithFilters(
@@ -149,21 +144,18 @@ export async function fetchBuddyFeedWithFilters(
   const { data: auth } = await supabase.auth.getUser();
   if (!auth?.user) return [];
 
-  // 自分の地域
   const { data: me } = await supabase
     .from("profiles")
     .select("region,region_code,region_label")
     .eq("user_id", auth.user.id)
     .maybeSingle();
 
-  // profiles のみ取得（JOIN しない）
   let q = supabase
     .from("profiles")
     .select(PROFILE_COLS, { count: "exact" })
     .neq("user_id", auth.user.id)
     .limit(limit);
 
-  // 地域フィルタ
   if (me?.region) q = q.eq("region", me.region);
   else if (me?.region_label) q = q.eq("region_label", me.region_label);
   else if (me?.region_code) q = q.eq("region_code", me.region_code);
@@ -212,7 +204,6 @@ export async function fetchBuddyFeedWithFilters(
     return bu > au ? 1 : bu < au ? -1 : 0;
   });
 
-  // users / settings を一括取得
   const ids = sorted.map((p) => p.user_id);
   const [{ data: users }, { data: settings }] = await Promise.all([
     supabase.from("users").select("user_id, gender").in("user_id", ids),
@@ -300,12 +291,10 @@ export async function getProfileByUserId(userId: string) {
   return data as any;
 }
 
-/* ================= 旧シンプル版（互換） ================= */
 export async function fetchBuddyFeed(limit = 40): Promise<Candidate[]> {
   return fetchBuddyFeedWithFilters({}, limit);
 }
 
-/* ================= いいね（前判定 + ブロック判定） ================= */
 export async function sendLikeWithPrecheck(toUserId: string) {
   const me = await getMe();
   if (!me) throw new Error('not_authenticated');
@@ -343,7 +332,6 @@ export async function sendLikeWithPrecheck(toUserId: string) {
   return { sent: true };
 }
 
-/* ================= マッチ一覧（未読数 + ブロック除外） ================= */
 export type MatchListItem = {
   match_id: string;
   other_user_id: string;
@@ -390,7 +378,6 @@ export async function fetchMyMatches(): Promise<MatchListItem[]> {
   });
 }
 
-/* ====== チャット一覧（未読 + ブロック除外） ====== */
 export type MatchRow = {
   id: string;
   other_user_id: string;
@@ -497,7 +484,6 @@ export async function markReadAll(matchId: string) {
   return { updated: (data ?? []).length };
 }
 
-/* ================= プロフィール編集 ================= */
 
 export async function ensureMyProfileRow() {
   const me = await getMe();
@@ -533,11 +519,9 @@ export type MyProfileEdit = {
   height_cm?: number | null;
   photos?: string[];
 
-  // 新
   goal?: string | null;
   training_frequency_per_week?: number | null;
 
-  // 旧（受け取りは可・保存は正規化で新に集約）
   goals?: string | null;
   availability?: string | number | null;
 };
@@ -589,7 +573,6 @@ export async function getMyProfileAndGender() {
       toInt(row.availability),
   } : null;
 
-  // gender フォールバック
   let gender = (profile as any)?.gender ?? "unknown";
   if (!gender || gender === "unknown") {
     const { data: urow } = await supabase
@@ -603,12 +586,10 @@ export async function getMyProfileAndGender() {
   return { profile: profile as any, gender };
 }
 
-/** UPDATE専用：検証カラムを送らず、安全に保存 */
 export async function saveMyProfile(input: MyProfileEdit) {
   const me = await getMe();
   if (!me) throw new Error("not_authenticated");
 
-  // まずレコードは必ず存在させる（以降は UPDATE のみ）
   await ensureMyProfileRow();
 
   const toInt = (v: any) => {
@@ -621,7 +602,6 @@ export async function saveMyProfile(input: MyProfileEdit) {
     return null;
   };
 
-  // 送信許可フィールドのみ構築（検証系カラムは一切含めない）
   const allowed: Record<string, any> = {
     updated_at: new Date().toISOString(),
   };
@@ -665,7 +645,6 @@ export async function saveMyProfile(input: MyProfileEdit) {
   if (error) throw error;
 }
 
-/* ================= 性別：フロントAPI（変更は set_gender_once 経由） ================= */
 
 type GenderOnceErrorCode =
   | 'gender_locked'
@@ -680,13 +659,11 @@ export type GenderOnceResult =
   | { ok: true }
   | { ok: false; code: GenderOnceErrorCode };
 
-/** UIから渡る Gender を RPCの受理に合わせて正規化 */
 function normalizeGenderForRpc(g: Gender): 'male'|'female'|'nonbinary' {
   if (g === 'male' || g === 'female') return g;
-  return 'nonbinary'; // 'other' / 'unknown' は nonbinary へ
+  return 'nonbinary';
 }
 
-/** set_gender_once を叩く唯一の窓口 */
 export async function updateMyGender(gender: Gender, token?: string | null): Promise<GenderOnceResult> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("not_authenticated");
@@ -711,19 +688,16 @@ export async function updateMyGender(gender: Gender, token?: string | null): Pro
   return { ok: false, code: map(msg) };
 }
 
-/** 互換：古い呼び出し */
 export async function saveMyGender(gender: string) {
   const { error } = await supabase.rpc("save_my_gender", { p_gender: gender });
   if (error) throw new Error(error.message);
 }
 
-/** 互換API（以前の setMyGender 呼び出しを踏み替え） */
 export async function setMyGender(gender: 'male'|'female'|'other'|'unknown', token?: string | null) {
   const res = await updateMyGender(gender as Gender, token);
   if (!res.ok) throw new Error(res.code);
 }
 
-/** 画面用：性別・KYCのゲート情報 */
 export type GenderGateState = {
   gender: Gender;
   kyc_status: 'not_started'|'pending'|'approved'|'rejected'|null;
@@ -753,7 +727,6 @@ export async function fetchGenderGateState(): Promise<GenderGateState> {
   };
 }
 
-/* ================= チャット ================= */
 export type ChatMessage = {
   id: string;
   match_id: string;
@@ -844,7 +817,6 @@ export async function sendImageMessage(matchId: string, localUri: string) {
   if (error) throw error;
 }
 
-// RN安全版：FormData + 直POST
 export async function uploadProfilePhoto(localUri: string): Promise<string> {
   const { data: auth } = await supabase.auth.getUser();
   if (!auth?.user) throw new Error("not_authenticated");
@@ -879,7 +851,6 @@ export async function uploadProfilePhoto(localUri: string): Promise<string> {
   return `${SUPABASE_URL}/storage/v1/object/public/${PROFILE_BUCKET}/${encodeURI(key)}`;
 }
 
-/** 並び替え/削除を含む写真配列を保存（UPDATEのみ・最大5枚） */
 export async function saveProfilePhotos(urls: string[]) {
   const me = await getMe();
   if (!me) throw new Error("not_authenticated");
@@ -891,7 +862,6 @@ export async function saveProfilePhotos(urls: string[]) {
   if (error) throw error;
 }
 
-/* ================= Safety：ブロック／マッチ解除・相手取得 ================= */
 export async function getMatchOtherUser(matchId: string): Promise<string> {
   const me = await getMe();
   if (!me) throw new Error('not_authenticated');
@@ -962,7 +932,6 @@ export async function unmatch(matchId: string) {
   return { ok: true };
 }
 
-/* ================= Safety：通報 & ミュート ================= */
 export type ReportCategory = 'spam' | 'harassment' | 'inappropriate' | 'other';
 
 export async function reportUser(params: {
@@ -1028,7 +997,6 @@ export async function unmuteUser(targetUserId: string) {
   return { ok: true };
 }
 
-/* ================= 受け取ったいいね ================= */
 export type ReceivedLike = {
   from_user_id: string;
   nickname: string | null;
@@ -1128,9 +1096,6 @@ export async function skipReceivedLike(fromUserId: string) {
   return dismissReceivedLike(fromUserId);
 }
 
-/* =========================================================
-   Stage7：距離・タグ一致スコア・ページング（無限スクロール）
-   ========================================================= */
 
 export type LatLng = { lat: number; lng: number };
 
@@ -1313,7 +1278,6 @@ export async function fetchBuddyFeedPage(
   };
 }
 
-/* ================= Stage9 追加：メッセージ削除＆ページング ================= */
 
 export async function deleteMyMessage(messageId: string) {
   const me = await getMe();
@@ -1346,7 +1310,6 @@ export async function fetchMessagesPage(
   return (data ?? []).slice().reverse() as ChatMessage[];
 }
 
-/* ================= KYC：開始/結果反映 ================= */
 
 export async function startKycSession(provider: 'persona', sessionId: string) {
   const { error } = await supabase.rpc('start_kyc_session', {
@@ -1362,7 +1325,6 @@ export async function applyKycResult(status: 'approved' | 'rejected') {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('not_authenticated');
 
-  // 検証系カラムの反映は安全関数経由（禁止列は自動で間引く）
   await updateProfilesKycSafeFor(user.id, {
     kyc_status: status,
     verified_status: status === 'approved' ? 'verified' : 'rejected',
@@ -1370,7 +1332,6 @@ export async function applyKycResult(status: 'approved' | 'rejected') {
   });
 }
 
-/* ================= KYC + 性別（簡易取得API：既存と互換） ================= */
 export async function getMyKycAndGender(): Promise<{
   verified_status: 'unverified'|'pending'|'verified'|'rejected'|'failed',
   verified_person_id: string | null,
@@ -1422,7 +1383,6 @@ export async function getMyKycAndGender(): Promise<{
   };
 }
 
-/* ================= 内部ヘルパ：profiles へのKYC安全反映 ================= */
 async function updateProfilesKycSafeFor(uid: string, patch: Record<string, any>) {
   const tryUpdate = async (keys: string[]) => {
     const body: Record<string, any> = {};
@@ -1451,7 +1411,6 @@ export async function adminSetKycResult(
   kycId: string,
   status: "approved" | "rejected"
 ) {
-  //   関数のパラメータ名と**同じ**名前にする（p_kyc_id / p_status）
   const { error } = await supabase.rpc("admin_set_kyc_result", {
     p_kyc_id: kycId,
     p_status: status,

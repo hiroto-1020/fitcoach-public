@@ -48,7 +48,6 @@ const ja = {
     alert_saved_title: "保存しました",
     alert_saved_message: "体組成タブのグラフにも反映されます",
 
-    // ▼ 今日のトレーニングカード
     training_today: {
       title: "今日のトレーニング",
       pr_badge: "🎉 PR更新",
@@ -420,7 +419,6 @@ const ja = {
       label_lucky_tempo: "ラッキーテンポ",
       note:
         "※ おみくじは一日一回。0:00 に自動リセットされます。",
-      // 部位名・フォーカス（押し／引き／脚／芯）
       muscles: {
         chest: { name: "大胸筋",       focus: "押し" },
         shoulders: { name: "三角筋",   focus: "押し" },
@@ -431,7 +429,6 @@ const ja = {
         core: { name: "体幹（コア）",  focus: "芯" },
       },
 
-      // 運勢ラベル
       fortuneLabels: {
         daikichi: "大吉",
         chuukichi: "中吉",
@@ -440,8 +437,6 @@ const ja = {
         suekichi: "末吉",
       },
 
-      // 運勢ごとのリードメッセージ
-      //   t("record.omikuji.fortuneMessages.daikichi", { muscleName, focus })
       fortuneMessages: {
         daikichi: "今日は{{focus}}が冴える超・快晴。{{muscleName}}は「質×少量」でキレを出そう！",
         chuukichi: "フォームが光る日。{{muscleName}}はコントロール重視で丁寧に。",
@@ -450,7 +445,6 @@ const ja = {
         suekichi: "回復優先。{{muscleName}}はストレッチ／軽いパンプで血流アップ。",
       },
 
-      // 回復のコツ
       recoveryTipsPool: [
         "水分1.5〜2.5L／日。カフェインはトレ前に寄せる。",
         "就寝90分前の入浴（10〜15分・40℃前後）。",
@@ -463,7 +457,6 @@ const ja = {
         "昼寝20分以内、夕方以降は避ける。",
       ],
 
-      // 小チャレンジ
       challengePool: [
         "鼻→口の深呼吸30秒でリセット。",
         "肩回し10回＋首ストレッチ各20秒。",
@@ -475,7 +468,6 @@ const ja = {
         "上を見て笑顔5秒。",
       ],
 
-      // ラッキーアイテム
       luckyItemsPool: {
         chest: [
           "リストラップ",
@@ -633,7 +625,6 @@ const ja = {
         ],
       },
 
-      // ラッキーセット（メニュー例）
       luckySetsPool: {
         chest: [
           "ベンチプレス 3×8 休150s",

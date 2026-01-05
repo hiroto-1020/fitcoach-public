@@ -1,6 +1,5 @@
-// lib/gotore/useMyGender.ts
 import { useEffect, useState } from 'react';
-import { supabase } from '../supabase'; // 相対パスはプロジェクトに合わせて
+import { supabase } from '../supabase';
 import type { Gender } from './types';
 
 export function useMyGender() {
@@ -13,7 +12,6 @@ export function useMyGender() {
       const uid = data.user?.id ?? null;
       setUserId(uid);
 
-      // 初回取得：user_profiles.gender を信頼（KYCの反映先を単一化）
       if (uid) {
         const { data: prof } = await supabase
           .from('user_profiles')
@@ -26,7 +24,6 @@ export function useMyGender() {
     })();
   }, []);
 
-  // KYC/プロフィール変更の追従
   useEffect(() => {
     if (!userId) return;
     const channel = supabase

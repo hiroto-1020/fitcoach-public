@@ -1,5 +1,3 @@
-// app/(tabs)/gotore/likes/index.tsx
-//もらったいいね一覧
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert,
@@ -49,7 +47,6 @@ function LikeRow({
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [gender, setGender] = useState<string>(item.gender ?? 'unknown');
 
-  // 1枚目のプロフィール写真を取得
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -63,13 +60,12 @@ function LikeRow({
     return () => { alive = false; };
   }, [item.from_user_id]);
 
-  // 性別が unknown ならユーザー側から取得して正規化
   useEffect(() => {
     if (gender && gender !== 'unknown') return;
     let alive = true;
     (async () => {
       try {
-        const g = await fetchGenderForUser(item.from_user_id); // 'male' | 'female' | 'other' | 'unknown'
+        const g = await fetchGenderForUser(item.from_user_id);
         if (alive) setGender(g ?? 'unknown');
       } catch {
         if (alive) setGender('unknown');
@@ -82,7 +78,6 @@ function LikeRow({
 
   return (
     <View style={styles.card}>
-      {/* 左：サムネイル（筋トレ感のアクセントリング） */}
       <TouchableOpacity
         onPress={() => router.push({ pathname: '/(tabs)/gotore/users/[userId]', params: { userId: item.from_user_id } })}
         style={styles.thumbWrap}
@@ -98,7 +93,6 @@ function LikeRow({
         <View style={styles.thumbRing} />
       </TouchableOpacity>
 
-      {/* 右：テキスト＆操作 */}
       <View style={{ flex: 1, marginLeft: 12 }}>
         <TouchableOpacity
           onPress={() => router.push({ pathname: '/(tabs)/gotore/users/[userId]', params: { userId: item.from_user_id } })}
@@ -152,7 +146,6 @@ export default function LikesInboxScreen() {
 
   useEffect(() => { load(); }, [load]);
 
-  // Realtime：新規/削除/更新があれば再取得
   useEffect(() => {
     let unsub: (() => void) | undefined;
     (async () => {
@@ -162,7 +155,6 @@ export default function LikesInboxScreen() {
           setItems(list);
         });
       } catch {
-        // サブスク非対応 or 失敗は無視
       }
     })();
     return () => { if (unsub) unsub(); };
@@ -187,10 +179,8 @@ export default function LikesInboxScreen() {
         Alert.alert('承認できません', '条件不一致またはブロック関係のため承認できません。');
         return;
       }
-      // 楽観更新
       setItems(prev => prev.filter(i => i.from_user_id !== userId));
 
-      // 既に相互成立ならチャットへ
       let mid = match_id ?? null;
       if (!mid) {
         await new Promise(r => setTimeout(r, 400));
@@ -265,14 +255,14 @@ export default function LikesInboxScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#0b1120' }, // ダーク基調（筋トレアプリの世界観）
+  screen: { flex: 1, backgroundColor: '#0b1120' },
   card: {
     flexDirection: 'row',
     gap: 12,
     borderRadius: 16,
     padding: 14,
     marginBottom: 12,
-    backgroundColor: '#0f172a', // Slate-900
+    backgroundColor: '#0f172a',
     borderWidth: 1,
     borderColor: 'rgba(148,163,184,0.15)',
     shadowColor: '#000',
@@ -284,7 +274,6 @@ const styles = StyleSheet.create({
   thumbWrap: { width: 64, height: 64, position: 'relative' },
   thumb: { width: 64, height: 64, borderRadius: 12 },
   thumbPlaceholder: { alignItems: 'center', justifyContent: 'center', backgroundColor: '#0b1020' },
-  // ダンベル色のアクセントリング
   thumbRing: {
     position: 'absolute',
     inset: -2,
@@ -294,7 +283,7 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   name: { color: '#fff', fontSize: 16, fontWeight: '900' },
-  meta: { color: '#93c5fd', marginTop: 4, fontWeight: '700' }, // 青みアクセント
+  meta: { color: '#93c5fd', marginTop: 4, fontWeight: '700' },
   actionsRow: { flexDirection: 'row', gap: 10, marginTop: 10 },
   primaryBtn: {
     backgroundColor: '#22c55e',

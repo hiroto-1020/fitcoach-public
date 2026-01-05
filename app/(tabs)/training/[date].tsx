@@ -1,4 +1,3 @@
-// app/(tabs)/training/[date].tsx
 import React, {
   useEffect,
   useMemo,
@@ -37,12 +36,10 @@ import {
   getSessionNote,
   updateSessionNote,
 } from "../../../lib/training/db";
-// 上部だけで完結（下部バーは使わない）
 import SessionMedia from "../../../ui/SessionMedia";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
-/* ---------- Theme ---------- */
 type Pal = {
   bg: string;
   card: string;
@@ -104,7 +101,6 @@ type Summary = {
   tonnageT: string;
 };
 
-/* ---------- ヘッダー ---------- */
 const Header: React.FC<{
   title: string;
   initialNote: string;
@@ -325,7 +321,6 @@ const Header: React.FC<{
   );
 };
 
-/* ---------- セット行：フォーカス時に自動スクロール ---------- */
 function SetRow({
   row,
   onChanged,
@@ -335,7 +330,7 @@ function SetRow({
   row: Row;
   onChanged: () => void;
   onDeleted: (r: Row) => void;
-  onAskEnsureVisible?: (y: number, h: number) => void; // 追加：見える位置までスクロール依頼
+  onAskEnsureVisible?: (y: number, h: number) => void;
 }) {
   const C = usePalette();
   const { t } = useTranslation();
@@ -348,7 +343,6 @@ function SetRow({
 
   const rowRef = useRef<View>(null);
   const ask = () => {
-    // レイアウト反映後に測る
     setTimeout(() => {
       rowRef.current?.measureInWindow?.(
         (x, y, width, height) => {
@@ -502,7 +496,6 @@ function SetRow({
   );
 }
 
-/* ---------- 画面本体 ---------- */
 export default function DayScreen() {
   const C = usePalette();
   const { date } = useLocalSearchParams<{ date: string }>();
@@ -519,7 +512,6 @@ export default function DayScreen() {
   const listRef = useRef<FlatList>(null);
   const scrollY = useRef(0);
 
-  // キーボードの可視/高さ
   const insets = useSafeAreaInsets();
   const [kbVisible, setKbVisible] = useState(false);
   const [kbHeight, setKbHeight] = useState(0);
@@ -600,7 +592,6 @@ export default function DayScreen() {
     [sessionId]
   );
 
-  // 集計（WU除外）
   const summary: Summary = useMemo(() => {
     const work = rows.filter(
       (r) => r.is_warmup !== 1
@@ -666,7 +657,6 @@ export default function DayScreen() {
     await refresh();
   };
 
-  // ：フォーカスした入力が見える位置まで自動スクロール
   const ensureVisible = useCallback(
     (y: number, h: number) => {
       const winH = Dimensions.get(
@@ -676,7 +666,7 @@ export default function DayScreen() {
         winH -
         kbHeight -
         insets.bottom -
-        12; // キーボードで隠れない最下点
+        12;
       const bottom = y + h;
       if (bottom > visibleBottom - 6) {
         const delta =
@@ -825,7 +815,6 @@ export default function DayScreen() {
               ? "interactive"
               : "on-drag"
           }
-          // “下に逃がす余白” を常に用意（キーボード表示時は少し多め）
           ListFooterComponent={
             <View
               style={{
@@ -852,5 +841,4 @@ export default function DayScreen() {
 }
 
 const styles = StyleSheet.create({
-  // いまは上部完結のため、下部バー系のスタイルは不要
 });

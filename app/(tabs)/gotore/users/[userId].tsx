@@ -169,7 +169,6 @@ export default function UserDetail() {
 
         setRow(p);
 
-        // 写真の決定ロジック：photos   Storage フォールバック   avatar_url
         let urls: string[] = Array.isArray(p?.photos)
           ? p!.photos!.filter(Boolean)
           : [];
@@ -237,7 +236,6 @@ export default function UserDetail() {
           </View>
         ) : (
           <ScrollView contentContainerStyle={{ paddingBottom: 28 }}>
-            {/* 写真カルーセル */}
             <View
               style={{
                 marginTop: Platform.select({ ios: 60, android: 16 }),
@@ -274,7 +272,6 @@ export default function UserDetail() {
               </View>
             </View>
 
-            {/* タイトル / メタ */}
             <View style={{ paddingHorizontal: 16, marginTop: 16 }}>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Text style={styles.name}>{nickname}</Text>
@@ -287,7 +284,6 @@ export default function UserDetail() {
               </Text>
             </View>
 
-            {/* ハイライト */}
             <View style={{ paddingHorizontal: 16, marginTop: 10 }}>
               <View style={styles.chipsRow}>
                 {h ? <Chip>{h}cm</Chip> : null}
@@ -301,21 +297,18 @@ export default function UserDetail() {
               </View>
             </View>
 
-            {/* 目標 */}
             {goals ? (
               <Section title="目標">
                 <Text style={styles.body}>{goals}</Text>
               </Section>
             ) : null}
 
-            {/* 自己紹介 */}
             {bio ? (
               <Section title="自己紹介">
                 <Text style={styles.body}>{bio}</Text>
               </Section>
             ) : null}
 
-            {/* アクション：未マッチ時は非表示のため削除 */}
           </ScrollView>
         )}
       </LinearGradient>
@@ -323,7 +316,6 @@ export default function UserDetail() {
   );
 }
 
-/* ---------- Styles ---------- */
 const CARD_RADIUS = 18;
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: "center", justifyContent: "center" },

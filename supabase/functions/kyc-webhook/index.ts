@@ -1,7 +1,3 @@
-// supabase/functions/kyc-webhook/index.ts
-// KYC モックからの結果通知（webhook）
-// - クライアントが事前に kyc_verifications に「pending」を INSERT 済みであることが前提
-// - ここでは session_id でその行を UPDATE し、profiles にも最終状態を反映
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -14,14 +10,12 @@ type Payload = {
 
 const DEBUG_TAG = "kyc-webhook-v1";
 
-// CORS 共通ヘッダ
 const cors = {
   "access-control-allow-origin": "*",
   "access-control-allow-headers": "authorization,content-type",
   "access-control-allow-methods": "POST,OPTIONS",
 };
 
-// レスポンスヘルパ
 const json = (obj: unknown, init?: ResponseInit) =>
   new Response(JSON.stringify(obj), {
     ...(init ?? {}),
@@ -34,13 +28,9 @@ const json = (obj: unknown, init?: ResponseInit) =>
   });
 
 Deno.serve(async (req) => {
-  // Preflight
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, { status: 405 });
 
-  // === 環境変数のフォールバック対応 ===
-  // （Dashboard > Secrets では PROJECT_URL / SERVICE_ROLE_KEY を使うのが推奨。
-  //   既存プロジェクトでは SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY が残っている場合もある）
   const SUPABASE_URL =
     Deno.env.get("SUPABASE_URL") ?? Deno.env.get("PROJECT_URL") ?? "";
   const SERVICE_ROLE =
@@ -55,7 +45,6 @@ Deno.serve(async (req) => {
 
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE, { auth: { persistSession: false } });
 
-  // === ボディ取得 ===
   let body: Payload;
   try {
     body = (await req.json()) as Payload;
@@ -70,7 +59,6 @@ Deno.serve(async (req) => {
 
   if (!sid) return json({ error: "missing_session_id" }, { status: 400 });
 
-  // === 1) pending 行を session_id で UPDATE（） ===
   const { data: rows, error: updErr } = await admin
     .from("kyc_verifications")
     .update({
@@ -87,7 +75,6 @@ Deno.serve(async (req) => {
     return json({ error: "update_failed", detail: updErr.message }, { status: 500 });
   }
   if (!rows || rows.length === 0) {
-    // 事前の pending が無い（= クライアントの startKycSession() が未実行）
     return json(
       {
         error: "pending_not_found",
@@ -100,7 +87,6 @@ Deno.serve(async (req) => {
 
   const userId = rows[0].user_id as string;
 
-  // === 2) profiles に最終状態を反映 ===
   const finalStatus = providerStatus === "approved" ? "verified" : providerStatus;
   const { error: profErr } = await admin
     .from("profiles")

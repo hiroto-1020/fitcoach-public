@@ -1,8 +1,6 @@
-// lib/notify.ts
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
-// 前景では OS バナーは出さない（前景はJSのアラームUI/Haptics/音で通知）
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: false,
@@ -33,7 +31,6 @@ export async function ensureNotificationSetup() {
   }
 }
 
-// 指定秒後に鳴るローカル通知（背景でのみ使う想定）
 export async function scheduleRestNotification(
   seconds: number,
   title = "レスト終了",
@@ -52,7 +49,7 @@ export async function scheduleRestNotification(
       content: {
         title,
         body,
-        sound: Platform.OS === "ios" ? "default" : undefined, // 背景時のみOSが鳴らす
+        sound: Platform.OS === "ios" ? "default" : undefined,
       },
       trigger,
     });

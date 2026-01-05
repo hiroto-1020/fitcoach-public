@@ -1,4 +1,3 @@
-// apps/mobile/app/onboarding.tsx
 import React, { useState } from 'react';
 import { View, Text, Pressable, Alert } from 'react-native';
 import { supabase } from '../lib/supabase';
@@ -18,12 +17,9 @@ export default function Onboarding() {
         Alert.alert('ログインが必要です');
         return;
       }
-      // users（性別）を確保
       await ensureMyUserRow(gender);
-      // settings（行確保）  モード更新
       await ensureMySettingsRow();
       await updateMyBuddyMode(mode);
-      // プロフィールを合トレ募集ON
       await setSeekingBuddyOn();
 
       Alert.alert('設定を保存しました');

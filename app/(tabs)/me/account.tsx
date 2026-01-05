@@ -1,13 +1,3 @@
-// app/(tabs)/me/account.tsx
-//
-// ・「端末内プロフィール（アカウント設定）」＋「合トレ用プロフィール」を一画面で編集
-// ・自己紹介/年数/写真/身長/目標/頻度 を“完全一致”カラムに保存
-// ・プロフィール写真はドラッグ並び替え・長押し削除・Storage同期
-// ・性別は set_gender_once 経由（saveMyGender）で保存
-// ・iOS InputAccessory（閉じる/保存）を全TextInputに対応
-// ・KYCレスポンスのゆらぎに防御（approved/processing/submitted/created などを正規化）
-// ・KYCが「rejected」になったら性別を 'unknown' に再読込して再選択を促す
-// ・GenderOncePicker は使わずチップUIに固定（過去エラー根絶のため）
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -42,7 +32,6 @@ import ReorderablePhotos from "../../../components/gotore/ReorderablePhotos";
 import { supabase } from "../../../lib/supabase";
 import { useTranslation } from "react-i18next";
 
-// optional deps（未インストールでも落ちない動的 import）
 let AsyncStorage: any = null;
 try {
   AsyncStorage = require("@react-native-async-storage/async-storage").default;
@@ -124,7 +113,6 @@ type LocalProfile = {
 
 type VerifiedStatus = "unverified" | "pending" | "verified" | "rejected" | "failed";
 
-/** 公開URL   object key（Storage削除用） */
 function publicUrlToObjectKey(publicUrl: string): string | null {
   const marker = `/object/public/${PROFILE_BUCKET}/`;
   const idx = publicUrl.indexOf(marker);
@@ -132,7 +120,6 @@ function publicUrlToObjectKey(publicUrl: string): string | null {
   return publicUrl.substring(idx + marker.length);
 }
 
-/* --- 代替バッジ（VerifiedBadge が不安定な環境向け） --- */
 function KycStatusPill({
   status,
   C,
@@ -192,7 +179,6 @@ function KycStatusPill({
   );
 }
 
-/* --- 性別チップUI（GenderOncePicker 非使用で安定運用） --- */
 function ChipGenderUI({
   value,
   onChange,
@@ -236,7 +222,6 @@ function ChipGenderUI({
   );
 }
 
-/* --- 安全ラッパー（常にチップUIを使用） --- */
 function SafeGenderOncePicker({
   value,
   onChange,
@@ -256,14 +241,12 @@ export default function AccountScreen() {
   const router = useRouter();
   const { t } = useTranslation();
 
-  // 端末内（ローカル）
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [timezone, setTimezone] = useState(getDeviceTZ());
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [savingLocal, setSavingLocal] = useState(false);
 
-  // 合トレ用（サーバ保存）
   const [nickname, setNickname] = useState("");
   const [gender, setGender] = useState<Gender>("unknown");
   const [homeGym, setHomeGym] = useState("");
@@ -272,7 +255,6 @@ export default function AccountScreen() {
   const [savingServer, setSavingServer] = useState(false);
   const [loadingServer, setLoadingServer] = useState(true);
 
-  // “完全一致”フィールド群
   const [bio, setBio] = useState("");
   const [trainingYears, setTrainingYears] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
@@ -281,23 +263,18 @@ export default function AccountScreen() {
   const [goal, setGoal] = useState("");
   const [freqPerWeek, setFreqPerWeek] = useState("");
 
-  // KYC
   const [kycStatus, setKycStatus] = useState<VerifiedStatus>("unverified");
   const [kycPersonId, setKycPersonId] = useState<string | null>(null);
   const [kycLoading, setKycLoading] = useState(false);
 
-  // 管理者リンク表示
   const [isAdmin, setIsAdmin] = useState(false);
   const [canSelfPromote, setCanSelfPromote] = useState(false);
 
-  // 地域モーダル
   const [regionOpen, setRegionOpen] = useState(false);
   const [regionQuery, setRegionQuery] = useState("");
 
-  // iOS InputAccessory
   const accessoryID = useRef("accountAccessory").current;
 
-  /* ===== Util ===== */
   const normalizeGender = useCallback((g: any): Gender => {
     return (["male", "female", "other"].includes(g) ? g : "unknown") as Gender;
   }, []);
@@ -320,7 +297,6 @@ export default function AccountScreen() {
     }
   }, [t]);
 
-  /* ===== プロフィール再読込（初期ロード/手動更新で共通使用） ===== */
   const reloadProfile = useCallback(async () => {
     setLoadingServer(true);
     try {
@@ -369,7 +345,6 @@ export default function AccountScreen() {
     }
   }, [normalizeGender, t]);
 
-  /* ===== 初期ロード（ローカル） ===== */
   useEffect(() => {
     (async () => {
       if (!AsyncStorage) return;
@@ -384,12 +359,10 @@ export default function AccountScreen() {
     })();
   }, []);
 
-  /* ===== 初期ロード（サーバ：プロフィール） ===== */
   useEffect(() => {
     reloadProfile();
   }, [reloadProfile]);
 
-  /* ===== 管理者判定 ===== */
   useEffect(() => {
     (async () => {
       try {
@@ -409,16 +382,14 @@ export default function AccountScreen() {
         }
 
         setIsAdmin(db || allow);
-        setCanSelfPromote(allow && !db); // 許可メールだがDBはfalse → 復旧ボタンを出す
+        setCanSelfPromote(allow && !db);
       } catch {}
     })();
   }, []);
 
-  /* ===== KYC 状態の読込（防御的） ===== */
   const loadKyc = useCallback(async () => {
     setKycLoading(true);
     try {
-      // サーバのKYC＋性別情報を取得（返却形のゆらぎに対応）
       const raw = await getMyKycAndGender().catch(() => undefined);
 
       const node: any =
@@ -456,7 +427,6 @@ export default function AccountScreen() {
       setKycStatus(normalized);
       setKycPersonId(personId);
 
-      //  否認 or 未確認時はサーバの最新プロフィールを取り直してUIへ反映
       if (normalized === "rejected" || normalized === "unverified") {
         try {
           const { gender: g } = await getMyProfileAndGender();
@@ -482,19 +452,16 @@ export default function AccountScreen() {
     loadKyc();
   }, [loadKyc]);
 
-  /* ===== KYC 起動 ===== */
   const onStartKycInApp = useCallback(
     async () => {
       try {
         setKycLoading(true);
         const sid =
           "sess_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
-        await startKycSession("persona", sid); // ← RPCがDBにpending行を作る
+        await startKycSession("persona", sid);
 
-        // 楽観更新：すぐピルを pending に
         setKycStatus("pending");
 
-        // 既存のKYCフローへ遷移（存在する前提）
         router.push({
           pathname: "/(tabs)/me/kyc",
           params: { sid, provider: "persona" },
@@ -511,7 +478,6 @@ export default function AccountScreen() {
     [router, t],
   );
 
-  /* ===== 端末保存 ===== */
   const onSaveLocal = useCallback(async () => {
     setSavingLocal(true);
     try {
@@ -538,7 +504,6 @@ export default function AccountScreen() {
     }
   }, [displayName, email, timezone, avatarUri, haptic, t]);
 
-  /* ===== サーバ保存（合トレ） ===== */
   const onSaveServer = useCallback(async () => {
     if (!region) {
       Alert.alert(
@@ -573,13 +538,12 @@ export default function AccountScreen() {
         region,
         bio: bio.trim() || null,
         training_years: yearsNum,
-        photos, // 先頭がメイン
+        photos,
         height_cm: heightNum,
         goal: goal.trim() || null,
         training_frequency_per_week: freqNum,
       });
 
-      //  性別は set_gender_once（saveMyGender throwで制御）
       await saveMyGender(gender);
 
       haptic("light");
@@ -626,7 +590,6 @@ export default function AccountScreen() {
     t,
   ]);
 
-  /* ===== 画像変更（ローカル：端末アバター） ===== */
   const pickImage = useCallback(async () => {
     if (!ImagePicker) {
       Alert.alert(
@@ -680,14 +643,12 @@ export default function AccountScreen() {
     haptic("light");
   }, [haptic]);
 
-  /* ===== 地域候補 ===== */
   const regionFiltered = useMemo(() => {
     const q = regionQuery.trim();
     if (!q) return PREF_LIST as readonly string[];
     return PREF_LIST.filter((p) => p.includes(q));
   }, [regionQuery]);
 
-  /* ===== 現在地から都道府県推定 ===== */
   const setRegionFromGPS = useCallback(async () => {
     if (!Location) {
       Alert.alert(
@@ -718,7 +679,6 @@ export default function AccountScreen() {
     }
   }, [t]);
 
-  /* ===== 合トレ写真：追加（Storage   DB） ===== */
   const pickServerPhoto = useCallback(
     async () => {
       if (!ImagePicker) {
@@ -745,14 +705,11 @@ export default function AccountScreen() {
 
         setUploadingPhoto(true);
 
-        // 共通アップローダ（RN安全版）
         const publicUrl = await uploadProfilePhoto(src);
 
-        // 先頭に追加（＝メイン化）し、最大5枚
         const next = [publicUrl, ...photos].slice(0, MAX);
         setPhotos(next);
 
-        // DBにも即反映
         await saveProfilePhotos(next);
 
         haptic("light");
@@ -768,15 +725,12 @@ export default function AccountScreen() {
     [photos, haptic, t],
   );
 
-  /* ===== 合トレ写真：並び替え/削除   即保存 & Storage同期 ===== */
   const onPhotosChange = useCallback(
     async (next: string[]) => {
       const capped = next.slice(0, MAX);
 
-      // 同一なら何もしない（無駄保存防止）
       if (JSON.stringify(capped) === JSON.stringify(photos)) return;
 
-      // 削除されたURLを検出し、Storageからも削除
       const removed = photos.filter((u) => !capped.includes(u));
       if (removed.length) {
         const keys = removed
@@ -803,7 +757,6 @@ export default function AccountScreen() {
     async (idx: number) => {
       try {
         const next = photos.filter((_, i) => i !== idx);
-        // Storage削除
         const key = publicUrlToObjectKey(photos[idx]);
         if (key) {
           await supabase.storage
@@ -824,7 +777,6 @@ export default function AccountScreen() {
     [photos, haptic, t],
   );
 
-  /* ===== 表示 ===== */
   const inputAccessoryProp =
     Platform.OS === "ios" ? { inputAccessoryViewID: accessoryID } : {};
 
@@ -844,7 +796,6 @@ export default function AccountScreen() {
           {t("account.subtitle")}
         </Text>
 
-        {/* 端末内プロフィール（ローカル） */}
         <Card title={t("account.local.cardTitle")} C={C}>
           <View style={styles.row}>
             <TouchableOpacity
@@ -946,9 +897,7 @@ export default function AccountScreen() {
           </View>
         </Card>
 
-        {/* 合トレ用プロフィール（サーバ保存） */}
         <Card title={t("account.gotore.cardTitle")} C={C}>
-          {/* ニックネーム */}
           <Text style={[styles.label, { color: C.sub }]}>
             {t("account.gotore.nicknameLabel")}
           </Text>
@@ -970,7 +919,6 @@ export default function AccountScreen() {
             {...inputAccessoryProp}
           />
 
-          {/* 性別 */}
           <Text
             style={[
               styles.label,
@@ -986,7 +934,6 @@ export default function AccountScreen() {
             t={t}
           />
 
-          {/* 地域（必須） */}
           <Text
             style={[
               styles.label,
@@ -1060,7 +1007,6 @@ export default function AccountScreen() {
             )}
           </View>
 
-          {/* ホームジム */}
           <Text
             style={[
               styles.label,
@@ -1087,7 +1033,6 @@ export default function AccountScreen() {
             {...inputAccessoryProp}
           />
 
-          {/* 種目タグ */}
           <Text
             style={[
               styles.label,
@@ -1114,7 +1059,6 @@ export default function AccountScreen() {
             {...inputAccessoryProp}
           />
 
-          {/* 自己紹介 */}
           <Text
             style={[
               styles.label,
@@ -1144,7 +1088,6 @@ export default function AccountScreen() {
             {...inputAccessoryProp}
           />
 
-          {/* トレーニング年数（年） */}
           <Text
             style={[
               styles.label,
@@ -1175,7 +1118,6 @@ export default function AccountScreen() {
             {...inputAccessoryProp}
           />
 
-          {/* 身長（cm） */}
           <Text
             style={[
               styles.label,
@@ -1206,7 +1148,6 @@ export default function AccountScreen() {
             {...inputAccessoryProp}
           />
 
-          {/* 目標 */}
           <Text
             style={[
               styles.label,
@@ -1236,7 +1177,6 @@ export default function AccountScreen() {
             {...inputAccessoryProp}
           />
 
-          {/* 頻度（週あたり回数） */}
           <Text
             style={[
               styles.label,
@@ -1302,7 +1242,6 @@ export default function AccountScreen() {
             ))}
           </View>
 
-          {/* プロフィール写真（ドラッグで並び替え / 先頭がメイン / 長押しで削除 / ＋追加） */}
           <Text
             style={[
               styles.label,
@@ -1329,7 +1268,6 @@ export default function AccountScreen() {
             busy={uploadingPhoto}
           />
 
-          {/* 保存ボタン */}
           <TouchableOpacity
             onPress={onSaveServer}
             disabled={savingServer || loadingServer}
@@ -1359,7 +1297,6 @@ export default function AccountScreen() {
           </Text>
         </Card>
 
-        {/* 本人確認（KYC） */}
         <Card title={t("account.kyc.cardTitle")} C={C}>
           <View
             style={{
@@ -1445,7 +1382,6 @@ export default function AccountScreen() {
           </View>
         </Card>
 
-        {/* 管理リンク（管理者のみ表示） */}
         {(isAdmin || canSelfPromote) && (
           <Card title={t("account.admin.cardTitle")} C={C}>
             {canSelfPromote && (
@@ -1492,7 +1428,6 @@ export default function AccountScreen() {
         )}
       </ScrollView>
 
-      {/* 保存バー（ローカル） */}
       <View
         style={[
           styles.fixedBar,
@@ -1516,7 +1451,6 @@ export default function AccountScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* iOS accessory */}
       {Platform.OS === "ios" && (
         <InputAccessoryView nativeID={accessoryID}>
           <View
@@ -1556,7 +1490,6 @@ export default function AccountScreen() {
         </InputAccessoryView>
       )}
 
-      {/* 地域選択モーダル */}
       <Modal
         visible={regionOpen}
         animationType="slide"
@@ -1633,7 +1566,6 @@ export default function AccountScreen() {
   );
 }
 
-/* ---------- 付属UI ---------- */
 function Card({
   title,
   C,
@@ -1656,7 +1588,6 @@ function Card({
   );
 }
 
-/* ---------- Utils ---------- */
 function getDeviceTZ() {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -1668,7 +1599,6 @@ const safeStr = (v: any) => (typeof v === "string" ? v : "") as string;
 const isDark = (C: any) =>
   (C.text || "").toLowerCase() === "#e5e7eb";
 
-/** 住所文字列から都道府県名を推定（都/府/県の有無ゆらぎに対応） */
 function matchPrefecture(administrativeName: string): string | null {
   const adm = administrativeName.replace(/\s/g, "");
   const variants = new Set<string>();
@@ -1687,7 +1617,6 @@ function matchPrefecture(administrativeName: string): string | null {
   return null;
 }
 
-/* ---------- Styles ---------- */
 const styles = StyleSheet.create({
   h1: { fontSize: 20, fontWeight: "800" },
   sub: { marginTop: 4, marginBottom: 12 },

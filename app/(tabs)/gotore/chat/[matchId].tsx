@@ -62,23 +62,18 @@ export default function ChatScreen() {
   const listRef = useRef<FlatList<ChatMessage>>(null);
   const focusedRef = useRef(true);
 
-  // 画像プレビュー
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  // ヘッダーメニュー（ブロック/解除）
   const [menuOpen, setMenuOpen] = useState(false);
   const [actionBusy, setActionBusy] = useState(false);
 
-  // 長押し（行単位）メニュー
   const [contextOpen, setContextOpen] = useState(false);
   const [ctxTarget, setCtxTarget] = useState<ChatMessage | null>(null);
 
-  // ページネーション
   const oldestAt = useMemo(() => messages[0]?.created_at, [messages]);
   const [hasMore, setHasMore] = useState(false);
   const PAGE_SIZE = 30;
 
-  // 下部へジャンプ用
   const [atBottom, setAtBottom] = useState(true);
 
   useEffect(() => { (async () => {
@@ -132,7 +127,6 @@ export default function ChatScreen() {
     return () => unsub();
   }, [mid, meId, atBottom, scrollToEnd]);
 
-  // === 送信（テキスト）
   const onSend = useCallback(async () => {
     const body = (text ?? '').trim();
     if (!body || !mid || sendState !== 'idle') return;
@@ -146,7 +140,6 @@ export default function ChatScreen() {
     } finally { setSendState('idle'); }
   }, [text, mid, sendState, scrollToEnd]);
 
-  // === 送信（画像）
   const onSendImage = useCallback(async () => {
     if (!ImagePicker) {
       Alert.alert('画像機能が未導入', 'expo-image-picker を導入してください。\n\nnpx expo install expo-image-picker');
@@ -195,7 +188,6 @@ export default function ChatScreen() {
     } finally { setSendState('idle'); }
   }, [mid, sendState, scrollToEnd]);
 
-  // === 古い履歴追加
   const loadOlder = useCallback(async () => {
     if (!oldestAt) return;
     try {
@@ -206,14 +198,12 @@ export default function ChatScreen() {
     } catch (e: any) { Alert.alert('取得エラー', e?.message ?? '不明なエラー'); }
   }, [mid, oldestAt]);
 
-  // === コピー
   const onCopy = useCallback(async (str?: string | null) => {
     const s = (str ?? '').trim();
     if (!s) return;
     try { await Clipboard.setStringAsync(s); Alert.alert('コピーしました'); } catch {}
   }, []);
 
-  // === 画像 保存/共有
   const ensureMediaPermission = useCallback(async () => {
     if (!MediaLibrary) return false;
     const { status } = await MediaLibrary.requestPermissionsAsync();
@@ -241,7 +231,6 @@ export default function ChatScreen() {
     }
   }, []);
 
-  // === 行描画（アバター/グラデ/影 など）
   const openContext = useCallback((msg: ChatMessage) => { setCtxTarget(msg); setContextOpen(true); }, []);
   const closeContext = useCallback(() => { setContextOpen(false); setCtxTarget(null); }, []);
 const { width: W } = Dimensions.get('window');
@@ -260,14 +249,12 @@ const BUBBLE_MAX = Math.min(420, Math.round(W * 0.78));
       return (
         <View style={{ paddingHorizontal: 12, marginTop: 2 }}>
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: mine ? 'flex-end' : 'flex-start' }}>
-            {/* 相手側：末尾の気泡だけアバター表示 */}
             {!mine && isLastOfBlock ? (
               <View style={{ marginRight: 8 }}>
                 <Avatar size={28} photo={partnerPhoto} />
               </View>
             ) : !mine ? <View style={{ width: 36 }} /> : null}
 
-            {/* バブル（行内でも正しく広がるように最大幅を固定） */}
             <View style={{ maxWidth: BUBBLE_MAX, flexShrink: 1 }}>
               {imgUrl ? (
                 <TouchableOpacity activeOpacity={0.9} onPress={() => setPreviewUrl(imgUrl)} onLongPress={() => openContext(item)}>
@@ -301,7 +288,6 @@ const BUBBLE_MAX = Math.min(420, Math.round(W * 0.78));
     [meId, messages, openContext, partnerPhoto]
   );
 
-  // === ヘッダーの三点
   const doBlock = useCallback(async () => {
     try {
       setActionBusy(true);
@@ -323,7 +309,6 @@ const BUBBLE_MAX = Math.min(420, Math.round(W * 0.78));
     } finally { setActionBusy(false); setMenuOpen(false); }
   }, [mid]);
 
-  // === 長押しメニューのアクション
   const doCopyCtx = useCallback(async () => {
     if (!ctxTarget?.text) { closeContext(); return; }
     await onCopy(ctxTarget.text);
@@ -368,7 +353,6 @@ const BUBBLE_MAX = Math.min(420, Math.round(W * 0.78));
     closeContext();
   }, [ctxTarget, shareImage, closeContext]);
 
-  // スクロール位置監視（FAB表示）
   const onScroll = useCallback((e: any) => {
     const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
     const bottomGap = contentSize.height - (contentOffset.y + layoutMeasurement.height);
@@ -423,7 +407,6 @@ const BUBBLE_MAX = Math.min(420, Math.round(W * 0.78));
           scrollEventThrottle={16}
         />
 
-        {/* 下へスクロールFAB */}
         {!atBottom && (
           <TouchableOpacity
             onPress={scrollToEnd}
@@ -434,7 +417,6 @@ const BUBBLE_MAX = Math.min(420, Math.round(W * 0.78));
           </TouchableOpacity>
         )}
 
-        {/* 入力バー */}
         <View style={{
           padding: 8,
           paddingBottom: Math.max(8, insets.bottom),
@@ -485,7 +467,6 @@ const BUBBLE_MAX = Math.min(420, Math.round(W * 0.78));
         </View>
       </LinearGradient>
 
-      {/* ヘッダーの…メニュー */}
       <Modal visible={menuOpen} transparent animationType="fade" onRequestClose={() => setMenuOpen(false)}>
         <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.25)' }} onPress={() => setMenuOpen(false)}>
           <View style={{ marginTop: 'auto', backgroundColor: '#fff', padding: 12, borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
@@ -500,11 +481,9 @@ const BUBBLE_MAX = Math.min(420, Math.round(W * 0.78));
         </Pressable>
       </Modal>
 
-      {/* 長押しメニュー（行単位） */}
       <Modal visible={contextOpen} transparent animationType="fade" onRequestClose={closeContext}>
         <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.25)' }} onPress={closeContext}>
           <View style={{ marginTop: 'auto', backgroundColor: '#fff', padding: 12, borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
-            {/* 画像の場合は 保存/共有 を優先 */}
             {ctxTarget?.attachments?.images?.[0]?.url ? (
               <>
                 <TouchableOpacity onPress={doSaveImage} style={{ paddingVertical: 12 }}>
@@ -536,7 +515,6 @@ const BUBBLE_MAX = Math.min(420, Math.round(W * 0.78));
         </Pressable>
       </Modal>
 
-      {/* 画像プレビュー */}
       <ImageView
         images={previewUrl ? [{ uri: previewUrl }] : []}
         imageIndex={0}

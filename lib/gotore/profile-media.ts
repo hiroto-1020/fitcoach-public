@@ -1,10 +1,8 @@
-// lib/gotore/profile-media.ts
 import { supabase } from "../supabase";
 import type { Gender } from "./types";
 
 export const PROFILE_BUCKET = "profile-photos";
 
-// ---- Gender helpers ----
 export function labelGender(g?: Gender | string | null): string {
   switch (normalizeGender(g)) {
     case "male": return "男性";
@@ -24,10 +22,8 @@ export function normalizeGender(g?: any): Gender {
   return ["male","female","other","unknown"].includes(s as any) ? s : "unknown";
 }
 
-/** 任意の userId の性別を、よくあるテーブル/カラムを横断して補完取得 */
 export async function fetchGenderForUser(userId: string): Promise<Gender> {
   if (!userId) return "unknown";
-  // よくある候補（環境に合わせて増減可）
   const candidates = [
     { table: "profiles", idCols: ["user_id","id"] },
     { table: "users",    idCols: ["user_id","id"] },
@@ -54,7 +50,6 @@ export async function fetchGenderForUser(userId: string): Promise<Gender> {
   return "unknown";
 }
 
-// ---- Photo helpers ----
 async function toUrl(path: string): Promise<string | null> {
   const pub = supabase.storage.from(PROFILE_BUCKET).getPublicUrl(path)?.data?.publicUrl;
   if (pub) return pub;
@@ -62,15 +57,9 @@ async function toUrl(path: string): Promise<string | null> {
   return signed.data?.signedUrl ?? null;
 }
 
-/**
- * 1枚目として表示する写真URLを返す。
- * 優先度: profiles.photos[0]   profile_photos(order_index/created_at)   Storage最新更新
- * 返却時に `?v=timestamp` を付与してキャッシュを回避。
- */
 export async function getFirstProfilePhotoUrl(userId: string): Promise<string | null> {
   if (!userId) return null;
 
-  // 0) profiles.photos（URL配列）を最優先
   const { data: prof } = await supabase
     .from("profiles")
     .select("photos, updated_at")
@@ -84,7 +73,6 @@ export async function getFirstProfilePhotoUrl(userId: string): Promise<string | 
     return ver ? `${u}${u.includes("?") ? "&" : "?"}v=${ver}` : u;
   }
 
-  // 1) 中間テーブルがある場合
   const { data: rows } = await supabase
     .from("profile_photos")
     .select("storage_path, path, order_index, created_at")
@@ -100,7 +88,6 @@ export async function getFirstProfilePhotoUrl(userId: string): Promise<string | 
     if (withV) return withV;
   }
 
-  // 2) Storage を最新更新順で拾う（ascではなく更新降順）
   const { data: list } = await supabase.storage.from(PROFILE_BUCKET).list(userId, {
     limit: 100, offset: 0, sortBy: { column: "updated_at", order: "desc" as any },
   });

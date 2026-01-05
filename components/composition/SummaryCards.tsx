@@ -1,4 +1,3 @@
-// components/composition/SummaryCards.tsx
 import React from "react";
 import { View, Text } from "react-native";
 import { radius, spacing, shadow } from "../../ui/theme.body";

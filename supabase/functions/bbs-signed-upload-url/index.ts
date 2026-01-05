@@ -16,7 +16,6 @@ function cors(body: unknown, status = 200) {
 
 function uuid() {
   try { return crypto.randomUUID(); } catch { /* deno old */ }
-  // ざっくりフォールバック
   const s = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c=>{
     const r = (Math.random()*16)|0, v = c==="x"? r : (r&0x3)|0x8; return v.toString(16);
   });
@@ -39,11 +38,9 @@ serve(async (req) => {
     }
 
     const sb = createClient(url, srv, {
-      // Storage Admin API を使うので Authorization を付与
       global: { headers: { Authorization: `Bearer ${srv}` } },
     });
 
-    // ここでバケットが存在しないとエラーになる（典型）
     const now = new Date();
     const y = now.getFullYear();
     const m = String(now.getMonth()+1).padStart(2,"0");
@@ -52,7 +49,6 @@ serve(async (req) => {
 
     const { data, error } = await sb.storage.from("bbs").createSignedUploadUrl(path);
     if (error) {
-      // ：ログに詳細を出す
       console.error("createSignedUploadUrl error:", error);
       return cors({ error: String(error?.message ?? error) }, 500);
     }

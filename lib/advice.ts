@@ -2,7 +2,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import { AI_BASE, warmupAnalyzer } from "./ai";
 
-// ── 接続先（既存ロジックを踏襲） ─────────────────────────────────────
 function resolveAdviceBase() {
   const raw =
     process.env.EXPO_PUBLIC_AI_ADVICE_URL ||
@@ -20,7 +19,6 @@ function resolveAdviceBase() {
 const ADVICE_BASE = resolveAdviceBase();
 export const ADVICE_ENDPOINT = `${ADVICE_BASE}/advice`;
 
-// ── ウォームアップ ───────────────────────────────────────────────────
 export async function warmupAdvice() {
   try {
     await warmupAnalyzer().catch(() => {});
@@ -36,7 +34,6 @@ export async function warmupAdvice() {
   } catch {}
 }
 
-// ── 便利関数 ─────────────────────────────────────────────────────────
 const PER_TRY_TIMEOUT_MS = 60000;
 const RETRIES = 3;
 const RETRY_BACKOFF_MS = 800;
@@ -45,7 +42,6 @@ const withTimeout = <T,>(p:Promise<T>, ms:number)=>
   new Promise<T>((resolve,reject)=>{const id=setTimeout(()=>reject(new Error(`timeout ${ms}ms`)),ms);
     p.then(v=>{clearTimeout(id);resolve(v);}).catch(e=>{clearTimeout(id);reject(e);});});
 
-// ── 直近テーマの記憶（重複回避用） ───────────────────────────────────
 const TOPIC_HISTORY_KEY = "ADVICE_TOPICS_HISTORY";
 async function loadRecentTopics(): Promise<string[]> {
   try { const v = await AsyncStorage.getItem(TOPIC_HISTORY_KEY); return v ? JSON.parse(v) : []; } catch { return []; }
@@ -54,7 +50,6 @@ async function saveRecentTopics(keys: string[]) {
   try { await AsyncStorage.setItem(TOPIC_HISTORY_KEY, JSON.stringify(keys.slice(-10))); } catch {}
 }
 
-// ── 出力整形（バリエーションはサーバ側に寄せ、クライアントは軽整形） ─────────
 function extractTextFromResponse(payload:any):string{
   if(payload==null) return "";
   if(typeof payload==="string") return payload;
@@ -77,7 +72,6 @@ function stripPromptLike(text:string){
 }
 export function toCasualWithEmojis(raw:string){
   if(!raw) return "";
-  // ここは最小限：サーバ側が充分バリエーションを付ける
   return raw
     .split(/\r?\n/).map(x=>x.trim()).filter(Boolean)
     .map(ln=>{
@@ -92,7 +86,6 @@ export function toCasualWithEmojis(raw:string){
     .join("\n");
 }
 
-// ── “10倍データ”の組み立て（今ある情報だけでもOK、無ければ null） ────────
 export type AdvicePayload = {
   user: { id?: string; sex?: "male"|"female"|"other"; height?: number; birthYear?: number; };
   goals: { kcalTarget?: number; proteinTarget?: number; fatTarget?: number; carbsTarget?: number; weightGoal?: number; };
@@ -107,13 +100,12 @@ export function buildAdvicePayload(base:{
   goals:{kcalTarget:number;proteinTarget:number;fatTarget:number;carbsTarget:number};
   meals:Array<{title?:string;calories?:number;protein?:number;fat?:number;carbs?:number; time?:string;}>;
 }, extras?: Partial<AdvicePayload>): AdvicePayload {
-  // 既存データ + 追加分（無ければ undefined のままでOK）
   const dateISO = new Date().toISOString().slice(0,10);
   return {
     user: extras?.user ?? {},
     goals: { ...base.goals, weightGoal: extras?.goals?.weightGoal },
     totals: { kcal: base.totals.kcal, p: base.totals.p, f: base.totals.f, c: base.totals.c },
-    meals: base.meals.map(m=>({ ...m })), // fiber/sodium/sugar はUIに来たら足す
+    meals: base.meals.map(m=>({ ...m })),
     latestBody: extras?.latestBody,
     context: {
       dateISO,
@@ -127,19 +119,17 @@ export function buildAdvicePayload(base:{
   };
 }
 
-// ── 本体：/advice へ投げる（topicsUsed を保存 次回の重複回避に） ───────────
 export async function requestAdvice(params: {
   totals: { kcal: number; p: number; f: number; c: number };
   goals:  { kcalTarget: number; proteinTarget: number; fatTarget: number; carbsTarget: number };
   meals:  Array<{ title?: string; calories?: number; protein?: number; fat?: number; carbs?: number; fiber?: number; sugar?: number; sodium?: number }>;
   template?: string;
   endpoint?: string;
-  extraContext?: any;            // ★ 追加
+  extraContext?: any;
 }): Promise<string> {
   const endpoint = (params.endpoint || ADVICE_ENDPOINT).replace(/\/+$/, "");
   warmupAdvice().catch(() => {});
 
-  // 直近テーマを読み込み   payload.context.recentTopics に反映
   const recent = await loadRecentTopics();
   const payload = buildAdvicePayload(
     { totals: params.totals, goals: params.goals, meals: params.meals },
@@ -158,7 +148,7 @@ export async function requestAdvice(params: {
           goals:  params.goals,
           meals:  params.meals,
           template: params.template,
-          extraContext: params.extraContext || {},   // ★ 追加
+          extraContext: params.extraContext || {},
         }),
       }),
       PER_TRY_TIMEOUT_MS
@@ -174,7 +164,6 @@ export async function requestAdvice(params: {
       const data = ct.includes("application/json") ? await res.json() : JSON.parse(await res.text());
       const text = toCasualWithEmojis(stripPromptLike(extractTextFromResponse(data)).trim());
 
-      // 次回の重複回避に topicsUsed を保存
       if (Array.isArray(data?.topicsUsed) && data.topicsUsed.length) {
         await saveRecentTopics([ ...recent, ...data.topicsUsed ]);
       }
@@ -192,7 +181,6 @@ export async function requestAdvice(params: {
   throw new Error(`アドバイスAPIに接続できませんでした。接続先: ${ADVICE_BASE}${detail}`);
 }
 
-// ── メモ（既存維持） ───────────────────────────────────────────────
 const ADVICE_KEY_PREFIX="ADVICE_MEMO:";
 export async function saveAdviceMemo(dateISO:string,text:string){ await AsyncStorage.setItem(ADVICE_KEY_PREFIX+dateISO,text); }
 export async function loadAdviceMemo(dateISO:string){ return (await AsyncStorage.getItem(ADVICE_KEY_PREFIX+dateISO)) || ""; }

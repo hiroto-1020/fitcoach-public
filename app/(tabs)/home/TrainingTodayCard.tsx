@@ -1,11 +1,10 @@
-// app/(tabs)/home/TrainingTodayCard.tsx
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator, Animated } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import dayjs from "dayjs";
-import { useTranslation } from "react-i18next"; // ★追加
+import { useTranslation } from "react-i18next";
 
 import {
   initTrainingDb,
@@ -30,7 +29,7 @@ type TRow = {
 export default function TrainingTodayCard() {
   const router = useRouter();
   const today = dayjs().format("YYYY-MM-DD");
-  const { t } = useTranslation(); // ★追加
+  const { t } = useTranslation();
 
   const [loading, setLoading] = useState(true);
   const [sessionId, setSessionId] = useState<number | null>(null);
@@ -107,7 +106,6 @@ export default function TrainingTodayCard() {
       end={{ x: 1, y: 1 }}
       style={{ borderRadius: 16, padding: 14, borderWidth: 1, borderColor: "#e6e9f0" }}
     >
-      {/* ヘッダー */}
       <View
         style={{
           flexDirection: "row",
@@ -174,7 +172,6 @@ export default function TrainingTodayCard() {
         </View>
       </View>
 
-      {/* 内容 */}
       {loading ? (
         <View style={{ alignItems: "center", paddingVertical: 16 }}>
           <ActivityIndicator />
@@ -190,7 +187,6 @@ export default function TrainingTodayCard() {
             </Text>
           ) : (
             <>
-              {/* サマリー */}
               <View
                 style={{
                   flexDirection: "row",
@@ -247,7 +243,6 @@ export default function TrainingTodayCard() {
                 ))}
               </View>
 
-              {/* ダイジェスト（最大3種目） */}
               {digest.map((g, i) => (
                 <View
                   key={i}
@@ -282,7 +277,6 @@ export default function TrainingTodayCard() {
             </>
           )}
 
-          {/* CTA */}
           <View style={{ flexDirection: "row", gap: 10, marginTop: 12 }}>
             <TouchableOpacity
               onPress={() => router.push(`/training/${today}`)}

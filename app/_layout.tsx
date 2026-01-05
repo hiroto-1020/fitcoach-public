@@ -1,4 +1,3 @@
-﻿// ルートレイアウト（スプラッシュ含む）
 
 import "react-native-gesture-handler";
 import "react-native-reanimated";
@@ -19,17 +18,14 @@ import { supabase } from "../lib/supabase";
 import AppErrorBoundary from "../components/common/AppErrorBoundary";
 import "../lib/i18n";
 
-// ===== ロゴ画像とフォント =====
 const LOGO = require("../image/fitcoach.png");
 const FONT_FILE = require("../assets/fonts/Caveat-VariableFont_wght.ttf");
 
-// ===== スプラッシュ制御用定数 =====
 const DISPLAY_MS = 2500;
 const FADE_MS = 250;
 const MAX_WAIT_MS = 1500;
 
 export default function RootLayout() {
-  // RevenueCat初期化
   useEffect(() => {
     initRevenueCat().catch(() => {});
   }, []);
@@ -40,10 +36,8 @@ export default function RootLayout() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // フォント読み込み
   const [fontsLoaded] = useFonts({ FitTitle: FONT_FILE });
 
-  // スプラッシュ制御
   const [showSplash, setShowSplash] = useState(true);
   const [readyToShow, setReadyToShow] = useState(false);
   const [logoError, setLogoError] = useState<string | null>(null);
@@ -62,7 +56,6 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, titleOpacity]);
 
-  // 画像プリロード＋フェイルセーフ
   useEffect(() => {
     let mounted = true;
     let safetyTimer: ReturnType<typeof setTimeout> | null = null;
@@ -115,7 +108,6 @@ export default function RootLayout() {
 
           <View style={{ flex: 1 }}>
             <AppErrorBoundary>
-              {/*  ：ルートは必ず (tabs) グループにする */}
               <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen
                   name="(tabs)"

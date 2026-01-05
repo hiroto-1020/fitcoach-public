@@ -1,4 +1,3 @@
-// app/(tabs)/settings/language.tsx
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -25,7 +24,6 @@ export default function LanguageSettingsScreen() {
   const [current, setCurrent] = useState<AppLang>("ja");
   const [saving, setSaving] = useState(false);
 
-  // 現在の言語コードから初期値を決定
   useEffect(() => {
     const code = (i18n.language || "ja").split("-")[0] as AppLang;
     setCurrent(SUPPORTED_LANGS.includes(code) ? code : "ja");
@@ -35,7 +33,7 @@ export default function LanguageSettingsScreen() {
     if (saving || code === current) return;
     setSaving(true);
     try {
-      await setAppLanguage(code); // i18next + AsyncStorage を更新
+      await setAppLanguage(code);
       setCurrent(code);
     } finally {
       setSaving(false);
@@ -44,12 +42,10 @@ export default function LanguageSettingsScreen() {
 
   return (
     <>
-      {/* システムのナビタイトル（ヘッダー自体は root で消してるので表示されない） */}
       <Stack.Screen options={{ title: t("settings.language") }} />
 
       <SafeAreaView style={[styles.safe, { backgroundColor: C.bg }]}>
         <View style={styles.container}>
-          {/* ページタイトル */}
           <Text style={[styles.title, { color: C.text }]}>
             {t("settings.language")}
           </Text>
@@ -57,7 +53,6 @@ export default function LanguageSettingsScreen() {
             {t("settings.language_hint")}
           </Text>
 
-          {/* 言語カード */}
           <View
             style={[
               styles.card,
@@ -84,12 +79,10 @@ export default function LanguageSettingsScreen() {
                     selected && { backgroundColor: `${C.primary}11` },
                   ]}
                 >
-                  {/* フラグアイコン */}
                   <Text style={[styles.flag, { opacity: selected ? 1 : 0.8 }]}>
                     {item.flag}
                   </Text>
 
-                  {/* ラベル */}
                   <View style={{ flex: 1 }}>
                     <Text
                       style={[
@@ -106,7 +99,6 @@ export default function LanguageSettingsScreen() {
                     )}
                   </View>
 
-                  {/* ラジオボタン */}
                   <View
                     style={[
                       styles.radioOuter,
@@ -166,7 +158,6 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     overflow: "hidden",
-    // ふわっとした影
     shadowOpacity: 0.08,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },

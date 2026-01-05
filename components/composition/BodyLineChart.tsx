@@ -1,4 +1,3 @@
-﻿// components/composition/BodyLineChart.tsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Dimensions, Text, ScrollView } from "react-native";
 import { LineChart } from "react-native-chart-kit";
@@ -75,10 +74,10 @@ export function BodyLineChart({
       color: (o?: number) => string
     ) => out.push({ data: arr.map((v) => (v == null ? NaN : v)), strokeWidth, color });
 
-    if (showWeight) push(weightSeries, 2, (o = 1) => `rgba(109,40,217,${o})`); // violet-700
-    if (showBodyFat) push(bodyFatSeries, 2, (o = 1) => `rgba(245,158,11,${o})`); // amber-500
-    if (rollingAvgSeries) push(rollingAvgSeries, 2, (o = 1) => `rgba(59,130,246,${o})`); // blue-500
-    if (goalLineSeries) push(goalLineSeries, 1, (o = 1) => `rgba(148,163,184,${o})`); // slate-400
+    if (showWeight) push(weightSeries, 2, (o = 1) => `rgba(109,40,217,${o})`);
+    if (showBodyFat) push(bodyFatSeries, 2, (o = 1) => `rgba(245,158,11,${o})`);
+    if (rollingAvgSeries) push(rollingAvgSeries, 2, (o = 1) => `rgba(59,130,246,${o})`);
+    if (goalLineSeries) push(goalLineSeries, 1, (o = 1) => `rgba(148,163,184,${o})`);
     if (out.length === 0) push(labels.map(() => null), 0, () => "rgba(0,0,0,0)");
     return out;
   }, [rev, labels, showWeight, showBodyFat, weightSeries, bodyFatSeries, rollingAvgSeries, goalLineSeries]);

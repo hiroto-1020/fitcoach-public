@@ -1,4 +1,3 @@
-// app/(tabs)/training/manage.tsx
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
@@ -24,7 +23,6 @@ import {
 } from "../../../lib/training/db";
 import { useTranslation } from "react-i18next";
 
-// ===== パレット（ui/theme のフックがあれば最優先 / なければ OS に追従） =====
 type Pal = {
   bg: string;
   card: string;
@@ -151,7 +149,6 @@ export default function Manage() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
-        {/* ヘッダー */}
         <Text
           style={{
             fontSize: 20,
@@ -163,7 +160,6 @@ export default function Manage() {
           {t("trainingManage.title")}
         </Text>
 
-        {/* 部位の追加 */}
         <View style={{ flexDirection: "row", gap: 8, marginBottom: 16 }}>
           <TextInput
             value={partName}
@@ -201,7 +197,6 @@ export default function Manage() {
           </TouchableOpacity>
         </View>
 
-        {/* 部位ごとの一覧 */}
         {loading ? (
           <View style={{ paddingVertical: 16, alignItems: "center" }}>
             <ActivityIndicator />
@@ -225,7 +220,6 @@ export default function Manage() {
                 backgroundColor: C.card,
               }}
             >
-              {/* 部位ヘッダー */}
               <View
                 style={{
                   flexDirection: "row",
@@ -254,10 +248,8 @@ export default function Manage() {
                 </TouchableOpacity>
               </View>
 
-              {/* 種目リスト */}
               <ExercisesBlock partId={p.id} onDelete={removeExercise} />
 
-              {/* 種目追加 */}
               <View style={{ flexDirection: "row", gap: 8, padding: 12 }}>
                 <TextInput
                   value={exInputs[p.id] ?? ""}

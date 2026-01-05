@@ -16,14 +16,12 @@ import {
 } from "../../lib/bbs/api";
 import { supabase } from "../../lib/supabase";
 
-// 任意依存（未導入なら null のまま）
 let ImagePicker: any = null; try { ImagePicker = require("expo-image-picker"); } catch {}
 let FileSystem: any = null;
 try { FileSystem = require("expo-file-system/legacy"); } catch {
   try { FileSystem = require("expo-file-system"); } catch {}
 }
 
-// RN用 Base64 Uint8Array
 function base64ToBytes(b64: string) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
   let bufferLength = b64.length * 0.75, len = b64.length, i = 0, p = 0;
@@ -70,14 +68,11 @@ export default function BbsThreadDetail() {
     [isAdmin, myId, thread?.creator_user_id]
   );
 
-  // 画像添付
   const [picked, setPicked] = useState<{ uri: string; w: number; h: number; mime: "image/jpeg"|"image/png" } | null>(null);
 
-  // 429 クールダウン
   const [cooldownMs, setCooldownMs] = useState<number>(0);
   const cdRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 通報モーダル
   const [reportOpen, setReportOpen] = useState(false);
   const [reportTarget, setReportTarget] = useState<{ type:"thread"|"post"; id:string }|null>(null);
   const [reportReason, setReportReason] = useState("");
@@ -91,7 +86,6 @@ export default function BbsThreadDetail() {
       if (!th) throw new Error("スレッドが見つかりません");
       setThread(th);
 
-      // 自分のユーザー情報
       const { data: ures } = await supabase.auth.getUser();
       const u = ures?.user;
       setMyId(u?.id ?? null);
@@ -186,11 +180,10 @@ export default function BbsThreadDetail() {
     const ext = picked.mime === "image/png" ? "png" : "jpg";
     const { path, url } = await getSignedUploadUrl({ ext, boardSlug: thread?.board?.slug ?? "general" });
 
-    // RNは encoding: "base64"
     const b64 = await FileSystem.readAsStringAsync(picked.uri, { encoding: "base64" });
     const bytes = base64ToBytes(b64);
 
-    await uploadToSignedUrl(url, bytes, picked.mime); // PUT
+    await uploadToSignedUrl(url, bytes, picked.mime);
     return { path, w: picked.w, h: picked.h };
   }
 
@@ -200,7 +193,7 @@ export default function BbsThreadDetail() {
 
     setSending(true);
     try {
-      const image = await uploadPickedToSignedUrl(); // 画像ありならアップロード
+      const image = await uploadPickedToSignedUrl();
       const name = await getLocalDisplayName();
       await createPost({ threadId: id, body, isSage, displayName: name, image });
 
@@ -261,7 +254,6 @@ export default function BbsThreadDetail() {
     return (
       <View style={{ backgroundColor: C.card, borderColor: C.border, borderWidth: 1, borderRadius: 10, padding: 12, marginBottom: 10, opacity: deleted ? 0.7 : 1 }}>
         <TouchableOpacity onLongPress={() => insertQuote(item.no)} activeOpacity={0.7} disabled={deleted}>
-          {/* 1行目 */}
           <View style={{ flexDirection:"row", alignItems:"center", justifyContent:"space-between", marginBottom: 6 }}>
             <Text style={{ color: C.sub, fontSize: 11 }}>No.{item.no}</Text>
             <View style={{ flexDirection:"row", alignItems:"center", gap: 12 }}>
@@ -296,14 +288,12 @@ export default function BbsThreadDetail() {
             </View>
           </View>
 
-          {/* 2行目：名前/ID/sage */}
           <View style={{ flexDirection:"row", alignItems:"center", gap: 6, marginBottom: 6 }}>
             <Text style={{ color: C.text, fontWeight: "800" }}>{item.display_name_snapshot || "名無しの筋トレ民"}</Text>
             {item.author_pseudonym ? <Text style={{ color: C.sub, fontSize: 12 }}>ID:{item.author_pseudonym}</Text> : null}
             {item.is_sage ? <Text style={{ color: "#fbbf24", fontSize: 11, marginLeft: 6 }}>sage</Text> : null}
           </View>
 
-          {/* 本文 or 削除表示 */}
           {deleted ? (
             <Text style={{ color: C.sub, fontStyle: "italic" }}>※ このコメントの内容は削除されました</Text>
           ) : (
@@ -356,7 +346,6 @@ export default function BbsThreadDetail() {
 
               {canManageThread && (
               <>
-                {/* スレを閉じる */}
                 <TouchableOpacity
                   onPress={async () => {
                     try {
@@ -372,7 +361,6 @@ export default function BbsThreadDetail() {
                   <Text style={{ color: C.sub }}>閉じる</Text>
                 </TouchableOpacity>
 
-                {/* スレを削除 */}
                 <TouchableOpacity
                   onPress={async () => {
                     Alert.alert("確認", "このスレッドを完全に削除します。よろしいですか？", [

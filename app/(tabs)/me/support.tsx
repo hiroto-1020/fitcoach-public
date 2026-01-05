@@ -15,10 +15,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeColors, radius, shadow, alpha, getColorScheme } from "../../../ui/theme";
 import { useTranslation } from "react-i18next";
 
-// Expo SDK 54: legacy FS
 import * as FileSystem from "expo-file-system/legacy";
 
-// optional requires
 let AsyncStorage: any = null;
 try {
   AsyncStorage = require("@react-native-async-storage/async-storage").default;
@@ -58,7 +56,6 @@ const DOC_DIR = FileSystem.documentDirectory || "";
 const SQLITE_DIR = `${DOC_DIR}SQLite/`;
 const TMP_DIR = FileSystem.cacheDirectory || DOC_DIR;
 
-// ====== 型 ======
 type Diag = {
   app: {
     name?: string | null;
@@ -83,11 +80,10 @@ type Diag = {
     sqlite: { files: Array<{ name: string; size: number }>; totalBytes: number };
   };
   timestamps: {
-    collectedAt: string; // ISO
+    collectedAt: string;
   };
 };
 
-// ====== Utilities ======
 async function ensureDir(uri: string) {
   const info = await FileSystem.getInfoAsync(uri);
   if (!info.exists) {
@@ -117,7 +113,6 @@ function prettyBytes(b: number) {
   return `${(b / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-// ====== 画面 ======
 export default function SupportScreen() {
   const C = useThemeColors();
   const { t } = useTranslation();
@@ -129,7 +124,6 @@ export default function SupportScreen() {
   const refreshDiag = useCallback(async () => {
     setLoading(true);
     try {
-      // AsyncStorage
       let keysLen = 0;
       let approxBytes = 0;
       if (AsyncStorage) {
@@ -141,7 +135,6 @@ export default function SupportScreen() {
         } catch {}
       }
 
-      // SQLite
       const files = await listSQLiteFiles();
       const totalBytes = files.reduce((s, f) => s + (f.size || 0), 0);
 
@@ -193,7 +186,6 @@ export default function SupportScreen() {
 
   const diagText = useMemo(() => (diag ? JSON.stringify(diag, null, 2) : ""), [diag]);
 
-  // ====== アクション ======
   const copyDiagnostics = useCallback(async () => {
     if (!diag) return;
     try {
@@ -265,12 +257,10 @@ export default function SupportScreen() {
         return;
       }
     } catch {
-      // fallthrough
     } finally {
       setBusy(false);
     }
 
-    // mailto フォールバック
     const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(body.slice(0, 1800))}`;
@@ -300,7 +290,6 @@ export default function SupportScreen() {
     }
   }, [t]);
 
-  // ====== UI ======
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: C.bg }}
@@ -312,7 +301,6 @@ export default function SupportScreen() {
         C={C}
       />
 
-      {/* お問い合わせ */}
       <SectionCard C={C} title={t("support.section_contact_title")}>
         <PrimaryButton
           title={t("support.contact_button_email")}
@@ -338,10 +326,8 @@ export default function SupportScreen() {
             {t("support.contact_tip2")}
           </Text>
         </Tip>
-        {/* <OutlineButton title={t("support.open_x_button")} onPress={openX} C={C} /> */}
       </SectionCard>
 
-      {/* 診断情報 */}
       <SectionCard
         C={C}
         title={t("support.section_diag_title")}
@@ -415,7 +401,6 @@ export default function SupportScreen() {
         )}
       </SectionCard>
 
-      {/* FAQ */}
       <SectionCard C={C} title={t("support.section_faq_title")}>
         <FAQItem
           Q={t("support.faq_q1")}
@@ -433,14 +418,8 @@ export default function SupportScreen() {
           C={C}
         />
         <View style={{ height: 6 }} />
-        {/* <OutlineButton
-          title={t("support.reload_button")}
-          onPress={() => DevSettings.reload()}
-          C={C}
-        /> */}
       </SectionCard>
 
-      {/* フッター */}
       <Text
         style={{
           color: C.subtext,
@@ -459,7 +438,6 @@ export default function SupportScreen() {
   );
 }
 
-/* ---------- 共通UI（data-privacy と同等） ---------- */
 function Header({
   title,
   subtitle,

@@ -1,4 +1,3 @@
-// ui/components.tsx
 import React from 'react';
 import {
   View,
@@ -13,9 +12,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-/* ----------------------------
-   📱 Screen: 安全領域付きの基本レイアウト
------------------------------ */
 export function Screen({
   children,
   style,
@@ -26,9 +22,6 @@ export function Screen({
   return <SafeAreaView style={[styles.screen, style]}>{children}</SafeAreaView>;
 }
 
-/* ----------------------------
-   🧩 Card: 白背景＋シャドウ付きのカード
------------------------------ */
 export function Card({
   children,
   style,
@@ -39,9 +32,6 @@ export function Card({
   return <View style={[styles.card, style]}>{children}</View>;
 }
 
-/* ----------------------------
-   🔖 SectionTitle: セクション見出し
------------------------------ */
 export function SectionTitle({
   children,
   style,
@@ -52,9 +42,6 @@ export function SectionTitle({
   return <Text style={[styles.sectionTitle, style]}>{children}</Text>;
 }
 
-/* ----------------------------
-   🔘 ボタン（プライマリ／アウトライン）
------------------------------ */
 type BtnProps = {
   title: string;
   onPress?: (e: GestureResponderEvent) => void;
@@ -82,9 +69,6 @@ export function ButtonOutline({ title, onPress, style }: BtnProps) {
   );
 }
 
-/* ----------------------------
-   ✏️ Field: ラベル付き入力欄
------------------------------ */
 export function Field({
   label,
   value,
@@ -118,16 +102,10 @@ export function Field({
   );
 }
 
-/* ----------------------------
-   🔹 Spacer: 余白コンポーネント
------------------------------ */
 export function Spacer({ size = 12 }: { size?: number }) {
   return <View style={{ height: size }} />;
 }
 
-/* ----------------------------
-   🎨 スタイル定義
------------------------------ */
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#f9fafb', padding: 16 },
   card: {

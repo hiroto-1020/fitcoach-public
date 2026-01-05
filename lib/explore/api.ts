@@ -1,9 +1,7 @@
-// lib/explore/api.ts
 import { supabase } from "../supabase";
 
 export type ExploreCategory = "workout" | "motivation" | "music" | "all";
 
-// DBのビューは thumb_high と thumb_url のどちらか/両方がある想定
 export type ExploreItem = {
   yt_id: string;
   title: string;
@@ -15,7 +13,6 @@ export type ExploreItem = {
   rank: number;
 };
 
-// 画面側が使う最終形
 export type ExploreClientItem = {
   id: string;
   title: string;
@@ -42,7 +39,6 @@ export async function fetchExploreCache(params: {
 
   let q = supabase
     .from("v_explore_feed")
-    //   thumb_high と thumb_url を両方取得（どちらか無くてもOK）
     .select("yt_id,title,channel_title,thumb_high,thumb_url,published_at,category,rank")
     .in("category", cats as any);
 
@@ -63,7 +59,6 @@ export async function fetchExploreCache(params: {
   const { data, error } = await q;
   if (error) throw new Error(error.message);
 
-  // サムネは thumb_high   thumb_url   img.youtube.com の順で採用
   const toClient = (x: ExploreItem): ExploreClientItem => ({
     id: x.yt_id,
     title: x.title,

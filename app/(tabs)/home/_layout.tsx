@@ -1,11 +1,9 @@
-// app/(tabs)/home/_layout.tsx
 import React from "react";
 import { Text, TouchableOpacity } from "react-native";
 import { Stack, Link } from "expo-router";
 import { colors } from "../../../ui/theme";
 import { useTranslation } from "react-i18next";
 
-// 透明度付きカラー（#RRGGBBのみ対応）
 function withAlpha(hex: string, a: number) {
   const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
   if (!m) return hex;

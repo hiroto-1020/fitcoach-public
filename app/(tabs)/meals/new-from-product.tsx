@@ -1,4 +1,3 @@
-// app/(tabs)/meals/new-from-product.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, TextInput, Image, TouchableOpacity, ScrollView, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -11,7 +10,7 @@ import { Card, SectionTitle, PrimaryButton } from "../../../ui/components";
 import type { Meal, MealType } from "../../../lib/meals";
 import { saveMeal } from "../../../lib/storage";
 import { generateId } from "../../../lib/id";
-import { recordUsage } from "../../../lib/usage"; // ★ 追加
+import { recordUsage } from "../../../lib/usage";
 
 type PrefillParams = {
   prefill_title?: string;
@@ -89,12 +88,10 @@ export default function NewFromProductScreen() {
     };
     await saveMeal(meal);
 
-    //  使用履歴に記録（code不明なのでtitleベース）
     await recordUsage({
       title: meal.title || "（名称不明）",
       brand: meal.brand,
       image: meal.photoUri,
-      // 100g基準は不明なので空でOK
     });
 
     Alert.alert("保存しました", "記録を保存しました。", [
@@ -104,7 +101,6 @@ export default function NewFromProductScreen() {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.bg }} contentContainerStyle={{ padding: spacing.lg, gap: spacing.lg }}>
-      {/* 以降UIは変更なし */}
       <Card style={{ padding: spacing.md }}>
         <SectionTitle>基本情報</SectionTitle>
         <Text style={{ color: colors.subtext, marginTop: spacing.sm }}>タイトル</Text>
@@ -125,7 +121,6 @@ export default function NewFromProductScreen() {
 
       <Card style={{ padding: spacing.md }}>
         <SectionTitle>分量・栄養</SectionTitle>
-        {/* 省略：既存UIそのまま */}
         <Text style={{ color: colors.subtext, marginTop: spacing.sm }}>分量（g）</Text>
         <TextInput
           value={grams != null ? String(grams) : ""}
@@ -189,7 +184,6 @@ export default function NewFromProductScreen() {
 
       <Card style={{ padding: spacing.md }}>
         <SectionTitle>記録先</SectionTitle>
-        {/* 省略：既存UIそのまま */}
         <Text style={{ color: colors.subtext, marginTop: spacing.sm }}>日付（YYYY-MM-DD）</Text>
         <TextInput value={date} onChangeText={setDate} placeholder="YYYY-MM-DD" placeholderTextColor={colors.muted} style={ti()} />
         <Text style={{ color: colors.subtext, marginTop: spacing.md }}>区分</Text>

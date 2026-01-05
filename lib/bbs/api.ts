@@ -1,12 +1,9 @@
-// lib/bbs/api.ts
 import { supabase } from "../supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// 任意依存
 let ExpoCrypto: any = null; try { ExpoCrypto = require("expo-crypto"); } catch {}
 
 function uuidv4() {
-  // @ts-ignore
   if (typeof global?.crypto?.randomUUID === "function") return global.crypto.randomUUID();
   if (ExpoCrypto?.randomUUID) return ExpoCrypto.randomUUID();
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
@@ -28,7 +25,6 @@ async function getDeviceKey() {
   return v;
 }
 
-// ===== 作成 =====
 export async function createThread(params: {
     title: string; body: string; boardSlugs?: string[]; displayName?: string;
   }) {
@@ -54,14 +50,12 @@ export async function createPost(params: {
     headers: { "x-device-key": xdk },
   });
   if (res.error) {
-    //   ここで JSON 本文の error を優先的に表示
     const msg = (res.data as any)?.error || res.error.message;
     throw new Error(msg);
   }
   return res.data as { ok: true; no: number };
 }
 
-// ===== 読み取り =====
 export async function fetchThreads(opts?: { limit?: number; cursor?: string | null }) {
   const limit = opts?.limit ?? 20;
   let q = supabase.from("bbs_threads_list")
@@ -121,7 +115,6 @@ export async function deleteThread(threadId: string) {
   return data as { ok: true; state: "deleted" };
 }
 
-// 投稿削除
 export async function deletePost(postId: string) {
   const { error } = await supabase.functions.invoke("bbs-post-delete", { body: { postId } });
   if (error) throw new Error(error.message || "edge_failed");
@@ -138,7 +131,6 @@ export async function fetchPostsLatest50(threadId: string) {
   return fetchPosts(threadId, { fromNo, limit: 50 });
 }
 
-// ===== 通報 =====
 export async function reportContent(params: { targetType: "thread" | "post"; targetId: string; reason: string; }) {
   const xdk = await getDeviceKey();
   const { data, error } = await supabase.functions.invoke("bbs-report", {
@@ -149,7 +141,6 @@ export async function reportContent(params: { targetType: "thread" | "post"; tar
   return data as { ok: true; reportId: string };
 }
 
-// ===== お気に入り =====
 async function getUserId() {
   const { data } = await supabase.auth.getUser();
   return data.user?.id ?? null;
@@ -186,7 +177,6 @@ export async function getSignedUploadUrl(params: { ext: "jpg" | "png"; boardSlug
   return data as { path: string; url: string };
 }
 
-/** 署名付きURLへPUTアップロード */
 export async function uploadToSignedUrl(
   url: string,
   bytes: Uint8Array,

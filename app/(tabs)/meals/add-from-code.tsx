@@ -1,8 +1,7 @@
-// app/(tabs)/meals/add-from-code.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { spacing } from "../../../ui/theme"; // ← colorsは使わない
+import { spacing } from "../../../ui/theme";
 import { PrimaryButton, SectionTitle } from "../../../ui/components";
 import { addUsage } from "../../../lib/usage";
 import { useAppPrefs } from "../../../lib/app-prefs";
@@ -36,7 +35,6 @@ export default function AddFromCodeScreen() {
           setProduct(null);
         } else {
           setProduct(json.product);
-          // 使用履歴に即登録
           const nutr = json.product?.nutriments || {};
           await addUsage({
             id: String(code),

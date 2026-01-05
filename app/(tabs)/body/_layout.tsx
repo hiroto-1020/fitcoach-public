@@ -7,19 +7,11 @@ export default function BodyLayout() {
 
   return (
     <Stack screenOptions={{ headerTitleAlign: "center" }}>
-      {/* /body */}
       <Stack.Screen
         name="index"
         options={{ title: t("body.title") }}
       />
 
-      {/* /body/new を将来作る場合 */}
-      {/* 
-      <Stack.Screen
-        name="new"
-        options={{ title: t("body.title_new") }}
-      />
-      */}
     </Stack>
   );
 }

@@ -1,4 +1,3 @@
-// hooks/useOffSearch.ts
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { OFFProduct } from "../types/off";
@@ -60,7 +59,6 @@ export function useOffSearch(pageSize = 24): SearchState {
   const debouncedQuery = useDebounce(query, 400);
   const abortRef = useRef<AbortController | null>(null);
 
-  // 復元
   useEffect(() => {
     (async () => {
       try {
@@ -76,7 +74,6 @@ export function useOffSearch(pageSize = 24): SearchState {
     })();
   }, []);
 
-  // 保存
   useEffect(() => {
     const payload = JSON.stringify({ serverFilter, clientFilter });
     AsyncStorage.setItem(STORAGE_FILTER_KEY, payload).catch(() => {});
@@ -89,7 +86,6 @@ export function useOffSearch(pageSize = 24): SearchState {
   const fetchData = useCallback(async () => {
     const q = (debouncedQuery || "").trim();
 
-    //  クエリ空ならAPI叩かず リストを空に
     if (q.length === 0) {
       abortRef.current?.abort();
       setLoading(false);
@@ -124,12 +120,10 @@ export function useOffSearch(pageSize = 24): SearchState {
     }
   }, [debouncedQuery, page, pageSize, serverFilter]);
 
-  // 条件が変わればページを1へ
   useEffect(() => {
     setPage(1);
   }, [debouncedQuery, serverFilter, clientFilter, sort]);
 
-  // 実検索
   useEffect(() => {
     fetchData();
   }, [fetchData]);

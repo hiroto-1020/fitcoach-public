@@ -1,14 +1,12 @@
-// lib/safe.ts
 export const nz = (v: any, d = 0) =>
   typeof v === "number" && isFinite(v) ? v : (typeof v === "string" && isFinite(Number(v)) ? Number(v) : d);
 
 export const safe1 = (v: any) => {
   const n = nz(v, NaN);
-  return isFinite(n) ? Math.round(n * 10) / 10 : undefined; // 小数1桁に
+  return isFinite(n) ? Math.round(n * 10) / 10 : undefined;
 };
 
 export const safeDateKey = (s: any): string | null => {
-  // 受け取りが Date/文字列 でも "YYYY-MM-DD" に正規化。失敗したら null。
   try {
     const d = new Date(s);
     if (isNaN(d.getTime())) return null;

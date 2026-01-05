@@ -1,4 +1,3 @@
-// app/(tabs)/me/kyc.tsx
 import React, { useMemo, useState } from "react";
 import { View, Text, TouchableOpacity, Alert, StyleSheet, Platform } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -7,7 +6,7 @@ import { supabase, SUPABASE_URL } from "../../../lib/supabase";
 
 const functionsOrigin = (() => {
   const host = new URL(SUPABASE_URL).hostname.split(".")[0];
-  return `https://${host}.functions.supabase.co`; // 認証OFF関数にも確実に届く
+  return `https://${host}.functions.supabase.co`;
 })();
 
 export default function KycMockScreen() {

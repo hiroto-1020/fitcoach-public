@@ -3,14 +3,13 @@ import { View, Text, TouchableOpacity, Image, StyleSheet, ScrollView } from "rea
 
 type Props = {
   photos: string[];
-  max?: number;                   // 既定:5
+  max?: number;
   onChange: (next: string[]) => void;
-  onPick?: () => void;            // 「＋」で追加
+  onPick?: () => void;
 };
 
 const MAX_DEFAULT = 5;
 
-// 配列の要素移動
 function move<T>(arr: T[], from: number, to: number) {
   const a = arr.slice();
   const item = a.splice(from, 1)[0];
@@ -34,7 +33,6 @@ export default function ReorderablePhotos({ photos, max = MAX_DEFAULT, onChange,
           <View key={`${u}-${idx}`} style={{ width: 92 }}>
             <Image source={{ uri: u }} style={styles.thumb(idx === 0)} />
 
-            {/* 操作ボタン群 */}
             <View style={styles.btnRow}>
               <TouchableOpacity onPress={() => left(idx)} disabled={idx === 0} style={styles.btn}>
                 <Text style={styles.btnText}>{idx === 0 ? " " : "←"}</Text>

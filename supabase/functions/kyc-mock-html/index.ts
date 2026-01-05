@@ -1,5 +1,3 @@
-﻿// supabase/functions/kyc-mock-html/index.ts
-// HTML を「絶対に」text/html で返す v5（Blob + ヘッダ強制 + nosniff + HEAD 対応）
 
 const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -10,7 +8,6 @@ const corsHeaders: Record<string, string> = {
 Deno.serve(async (req) => {
   const { method } = req;
 
-  // CORS preflight/HEAD
   if (method === "OPTIONS" || method === "HEAD") {
     return new Response(null, { headers: { ...corsHeaders } });
   }
@@ -83,7 +80,6 @@ Deno.serve(async (req) => {
 </script>
 </body></html>`;
 
-  // 本文は Blob/Uint8Array にして返却（ヘッダも二重に指定）
   const blob = new Blob([html], { type: "text/html; charset=utf-8" });
   const headers = new Headers({
     "Content-Type": "text/html; charset=utf-8",

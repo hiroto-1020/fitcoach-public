@@ -15,23 +15,20 @@ import {
 import { useThemeColors } from "../../../ui/theme";
 import { useTranslation } from "react-i18next";
 
-// ===== Optional deps（無くても落ちない） =====
 let AsyncStorage: any = null;
 try {
   AsyncStorage = require("@react-native-async-storage/async-storage").default;
 } catch {}
 
-// 保存キー（Settingsのindex.tsxと一致させる）
 const GOALS_KEY = "me.goals";
 
-// 型（簡易）
 type Goals = {
-  weightTarget: number | null; // kg
-  bodyFatTarget: number | null; // %
-  kcalPerDay: number | null; // kcal
-  p: number | null; // g
-  f: number | null; // g
-  c: number | null; // g
+  weightTarget: number | null;
+  bodyFatTarget: number | null;
+  kcalPerDay: number | null;
+  p: number | null;
+  f: number | null;
+  c: number | null;
 };
 
 const DEFAULT_GOALS: Goals = {
@@ -47,9 +44,8 @@ export default function GoalsScreen() {
   const C = useThemeColors();
   const { t } = useTranslation();
 
-  // 文字列で管理（小数/空/途中入力に対応）
-  const [w, setW] = useState(""); // kg
-  const [bf, setBf] = useState(""); // %
+  const [w, setW] = useState("");
+  const [bf, setBf] = useState("");
   const [kcal, setKcal] = useState("");
   const [p, setP] = useState("");
   const [f, setF] = useState("");
@@ -59,7 +55,6 @@ export default function GoalsScreen() {
   const [saving, setSaving] = useState(false);
   const [storageMissing, setStorageMissing] = useState(false);
 
-  // 画面マウント時に読み込み
   useEffect(() => {
     const load = async () => {
       if (!AsyncStorage) {
@@ -84,7 +79,6 @@ export default function GoalsScreen() {
     load();
   }, []);
 
-  // 数値変換 & バリデーション
   const vals = useMemo(() => {
     const weight = strToNum(w);
     const bodyFat = strToNum(bf);
@@ -134,10 +128,8 @@ export default function GoalsScreen() {
 
     const anyError = Object.values(errors).some(Boolean);
 
-    // マクロ 概算kcal
     const macroKcal = (pNum ?? 0) * 4 + (fNum ?? 0) * 9 + (cNum ?? 0) * 4;
 
-    // kcalとのズレ（参考）
     const kcalDiff = kcalNum === null ? null : macroKcal - kcalNum;
 
     return {
@@ -154,7 +146,6 @@ export default function GoalsScreen() {
     };
   }, [w, bf, kcal, p, f, c, t]);
 
-  // 変更有無（保存ボタンのガイドに使用）
   const hasAnyValue = [w, bf, kcal, p, f, c].some((s) => s.trim().length > 0);
 
   const onSave = useCallback(async () => {
@@ -207,7 +198,6 @@ export default function GoalsScreen() {
     setC("");
   }, []);
 
-  // iOS: キーボード上アクセサリバー用ID
   const accessoryID = useRef("goalsAccessory").current;
 
   if (loading) {
@@ -247,7 +237,6 @@ export default function GoalsScreen() {
           </View>
         )}
 
-        {/* 目標体重・体脂肪 */}
         <Card title={t("goals.section_body_title")} C={C}>
           <Field
             label={t("goals.field_weight")}
@@ -271,7 +260,6 @@ export default function GoalsScreen() {
           />
         </Card>
 
-        {/* 栄養目標 */}
         <Card title={t("goals.section_nutrition_title")} C={C}>
           <Field
             label={t("goals.field_kcal")}
@@ -314,7 +302,6 @@ export default function GoalsScreen() {
             C={C}
           />
 
-          {/* 概算カロリー表示 */}
           <View
             style={[
               styles.macroBox,
@@ -353,7 +340,6 @@ export default function GoalsScreen() {
           </View>
         </Card>
 
-        {/* 下部アクション（通常ボタン） */}
         <View style={{ marginTop: 8, gap: 8 }}>
           <PrimaryButton
             label={saving ? t("goals.button_saving") : t("goals.button_save")}
@@ -369,7 +355,6 @@ export default function GoalsScreen() {
         </View>
       </ScrollView>
 
-      {/* iOS: キーボード上の簡易完了バー（保存/閉じる） */}
       {Platform.OS === "ios" && (
         <InputAccessoryView nativeID={accessoryID}>
           <View style={[styles.accessoryBar, { borderColor: C.border, backgroundColor: C.card }]}>
@@ -401,7 +386,6 @@ export default function GoalsScreen() {
         </InputAccessoryView>
       )}
 
-      {/* 画面下固定の保存バー（Androidなど用） */}
       <View
         style={[
           styles.fixedBar,
@@ -428,7 +412,6 @@ export default function GoalsScreen() {
   );
 }
 
-/** ============== 小物 ============== **/
 
 function Card({
   title,
@@ -556,18 +539,14 @@ function SecondaryButton({
   );
 }
 
-/** ============== Util ============== **/
 
 function sanitizeDecimal(s: string): string {
-  // 数字/小数点のみ許容、先頭のピリオドを "0." に
   let v = s.replace(/[^\d.]/g, "");
   if (v.startsWith(".")) v = "0" + v;
-  // 小数点は最初の1つだけ
   const first = v.indexOf(".");
   if (first >= 0) {
     v = v.slice(0, first + 1) + v.slice(first + 1).replace(/\./g, "");
   }
-  // 先頭の不要0を抑制（"00" "0"）
   if (/^0\d/.test(v)) {
     v = v.replace(/^0+/, "0");
   }
@@ -584,7 +563,6 @@ function numToStr(n: number | null | undefined): string {
   return typeof n === "number" && Number.isFinite(n) ? String(n) : "";
 }
 
-/** ============== Styles ============== **/
 
 const styles = StyleSheet.create({
   wrap: { flex: 1 },

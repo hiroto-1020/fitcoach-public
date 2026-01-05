@@ -10,9 +10,7 @@ import { useLikeStatus } from "../../../hooks/useLikeStatus";
 function CardShell({ children, height }: { children: React.ReactNode; height: number }) {
   return (
     <View style={[styles.cardShell, { height }]}>
-      {/* 内側の面（少し明るめ） */}
       <View style={styles.cardInner}>{children}</View>
-      {/* うっすら縁取り（光沢感） */}
       <View pointerEvents="none" style={styles.cardRing} />
     </View>
   );
@@ -109,12 +107,11 @@ const styles = StyleSheet.create({
   },
   center: { alignItems: "center", justifyContent: "center", marginTop: 12 },
 
-  // ====== カード（背景と同化しない調整）======
   cardShell: {
     borderRadius: 20,
-    backgroundColor: "#0f172a",      // 外殻：背景より明るめ
+    backgroundColor: "#0f172a",
     borderWidth: 1,
-    borderColor: "#334155",          // くっきりした枠線
+    borderColor: "#334155",
     overflow: "hidden",
     shadowColor: "#000",
     shadowOpacity: 0.35,
@@ -124,20 +121,19 @@ const styles = StyleSheet.create({
   },
   cardInner: {
     flex: 1,
-    backgroundColor: "#111827",      // 内面：さらに明るめで差を出す
+    backgroundColor: "#111827",
   },
   cardRing: {
     ...StyleSheet.absoluteFillObject,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)", // うっすらハイライト
+    borderColor: "rgba(255,255,255,0.06)",
   },
   cardContentCenter: {
     flex: 1, alignItems: "center", justifyContent: "center",
   },
   cardText: { color: "#fff" },
 
-  // ====== ボタン ======
   actions: {
     flexDirection: "row",
     justifyContent: "space-evenly",

@@ -10,7 +10,6 @@ import { LikeStatusBar } from "../../../ui/components/LikeStatusBar";
 import { useLikeStatus } from "../../../hooks/useLikeStatus";
 import { canUsePurchases, initRevenueCat, purchaseLikesPack } from "../../../lib/revenuecat";
 
-//   フラグ（lib/featureFlags.ts に定義済み想定）
 import { GOTORE_PURCHASE_ENABLED } from "../../../lib/featureFlags";
 
 export default function PurchaseLikesScreen() {
@@ -21,7 +20,6 @@ export default function PurchaseLikesScreen() {
   const [busy, setBusy] = useState<10 | 30 | 50 | 100 | null>(null);
   const enabled = GOTORE_PURCHASE_ENABLED;
 
-  // RevenueCat 初期化は有効時のみ
   useEffect(() => {
     if (enabled) initRevenueCat();
   }, [enabled]);
@@ -29,7 +27,6 @@ export default function PurchaseLikesScreen() {
   const buy = useCallback(
     async (pack: 10 | 30 | 50 | 100) => {
       if (!enabled) {
-        // 念のためガード（将来の誤タップ対策）
         Alert.alert("準備中", "いいね購入は現在準備中です。");
         return;
       }
@@ -56,12 +53,10 @@ export default function PurchaseLikesScreen() {
   const paid = status?.paidRemaining ?? 0;
   const total = status?.totalRemaining ?? 0;
 
-  // ========== 準備中ビュー ==========
   if (!enabled) {
     return (
       <LinearGradient colors={["#0b1220", "#111827"]} style={{ flex: 1, paddingBottom: insets.bottom + 12 }}>
         <View style={{ paddingTop: insets.top }}>
-          {/* 現状の残数バーはそのまま見せてOK（ユーザーの状況把握用） */}
           <LikeStatusBar free={free} paid={paid} total={total} timeLeftMs={timeLeft ?? 0} />
         </View>
 
@@ -91,7 +86,6 @@ export default function PurchaseLikesScreen() {
     );
   }
 
-  // ========== 本来の購入UI（既存実装そのまま） ==========
   return (
     <View style={{ flex: 1, backgroundColor: "#0b1220", paddingBottom: insets.bottom + 12 }}>
       <View style={{ paddingTop: insets.top }}>

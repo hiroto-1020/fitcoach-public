@@ -16,7 +16,6 @@ import {
 import { useThemeColors } from "../../../ui/theme";
 import { useTranslation } from "react-i18next";
 
-// ===== Optional deps（無くても動作） =====
 let AsyncStorage: any = null;
 try {
   AsyncStorage = require("@react-native-async-storage/async-storage").default;
@@ -32,26 +31,23 @@ try {
   DateTimePicker = require("@react-native-community/datetimepicker").default;
 } catch {}
 
-// 保存キー（設定トップの読込と一致）
 const NOTI_KEY = "me.notifications";
-const NOTI_IDS_KEY = "me.noti.scheduledIds"; // 端末登録したIDの控え（自分の分だけキャンセルするため）
-const CHANNEL_ID = "reminders"; // ← 高重要度チャネルを明示
+const NOTI_IDS_KEY = "me.noti.scheduledIds";
+const CHANNEL_ID = "reminders";
 
-/** ===== 型 ===== */
-type TrainingSlot = { days: number[]; time: string }; // time="HH:mm", days: 0=Sun..6=Sat
+type TrainingSlot = { days: number[]; time: string };
 type NotiPrefs = {
   training: { enabled: boolean; times: TrainingSlot[] };
-  meals: { enabled: boolean; times: string[] }; // "HH:mm"
+  meals: { enabled: boolean; times: string[] };
   weeklyReview: { enabled: boolean; dow: number; time: string };
 };
 
 const DEFAULT_PREFS: NotiPrefs = {
   training: { enabled: false, times: [] },
   meals: { enabled: false, times: [] },
-  weeklyReview: { enabled: false, dow: 0, time: "20:00" }, // Sun 20:00
+  weeklyReview: { enabled: false, dow: 0, time: "20:00" },
 };
 
-/** ===== メイン ===== */
 export default function NotificationsScreen() {
   const C = useThemeColors();
   const { t } = useTranslation();
@@ -60,14 +56,11 @@ export default function NotificationsScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // 権限
   const [perm, setPerm] = useState<"unknown" | "granted" | "denied">("unknown");
   const [hasNotiModule, setHasNotiModule] = useState<boolean>(!!Notifications);
 
-  // iOSキーボード上バー
   const accessoryID = useRef("notiAccessory").current;
 
-  // 曜日ラベル（言語別）
   const DOW_LABEL = useMemo(
     () => [
       t("notifications.dow_sun"),
@@ -81,7 +74,6 @@ export default function NotificationsScreen() {
     [t]
   );
 
-  // 初回読込
   useEffect(() => {
     (async () => {
       if (AsyncStorage) {
@@ -97,7 +89,6 @@ export default function NotificationsScreen() {
           }
         } catch {}
       }
-      // 権限チェック & Androidチャネル（HIGH）作成
       if (Notifications) {
         try {
           const st = await Notifications.getPermissionsAsync();
@@ -144,7 +135,6 @@ export default function NotificationsScreen() {
     }
   }, [t]);
 
-  /** ===== 保存（必要ならOSへスケジュール登録） ===== */
   const onSave = useCallback(async () => {
     if (!AsyncStorage) {
       Alert.alert(
@@ -155,13 +145,10 @@ export default function NotificationsScreen() {
     }
     setSaving(true);
     try {
-      // 1) 設定を保存
       await AsyncStorage.setItem(NOTI_KEY, JSON.stringify(prefs));
 
-      // 2) モジュールがあれば端末へ再スケジュール
       let newIds: string[] = [];
       if (Notifications) {
-        // 2-1) 以前の自分のスケジュールをキャンセル
         try {
           const rawIds = await AsyncStorage.getItem(NOTI_IDS_KEY);
           const ids: string[] = rawIds ? JSON.parse(rawIds) : [];
@@ -171,7 +158,6 @@ export default function NotificationsScreen() {
             )
           );
         } catch {}
-        // 2-2) 必要なものを登録
         if (prefs.training.enabled) {
           for (const slot of prefs.training.times) {
             const { time, days } = slot;
@@ -223,7 +209,6 @@ export default function NotificationsScreen() {
           });
           if (id) newIds.push(id);
         }
-        // 2-3) 自分の登録IDを控える
         await AsyncStorage.setItem(NOTI_IDS_KEY, JSON.stringify(newIds));
       }
 
@@ -244,7 +229,6 @@ export default function NotificationsScreen() {
     }
   }, [prefs, hasNotiModule, t]);
 
-  // ===== UI操作ヘルパ =====
   const toggleTraining = (v: boolean) =>
     setPrefs((p) => ({ ...p, training: { ...p.training, enabled: v } }));
   const addTrainingSlot = () =>
@@ -316,7 +300,6 @@ export default function NotificationsScreen() {
       weeklyReview: { ...p.weeklyReview, time: tStr },
     }));
 
-  // 権限と状態のサマリ
   const permText = useMemo(() => {
     if (!hasNotiModule) return t("notifications.perm_module_missing");
     if (perm === "granted") return t("notifications.perm_granted");
@@ -358,7 +341,6 @@ export default function NotificationsScreen() {
           {t("notifications.subtitle")}
         </Text>
 
-        {/* 権限/状態 */}
         <View
           style={[
             styles.infoBox,
@@ -385,7 +367,6 @@ export default function NotificationsScreen() {
           )}
         </View>
 
-        {/* トレーニング */}
         <Card title={t("notifications.section_training_title")} C={C}>
           <RowSwitch
             label={t("notifications.switch_enabled")}
@@ -413,7 +394,6 @@ export default function NotificationsScreen() {
                     </TouchableOpacity>
                   </View>
 
-                  {/* 曜日チップ */}
                   <View style={styles.dowRow}>
                     {DOW_LABEL.map((lab, d) => {
                       const active = slot.days.includes(d);
@@ -463,7 +443,6 @@ export default function NotificationsScreen() {
           )}
         </Card>
 
-        {/* 食事 */}
         <Card title={t("notifications.section_meals_title")} C={C}>
           <RowSwitch
             label={t("notifications.switch_enabled")}
@@ -502,7 +481,6 @@ export default function NotificationsScreen() {
                 onPress={addMealTime}
                 C={C}
               />
-              {/* 推奨プリセット（ラベルなしチップ） */}
               <View
                 style={{
                   flexDirection: "row",
@@ -533,7 +511,6 @@ export default function NotificationsScreen() {
           )}
         </Card>
 
-        {/* 週間レビュー */}
         <Card title={t("notifications.section_weekly_title")} C={C}>
           <RowSwitch
             label={t("notifications.switch_enabled")}
@@ -543,7 +520,6 @@ export default function NotificationsScreen() {
           />
           {prefs.weeklyReview.enabled && (
             <View style={{ marginTop: 8 }}>
-              {/* 曜日選択（単一） */}
               <View style={styles.dowRow}>
                 {DOW_LABEL.map((lab, d) => {
                   const active = prefs.weeklyReview.dow === d;
@@ -578,7 +554,6 @@ export default function NotificationsScreen() {
           )}
         </Card>
 
-        {/* アクション */}
         <Text
           style={[styles.actionsLabel, { color: C.subtext }]}
         >
@@ -595,12 +570,6 @@ export default function NotificationsScreen() {
             disabled={saving}
             C={C}
           />
-          {/* テスト通知系はコメントのまま（必要なら後でi18n対応して再度有効化）
-          {hasNotiModule && (
-            <View style={{ gap: 8 }}>
-              ...
-            </View>
-          )} */}
         </View>
 
         {(!hasNotiModule || perm !== "granted") && (
@@ -619,7 +588,6 @@ export default function NotificationsScreen() {
         )}
       </ScrollView>
 
-      {/* iOS アクセサリバー */}
       {Platform.OS === "ios" && (
         <InputAccessoryView nativeID={accessoryID}>
           <View
@@ -660,7 +628,6 @@ export default function NotificationsScreen() {
   );
 }
 
-/** ====== 小物 ====== */
 function Card({
   title,
   children,
@@ -793,7 +760,6 @@ function OutlineButton({
   );
 }
 
-/** ====== Time Field（DateTimePicker があれば使い、無ければテキスト） ====== */
 function TimeField({
   label,
   value,
@@ -847,7 +813,6 @@ function TimeField({
             )}
           </>
         ) : (
-          // フォールバック：テキスト入力（HH:mm）
           <TextInput
             style={[
               styles.timeInput,
@@ -876,13 +841,12 @@ function TimeField({
   );
 }
 
-/** ====== 通知スケジュール（安全ラッパー：channelId付与） ====== */
 async function safeSchedule({
   title,
   body,
   hour,
   minute,
-  weekday, // 0..6 (Sun..Sat). 未指定なら毎日
+  weekday,
 }: {
   title: string;
   body: string;
@@ -892,7 +856,6 @@ async function safeSchedule({
 }): Promise<string | null> {
   if (!Notifications) return null;
 
-  // Expoのweekdayは 1=Sun..7=Sat。0..6から変換。
   const expoWeekday =
     typeof weekday === "number"
       ? ((weekday + 1) as number)
@@ -915,14 +878,14 @@ async function safeSchedule({
     try {
       const id = await Notifications.scheduleNotificationAsync({
         content: { title, body },
-        trigger: { channelId: CHANNEL_ID, hour, minute, repeats: true }, // 曜日不可環境のフォールバック
+        trigger: { channelId: CHANNEL_ID, hour, minute, repeats: true },
       });
       return id as string;
     } catch {
       try {
         const id = await Notifications.scheduleNotificationAsync({
           content: { title, body },
-          trigger: { channelId: CHANNEL_ID, seconds: 2 }, // 最終フォールバック
+          trigger: { channelId: CHANNEL_ID, seconds: 2 },
         });
         return id as string;
       } catch {
@@ -932,7 +895,6 @@ async function safeSchedule({
   }
 }
 
-/** ====== Utils ====== */
 function parseHHmm(
   s: string | null | undefined
 ): { hour: number; minute: number } | null {
@@ -951,12 +913,10 @@ function formatHHmm(h: number, m: number): string {
 }
 
 function sanitizeHHmm(s: string): string {
-  // 入力を HH:mm っぽく補正（数字以外除去 コロン挿入）
   const only = s.replace(/[^\d]/g, "").slice(0, 4);
   if (only.length <= 2) return only;
   const hh = only.slice(0, 2);
   const mm = only.slice(2, 4);
-  // 範囲クリップ
   const H = Math.max(0, Math.min(23, Number(hh)));
   const M = Math.max(0, Math.min(59, Number(mm)));
   return `${H.toString().padStart(2, "0")}:${M.toString()
@@ -969,7 +929,6 @@ function dateFromHM(h: number, m: number) {
   return d;
 }
 
-/** ====== Styles ====== */
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
   h1: { fontSize: 20, fontWeight: "800" },

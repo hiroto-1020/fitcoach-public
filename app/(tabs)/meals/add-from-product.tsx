@@ -1,4 +1,3 @@
-// app/(tabs)/meals/add-from-product.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { Image, StyleSheet, Text, View, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, Link } from "expo-router";
@@ -32,7 +31,6 @@ export default function AddFromProductScreen() {
 
   const [grams, setGrams] = useState(100);
 
-  // 初期値（検索からの受け取り）
   const [kcal100, setKcal100] = useState<number | undefined>(() => Number(params.kcal100 || 0) || undefined);
   const [p100, setP100]       = useState<number | undefined>(() => Number(params.protein100 || 0) || undefined);
   const [f100, setF100]       = useState<number | undefined>(() => Number(params.fat100 || 0) || undefined);
@@ -41,7 +39,6 @@ export default function AddFromProductScreen() {
   const [loading, setLoading] = useState(false);
   const [inferred, setInferred] = useState(false);
 
-  // 欠損がある場合は詳細APIで補正
   useEffect(() => {
     const needs = [kcal100, p100, f100, c100].some((v) => v == null || v === 0);
     if (!needs || !code) return;
@@ -56,7 +53,7 @@ export default function AddFromProductScreen() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [code]); // 初回のみ
+  }, [code]);
 
   const totals = useMemo(() => {
     return {

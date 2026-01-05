@@ -16,7 +16,6 @@ import { useAppPrefs, type ThemeMode } from "../../../lib/app-prefs";
 import { useTranslation } from "react-i18next";
 import i18n from "../../../lib/i18n";
 
-/** 画面 */
 export default function AppSettingsScreen() {
   const {
     themeMode,
@@ -30,24 +29,20 @@ export default function AppSettingsScreen() {
 
   const { t } = useTranslation();
 
-  // 画面上は“保存”までローカル編集中にする
   const [theme, setTheme] = useState<ThemeMode>(themeMode);
   const [hapticsLocal, setHapticsLocal] = useState<boolean>(hapticsEnabled);
   const [saving, setSaving] = useState(false);
 
-  // 言語（ローカル）
   const initialLang: "ja" | "en" | "ko" = (() => {
     const lng = i18n.language || "ja";
     if (lng.startsWith("en")) return "en";
     if (lng.startsWith("ko")) return "ko";
-    return "ja"; // ja / ja-JP など
+    return "ja";
   })();
   const [langLocal, setLangLocal] = useState<"ja" | "en" | "ko">(initialLang);
 
-  // iOS キーボード上バー
   const accessoryID = useRef("appSettingsAccessory").current;
 
-  // テーマオプション（ラベルを i18n から取得）
   const themeOptions: { key: ThemeMode; label: string }[] = useMemo(
     () => [
       { key: "auto", label: t("settings.theme_auto") },
@@ -57,27 +52,22 @@ export default function AppSettingsScreen() {
     [t]
   );
 
-  // 端末のライト/ダークラベル
   const schemeLabel = effectiveScheme === "dark" ? t("settings.theme_dark") : t("settings.theme_light");
 
-  // プレビュー用の色（ローカル選択に合わせて切替）
   const previewScheme: "light" | "dark" =
     theme === "auto" ? effectiveScheme : (theme as "light" | "dark");
   const ui = useMemo(() => palette(previewScheme), [previewScheme]);
 
-  // 画面初期化：グローバルからローカルへ同期（戻ってきた時など）
   useEffect(() => {
     setTheme(themeMode);
     setHapticsLocal(hapticsEnabled);
   }, [themeMode, hapticsEnabled]);
 
-  // 保存：グローバルへ反映（＝全画面に即反映 & 永続化）
   const onSave = useCallback(async () => {
     setSaving(true);
     try {
       await setThemeMode(theme);
       await setHapticsEnabled(hapticsLocal);
-      // 言語を変更（i18next）
       i18n.changeLanguage(langLocal);
 
       Alert.alert(
@@ -111,7 +101,6 @@ export default function AppSettingsScreen() {
           {t("settings.appSettings_desc")}
         </Text>
 
-        {/* テーマ */}
         <Card title={t("settings.theme_title")} colors={appColors}>
           <View style={styles.rowBetween}>
             <Text style={[styles.label, { color: appColors.text }]}>
@@ -145,7 +134,6 @@ export default function AppSettingsScreen() {
             </View>
           </View>
 
-          {/* 簡易プレビュー（ローカル選択を反映） */}
           <View style={[styles.preview, { backgroundColor: ui.card, borderColor: ui.border }]}>
             <Text style={{ color: ui.text, fontWeight: "800", marginBottom: 6 }}>
               {t("settings.theme_preview_title")}
@@ -183,7 +171,6 @@ export default function AppSettingsScreen() {
           </View>
         </Card>
 
-        {/* 言語切り替え */}
         <Card title={t("settings.language")} colors={appColors}>
           <View style={styles.rowBetween}>
             <Text style={[styles.label, { color: appColors.text }]}>
@@ -225,7 +212,6 @@ export default function AppSettingsScreen() {
           </Text>
         </Card>
 
-        {/* 触覚 */}
         <Card title={t("settings.haptics_title")} colors={appColors}>
           <View style={styles.rowBetween}>
             <Text style={[styles.label, { color: appColors.text }]}>
@@ -253,7 +239,6 @@ export default function AppSettingsScreen() {
           </TouchableOpacity>
         </Card>
 
-        {/* Tips */}
         <Card title={t("settings.memo_title")} colors={appColors}>
           <Text
             style={{
@@ -267,7 +252,6 @@ export default function AppSettingsScreen() {
         </Card>
       </ScrollView>
 
-      {/* iOS: キーボード上バー（“保存”ショートカット） */}
       {Platform.OS === "ios" && (
         <InputAccessoryView nativeID={accessoryID}>
           <View
@@ -315,7 +299,6 @@ export default function AppSettingsScreen() {
         </InputAccessoryView>
       )}
 
-      {/* 下固定バー（Android等） */}
       <View
         style={[
           styles.fixedBar,
@@ -342,7 +325,6 @@ export default function AppSettingsScreen() {
   );
 }
 
-/** ========== 小物 ========== */
 function Card({
   title,
   colors,
@@ -385,7 +367,6 @@ function palette(s: "light" | "dark") {
       };
 }
 
-/** ========== Styles ========== */
 const styles = StyleSheet.create({
   h1: { fontSize: 20, fontWeight: "800" },
   sub: { marginTop: 4, marginBottom: 12 },
@@ -429,7 +410,6 @@ const styles = StyleSheet.create({
   },
   previewCard: { borderWidth: StyleSheet.hairlineWidth, borderRadius: 12, padding: 12 },
 
-  // Buttons (shared)
   primaryBtn: { paddingVertical: 10, borderRadius: 10, alignItems: "center" },
   primaryBtnText: { color: "#FFFFFF", fontWeight: "800", fontSize: 14 },
   outlineBtn: {
@@ -441,7 +421,6 @@ const styles = StyleSheet.create({
   },
   outlineBtnText: { fontWeight: "800" },
 
-  // Accessory bar
   accessoryBar: {
     borderTopWidth: StyleSheet.hairlineWidth,
     padding: 8,
@@ -453,7 +432,6 @@ const styles = StyleSheet.create({
   accessoryPrimary: { paddingVertical: 10, paddingHorizontal: 14, borderRadius: 8 },
   accessoryPrimaryText: { color: "#FFFFFF", fontWeight: "800" },
 
-  // Fixed bottom bar
   fixedBar: {
     position: "absolute",
     left: 0,

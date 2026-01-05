@@ -11,13 +11,12 @@ const C = theme?.colors ?? { bg:"#0a0d0f", card:"#12161a", text:"#e6e8eb", sub:"
 
 import { fetchThreads, listFavoriteThreadIds, addFavorite, removeFavorite } from "../../lib/bbs/api";
 
-// boards を取得（存在しなければ固定配列）
 const useBoards = () => {
   const [boards, setBoards] = useState<Array<{slug:string; name:string}>>([]);
   useEffect(() => {
     (async () => {
       try {
-        const mod = await import("../../lib/bbs/boards"); // 任意：存在すれば使う
+        const mod = await import("../../lib/bbs/boards");
         setBoards([{ slug: "", name: "すべて" }, ...mod.default]);
       } catch {
         setBoards([
@@ -26,8 +25,8 @@ const useBoards = () => {
           { slug: "training", name: "筋トレ" },
           { slug: "nutrition",name: "栄養" },
           { slug: "chat",     name: "雑談" },
-          { slug: "sports",   name: "スポーツ" },  // 追加
-          { slug: "health",   name: "健康" },      // 追加
+          { slug: "sports",   name: "スポーツ" },
+          { slug: "health",   name: "健康" },
         ]);
       }
     })();
@@ -45,16 +44,14 @@ export default function BbsListScreen() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [q, setQ] = useState("");
   const [favSet, setFavSet] = useState<Set<string>>(new Set());
-  const [boardSlug, setBoardSlug] = useState<string>(""); // ""=すべて
+  const [boardSlug, setBoardSlug] = useState<string>("");
   const [sort, setSort] = useState<"new" | "hot">("new");
   const [onlyFav, setOnlyFav] = useState(false);
 
-  // 初回＆カテゴリ切替で取得
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const [{ items, nextCursor }, favs] = await Promise.all([
-        // サーバ側の fetchThreads が boardSlug を無視していてもOK（ローカルでも絞るため）
         fetchThreads({ limit: 20, boardSlug: boardSlug || null }),
         listFavoriteThreadIds().catch(() => new Set<string>()),
       ]);
@@ -70,7 +67,6 @@ export default function BbsListScreen() {
     load();
   }, [load]);
 
-  // ページング
   const loadMore = useCallback(async () => {
     if (!cursor || loadingMore) return;
     setLoadingMore(true);
@@ -87,7 +83,6 @@ export default function BbsListScreen() {
     }
   }, [cursor, loadingMore, boardSlug]);
 
-  // ローカル絞り込み（タイトル/お気に入り/カテゴリ）
   const filtered = items
     .filter((it) => {
       if (boardSlug) {
@@ -101,12 +96,10 @@ export default function BbsListScreen() {
     })
     .sort((a, b) => {
       if (sort === "hot") {
-        // 勢い: 返信数降順 -> 最終更新
         if ((b.reply_count ?? 0) !== (a.reply_count ?? 0)) {
           return (b.reply_count ?? 0) - (a.reply_count ?? 0);
         }
       }
-      // new: last_bump_at 新しい順
       const ba = new Date(b.last_bump_at ?? b.created_at ?? 0).getTime();
       const aa = new Date(a.last_bump_at ?? a.created_at ?? 0).getTime();
       return ba - aa;
@@ -144,7 +137,7 @@ export default function BbsListScreen() {
       activeOpacity={0.85}
       style={{
         flexBasis: "48%",
-        minWidth: 140, // 2列で崩れにくく
+        minWidth: 140,
         paddingVertical: 12,
         borderRadius: 16,
         paddingHorizontal: 12,
@@ -216,9 +209,7 @@ export default function BbsListScreen() {
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={{ flex: 1, backgroundColor: C.bg }}>
         <ScrollView contentContainerStyle={{ padding: 16 }}>
-            {/* ヘッダー */}
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-            {/* 左：タイトル + ホーム */}
             <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                 <Text style={{ color: C.text, fontSize: 22, fontWeight: "900" }}>筋肉掲示板</Text>
                 <TouchableOpacity
@@ -237,16 +228,14 @@ export default function BbsListScreen() {
                 </TouchableOpacity>
             </View>
 
-            {/* 右：新規スレ作成 */}
             <TouchableOpacity
-                onPress={() => router.push(`/bbs/new?board=${boardSlug || "general"}`)} // 選択中をプリセット
+                onPress={() => router.push(`/bbs/new?board=${boardSlug || "general"}`)}
                 style={{ backgroundColor: C.primary, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12 }}
             >
                 <Text style={{ color: "#00140e", fontWeight: "900" }}>新規スレ作成</Text>
             </TouchableOpacity>
             </View>
 
-            {/* フィルタ（2列グリッド & セグメント） */}
             <View style={{ marginBottom: 10 }}>
             <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
                 {boards.map((b) => (
@@ -260,7 +249,6 @@ export default function BbsListScreen() {
             </View>
             </View>
 
-            {/* 検索 */}
             <View style={{ backgroundColor: C.card, borderColor: C.border, borderWidth: 1, borderRadius: 10, marginBottom: 10 }}>
             <TextInput
                 value={q}
@@ -271,7 +259,6 @@ export default function BbsListScreen() {
             />
             </View>
 
-            {/* リスト */}
             {loading ? (
             <View style={{ height: 260, alignItems: "center", justifyContent: "center" }}>
                 <ActivityIndicator />
@@ -301,7 +288,6 @@ export default function BbsListScreen() {
                         {item.title || "(無題)"}
                         </Text>
 
-                        {/* 下段メタ情報 */}
                         <View style={{ flexDirection: "row", gap: 12 }}>
                         <Text style={{ color: C.sub, fontSize: 12 }}>{item.primary_name ?? "筋肉掲示板"}</Text>
                         <Text style={{ color: C.sub, fontSize: 12 }}>返信 {item.reply_count}</Text>
@@ -310,7 +296,6 @@ export default function BbsListScreen() {
                         </Text>
                         </View>
 
-                        {/* タグ（主カテゴリ + 追加タグ） */}
                         {tagsToShow.length > 0 && (
                         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
                             {tagsToShow.map((nm: string, i: number) => (
@@ -332,7 +317,6 @@ export default function BbsListScreen() {
                         )}
                     </TouchableOpacity>
 
-                    {/* 右上 お気に入り */}
                     <TouchableOpacity onPress={() => toggleFav(item.id, !isFav)} style={{ position: "absolute", right: 10, top: 10, padding: 6 }}>
                         <Text style={{ fontSize: 18, color: isFav ? "#facc15" : C.sub }}>{isFav ? "★" : "☆"}</Text>
                     </TouchableOpacity>

@@ -1,4 +1,3 @@
-// ui/RestTimerBar.tsx
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { View, Text, TouchableOpacity, AppState, AppStateStatus, TextInput } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -9,8 +8,8 @@ import { cancelNotification, ensureNotificationSetup, scheduleRestNotification }
 export type RestTimerHandle = { start: (sec?: number) => void };
 
 type Props = {
-  defaultSec?: number; // 初期のデフォルト秒
-  sound?: any;         // require("...mp3")
+  defaultSec?: number;
+  sound?: any;
 };
 
 export default forwardRef<RestTimerHandle, Props>(
@@ -22,7 +21,6 @@ export default forwardRef<RestTimerHandle, Props>(
     const tickRef = useRef<any>(null);
     const appState = useRef(AppState.currentState);
 
-    // UI: カスタム開始エリア
     const [customOpen, setCustomOpen] = useState(false);
     const [customSec, setCustomSec] = useState(String(defaultSec));
     const parseCustom = () => {
@@ -49,18 +47,17 @@ export default forwardRef<RestTimerHandle, Props>(
     }, [endAt, fired]);
 
     async function begin(sec: number) {
-      //  開始はこの関数だけ。UIの秒数ボタン/開始ボタン以外からは呼ばない。
-      await cancel(); // 既存をリセット
+      await cancel();
       const target = Date.now() + Math.max(1, Math.floor(sec)) * 1000;
       setEndAt(target);
       setFired(false);
-      const id = await scheduleRestNotification(sec); // 未来時刻にスケジュール
+      const id = await scheduleRestNotification(sec);
       setNotifId(id ?? null);
       setCustomOpen(false);
     }
 
     function add(sec: number) {
-      if (endAt == null) return; // ★ 進行中だけ延長できる
+      if (endAt == null) return;
       const remaining = Math.max(0, Math.ceil((endAt - Date.now()) / 1000) + sec);
       begin(remaining);
     }
@@ -92,7 +89,6 @@ export default forwardRef<RestTimerHandle, Props>(
     return (
       <View style={{ borderTopWidth: 1, borderColor: "#e5e7eb", backgroundColor: "#fff" }}>
         {endAt ? (
-          // 進行中バー
           <LinearGradient colors={["#eef2ff", "#e0f2fe"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
             style={{ paddingHorizontal: 12, paddingVertical: 10, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
             <Text style={{ fontWeight: "900", color: "#111827", fontSize: 16 }}>⏱ 残り {mm}:{ss}</Text>
@@ -102,10 +98,8 @@ export default forwardRef<RestTimerHandle, Props>(
             </View>
           </LinearGradient>
         ) : (
-          // アイドル時バー
           <View style={{ paddingHorizontal: 12, paddingVertical: 10 }}>
             {customOpen ? (
-              // カスタム秒数エリア
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                 <Text style={{ fontWeight: "800", color: "#111827" }}>カスタム</Text>
                 <TextInput
@@ -119,7 +113,6 @@ export default forwardRef<RestTimerHandle, Props>(
                 <SmallBtn label="戻る" onPress={() => setCustomOpen(false)} ghost />
               </View>
             ) : (
-              // プリセット秒数 + カスタムボタン
               <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
                 <Text style={{ fontWeight: "800", color: "#111827" }}>休憩タイマー</Text>
                 <View style={{ flexDirection: "row", gap: 8 }}>

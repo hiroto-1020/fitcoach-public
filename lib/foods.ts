@@ -1,5 +1,3 @@
-// lib/foods.ts
-// Open Food Facts を日本語優先で検索（国タグに依存せずヒット率重視）
 
 export type Per100 = { kcal?: number; p?: number; f?: number; c?: number };
 export type FoodItem = {
@@ -76,7 +74,6 @@ function buildItemFromProduct(prod: any): FoodItem {
   };
 }
 
-// 🇯🇵 修正版: 国フィルタ削除・日本語優先フィールドを重視
 export async function searchFoods(query: string, limit = 30): Promise<FoodItem[]> {
   const params = new URLSearchParams({
     search_terms: query,

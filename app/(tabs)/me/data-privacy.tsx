@@ -13,10 +13,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeColors, radius, shadow, alpha } from "../../../ui/theme";
 import { useTranslation } from "react-i18next";
 
-// Expo SDK 54: 「legacy」API を明示利用（新APIへは後日移行可）
 import * as FileSystem from "expo-file-system/legacy";
 
-// lazy requires（未導入でも画面は落ちない）
 let Sharing: any = null;
 try {
   Sharing = require("expo-sharing");
@@ -37,12 +35,11 @@ try {
   dayjs = require("dayjs");
 } catch {}
 
-// ====== バックアップのフォーマット ======
 type BackupV1 = {
   app: "FitGear";
   formatVersion: 1;
-  createdAt: string; // ISO
-  device: string; // "ios" | "android" | "web" | ...
+  createdAt: string;
+  device: string;
   asyncStorage: Record<string, string | null>;
   sqlite: { files: Record<string, string /* base64 */> };
 };
@@ -57,7 +54,6 @@ const BACKUP_DIR = `${DOC_DIR}backups/`;
 
 type BackupFile = { name: string; path: string; size: number; mtime: number };
 
-// ====== FS utils ======
 async function ensureDir(uri: string) {
   const info = await FileSystem.getInfoAsync(uri);
   if (!info.exists) {
@@ -134,9 +130,7 @@ export default function DataPrivacyScreen() {
   const [backups, setBackups] = useState<BackupFile[]>([]);
   const [loadingList, setLoadingList] = useState(true);
 
-  // サイズや最終エクスポート日時を再取得
   const refreshSizes = useCallback(async () => {
-    // AsyncStorage の概算サイズ
     let aSize = 0;
     if (AsyncStorage) {
       try {
@@ -147,7 +141,6 @@ export default function DataPrivacyScreen() {
     }
     setAsyncSize(aSize);
 
-    // SQLite の合計サイズ
     let sSize = 0;
     try {
       const files = await listSQLiteFiles();
@@ -159,7 +152,6 @@ export default function DataPrivacyScreen() {
     } catch {}
     setSqliteSize(sSize);
 
-    // 最終エクスポート日時
     try {
       if (AsyncStorage) {
         const iso = await AsyncStorage.getItem(KEY_LAST_EXPORT);
@@ -190,7 +182,6 @@ export default function DataPrivacyScreen() {
       : lastExportISO;
   }, [lastExportISO]);
 
-  // ====== エクスポート ======
   const doExport = useCallback(async () => {
     if (!FileSystem.documentDirectory) {
       Alert.alert(
@@ -203,7 +194,6 @@ export default function DataPrivacyScreen() {
     try {
       const createdAt = new Date().toISOString();
 
-      // AsyncStorage dump
       let asyncDump: Record<string, string | null> = {};
       if (AsyncStorage) {
         const keys: string[] = await AsyncStorage.getAllKeys();
@@ -211,7 +201,6 @@ export default function DataPrivacyScreen() {
         for (const [k, v] of pairs) asyncDump[k] = v;
       }
 
-      // SQLite dump
       const sqliteFiles = await listSQLiteFiles();
       const fileMap: Record<string, string> = {};
       for (const fullPath of sqliteFiles) {
@@ -242,7 +231,6 @@ export default function DataPrivacyScreen() {
         encoding: FileSystem.EncodingType.UTF8,
       });
 
-      // 共有ダイアログ
       if (Sharing && (await Sharing.isAvailableAsync())) {
         try {
           await Sharing.shareAsync(outPath, {
@@ -251,11 +239,9 @@ export default function DataPrivacyScreen() {
             dialogTitle: t("data.export_share_dialog_title"),
           });
         } catch {
-          /* cancel ok */
         }
       }
 
-      // 記録
       if (AsyncStorage) await AsyncStorage.setItem(KEY_LAST_EXPORT, createdAt);
       setLastExportISO(createdAt);
 
@@ -272,7 +258,6 @@ export default function DataPrivacyScreen() {
     }
   }, [refreshBackups, refreshSizes, t]);
 
-  // ====== インポート（上書き復元 or DocumentPicker） ======
   const doImport = useCallback(async () => {
     if (!FileSystem.documentDirectory) {
       Alert.alert(
@@ -317,7 +302,6 @@ export default function DataPrivacyScreen() {
         }
         pickedUri = (res as any).assets?.[0]?.uri ?? (res as any).uri ?? null;
       } else {
-        // DocumentPicker が無い場合：最新バックアップ or 固定パス
         const xs = await listBackups();
         if (xs.length === 0) {
           const fallback = `${BACKUP_DIR}import.json`;
@@ -332,7 +316,7 @@ export default function DataPrivacyScreen() {
           }
           pickedUri = fallback;
         } else {
-          pickedUri = xs[0].path; // 最新
+          pickedUri = xs[0].path;
         }
       }
 
@@ -349,7 +333,6 @@ export default function DataPrivacyScreen() {
         throw new Error(t("data.alert_import_not_supported"));
       }
 
-      // AsyncStorage
       if (AsyncStorage && parsed.asyncStorage) {
         await AsyncStorage.clear();
         const pairs = Object.entries(parsed.asyncStorage).map(
@@ -358,7 +341,6 @@ export default function DataPrivacyScreen() {
         if (pairs.length) await AsyncStorage.multiSet(pairs);
       }
 
-      // SQLite
       if (parsed.sqlite?.files) {
         await ensureDir(SQLITE_DIR);
         for (const [name, b64] of Object.entries(parsed.sqlite.files)) {
@@ -379,7 +361,6 @@ export default function DataPrivacyScreen() {
     }
   }, [refreshBackups, refreshSizes, t]);
 
-  // ====== 一つのバックアップから復元 ======
   const restoreFromPath = useCallback(
     async (path: string) => {
       const ok = await new Promise<boolean>((resolve) => {
@@ -438,7 +419,6 @@ export default function DataPrivacyScreen() {
     [refreshSizes, t]
   );
 
-  // ====== 全データ消去 ======
   const wipeAll = useCallback(
     async () => {
       const ok = await new Promise<boolean>((resolve) => {
@@ -487,7 +467,6 @@ export default function DataPrivacyScreen() {
     [refreshSizes, t]
   );
 
-  // ====== UI ======
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: C.bg }}
@@ -499,7 +478,6 @@ export default function DataPrivacyScreen() {
         C={C}
       />
 
-      {/* 概要カード */}
       <SectionCard C={C}>
         <Row
           icon="archive-outline"
@@ -523,7 +501,6 @@ export default function DataPrivacyScreen() {
         />
       </SectionCard>
 
-      {/* エクスポート */}
       <SectionCard
         C={C}
         title={t("data.export_title")}
@@ -543,7 +520,6 @@ export default function DataPrivacyScreen() {
         )}
       </SectionCard>
 
-      {/* インポート */}
       <SectionCard
         C={C}
         title={t("data.import_title")}
@@ -563,7 +539,6 @@ export default function DataPrivacyScreen() {
         )}
       </SectionCard>
 
-      {/* バックアップ一覧 */}
       <SectionCard
         C={C}
         title={t("data.list_title")}
@@ -643,7 +618,6 @@ export default function DataPrivacyScreen() {
         )}
       </SectionCard>
 
-      {/* リセット */}
       <SectionCard
         C={C}
         title={t("data.reset_title")}
@@ -661,7 +635,6 @@ export default function DataPrivacyScreen() {
   );
 }
 
-/* ---------- 共通UI ---------- */
 function Header({
   title,
   subtitle,

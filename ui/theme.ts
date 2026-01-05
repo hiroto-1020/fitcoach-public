@@ -1,8 +1,6 @@
-// ui/theme.ts
 import { Appearance, ColorSchemeName } from "react-native";
 import { useSyncExternalStore } from "react";
 
-// ====== 型 ======
 export type Palette = {
   bg: string;
   card: string;
@@ -20,7 +18,6 @@ export type Palette = {
 
 export type Mode = "system" | "light" | "dark";
 
-// ====== パレット定義 ======
 const PALETTES: Record<"light" | "dark", Palette> = {
   light: {
     bg: "#F7F8FA",
@@ -52,34 +49,28 @@ const PALETTES: Record<"light" | "dark", Palette> = {
   },
 } as const;
 
-// ====== ランタイムのテーマ管理 ======
-let mode: Mode = "system"; // 現在のユーザー指定（system|light|dark）
+let mode: Mode = "system";
 
 const initialScheme: "light" | "dark" =
   Appearance.getColorScheme() === "dark" ? "dark" : "light";
 
-let scheme: "light" | "dark" = initialScheme; // 実際に適用中のスキーム
+let scheme: "light" | "dark" = initialScheme;
 
-// 参照を固定したまま中身だけ差し替える “生きている” colors
 export const colors: Palette = { ...PALETTES[initialScheme] };
 
-// 外部購読（useTheme / useThemeColors が購読）
 const listeners = new Set<() => void>();
 
 function apply(next: "light" | "dark") {
   scheme = next;
-  Object.assign(colors, PALETTES[next]); // 参照は維持 / 中身のみ更新
+  Object.assign(colors, PALETTES[next]);
   listeners.forEach((l) => l());
 }
 
-// システムの外観変更を購読（mode=system の時のみ反映）
 Appearance.addChangeListener(({ colorScheme }: { colorScheme: ColorSchemeName }) => {
   if (mode !== "system") return;
   apply(colorScheme === "dark" ? "dark" : "light");
 });
 
-// ====== パブリックAPI ======
-/** テーマを固定（light/dark）またはシステム追従（system）に設定 */
 export function setTheme(next: Mode) {
   mode = next;
   const s =
@@ -91,35 +82,26 @@ export function setTheme(next: Mode) {
   apply(s);
 }
 
-/** 現在のテーマ状態を React で購読（色は `colors` を直接使える） */
 export function useTheme() {
   const subscribe = (onStoreChange: () => void) => {
     listeners.add(onStoreChange);
     return () => listeners.delete(onStoreChange);
   };
-  // 現状の scheme を外部ストアとして購読（SSR の fallback は light）
   useSyncExternalStore(subscribe, () => scheme, () => "light");
   return { colors, isDark: scheme === "dark", scheme, mode };
 }
 
-/** 互換フック：画面側で `const C = useThemeColors()` として使える */
 export function useThemeColors(pref: Mode = "system"): Palette {
-  // system 指定はグローバル状態を購読（再レンダリングも効く）
   if (pref === "system") {
-    // 購読を効かせるために useTheme() を呼ぶ
-    // （戻り値の colors は“生きている”参照なので直接返してOK）
     return useTheme().colors;
   }
-  // 画面単位で強制したい場合は固定パレットを返却（購読は不要）
   return PALETTES[pref === "dark" ? "dark" : "light"];
 }
 
-/** 現在のスキームだけ知りたい時用（購読不要のユーティリティ） */
 export function getColorScheme() {
   return scheme;
 }
 
-// ====== スペーシング/角丸/影（テーマ非依存）======
 export const radius = { s: 8, m: 12, l: 16, xl: 20 } as const;
 
 export const spacing = {
@@ -136,12 +118,10 @@ export const shadow = {
     shadowOpacity: 0.08,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
-    elevation: 3, // Android
+    elevation: 3,
   },
 } as const;
 
-// ====== ユーティリティ ======
-/** #RRGGBB にアルファを付与（例: alpha(colors.primary, 0.12)） */
 export function alpha(hex: string, a: number) {
   const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
   if (!m) return hex;

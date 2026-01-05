@@ -1,4 +1,3 @@
-// app/(tabs)/me/index.tsx
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   View,
@@ -24,7 +23,6 @@ import {
 import type { Gender } from "../../../lib/gotore/types";
 import { useTranslation } from "react-i18next";
 
-// ====== オプショナル依存（無くても落ちない） ======
 let AsyncStorage: any = null;
 try {
   AsyncStorage =
@@ -42,37 +40,30 @@ try {
 } catch {}
 
 type Summary = {
-  // プロフィール
   displayName: string | null;
   email: string | null;
   timezone: string | null;
 
-  // 目標・体データ
-  weightTarget: number | null; // kg
-  bodyFatTarget: number | null; // %
+  weightTarget: number | null;
+  bodyFatTarget: number | null;
   kcalPerDay: number | null;
   p: number | null;
   f: number | null;
   c: number | null;
 
-  // 通知
   trainingTimes: number;
   mealTimes: number;
   weeklyReview: boolean;
 
-  // アプリ設定
   theme: "auto" | "light" | "dark" | null;
   haptics: boolean | null;
 
-  // 体組成の最新（オプション）
   latestWeight: number | null;
   latestBodyFat: number | null;
-  latestMeasuredAt: string | null; // ISO
+  latestMeasuredAt: string | null;
 
-  // 食事合計（オプション）
   todayCalories: number | null;
 
-  // その他
   lastExportedAt: string | null;
   appVersion: string | null;
 };
@@ -103,7 +94,6 @@ const DEFAULT_SUMMARY: Summary = {
     null,
 };
 
-// 既定の保存キー
 const KEYS = {
   PROFILE: "me.profile",
   GOALS: "me.goals",
@@ -114,7 +104,6 @@ const KEYS = {
   LAST_EXPORT: "me.lastExportedAt",
 } as const;
 
-/** カード（テーマ対応） */
 function Card({ children }: { children: React.ReactNode }) {
   const C = useThemeColors();
   return (
@@ -134,7 +123,6 @@ function Card({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** 行リンク（テーマ対応） */
 function RowLink({
   href,
   title,
@@ -195,31 +183,26 @@ export default function SettingsHome() {
   const router = useRouter();
   const { t } = useTranslation();
 
-  // ===== Auth 状態 =====
   const [authLoading, setAuthLoading] = useState(true);
   const [meEmail, setMeEmail] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // ===== 既存サマリー =====
   const [summary, setSummary] = useState<Summary>(DEFAULT_SUMMARY);
   const [refreshing, setRefreshing] = useState(false);
 
-  // 起動時：ログイン中か確認
   useEffect(() => {
     (async () => {
       try {
         const { data } = await supabase.auth.getUser();
         setMeEmail(data.user?.email ?? null);
       } catch {
-        // noop
       } finally {
         setAuthLoading(false);
       }
     })();
   }, []);
 
-  // ===== Auth 操作 =====
   const signIn = async () => {
     try {
       setAuthLoading(true);
@@ -228,7 +211,6 @@ export default function SettingsHome() {
       if (error) throw error;
       setMeEmail(data.user?.email ?? null);
 
-      // 初回ログイン時に必要行を確保（性別は未回答として unknown）
       await ensureMyUserRow("unknown" as Gender);
       await ensureMySettingsRow();
       await ensureMyProfileRow();
@@ -301,7 +283,6 @@ export default function SettingsHome() {
     }
   };
 
-  // ===== 設定サマリーのロード =====
   const loadSummary = useCallback(async () => {
     const safeParse = (s: string | null) => {
       if (!s) return null;
@@ -312,12 +293,10 @@ export default function SettingsHome() {
       }
     };
 
-    // プロフィール
     let displayName: string | null = null;
     let emailV: string | null = null;
     let timezone: string | null = null;
 
-    // 目標
     let weightTarget: number | null = null;
     let bodyFatTarget: number | null = null;
     let kcalPerDay: number | null = null;
@@ -325,16 +304,13 @@ export default function SettingsHome() {
     let f: number | null = null;
     let c: number | null = null;
 
-    // 通知
     let trainingTimes = 0;
     let mealTimes = 0;
     let weeklyReview = false;
 
-    // アプリ設定
     let theme: "auto" | "light" | "dark" | null = null;
     let haptics: boolean | null = null;
 
-    // スナップショット
     let latestWeight: number | null = null;
     let latestBodyFat: number | null = null;
     let latestMeasuredAt: string | null = null;
@@ -443,7 +419,6 @@ export default function SettingsHome() {
     loadSummary();
   }, [loadSummary]);
 
-  // ===== 表示用文字列 =====
   const profileSub = useMemo(() => {
     const name =
       summary.displayName ?? t("settings.profile.nameUnset");
@@ -598,7 +573,6 @@ export default function SettingsHome() {
         {t("settings.description")}
       </Text>
 
-      {/* アカウント（ここでログイン/登録/ログアウト/合トレON） */}
       <Card>
         <View
           style={{
@@ -820,7 +794,6 @@ export default function SettingsHome() {
         </View>
       </Card>
 
-      {/* 基本セクション */}
       <Card>
         <RowLink
           href="/(tabs)/me/account"
@@ -899,7 +872,6 @@ export default function SettingsHome() {
   );
 }
 
-// ====== ユーティリティ ======
 function isNum(v: any): v is number {
   return typeof v === "number" && Number.isFinite(v);
 }

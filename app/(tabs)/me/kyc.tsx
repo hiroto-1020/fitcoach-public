@@ -1,4 +1,3 @@
-// app/(tabs)/me/kyc.tsx
 import React, { useMemo, useState, useCallback } from "react";
 import {
   View, Text, TouchableOpacity, Alert, StyleSheet,
@@ -7,7 +6,6 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { supabase, SUPABASE_URL } from "../../../lib/supabase";
 
-// ===== 動的 import（Expo Go でも落ちないように） =====
 let ImagePicker: any = null; try { ImagePicker = require("expo-image-picker"); } catch {}
 let FileSystem: any = null; try { FileSystem = require("expo-file-system/legacy"); } catch {}
 let atobPolyfill: any = null; try { atobPolyfill = require("base-64").decode; } catch {}
@@ -21,7 +19,6 @@ const functionsOrigin = (() => {
 
 type DocType = "license" | "insurance" | "juminhyo";
 
-// Base64   Uint8Array（RNでatobが無い環境に配慮）
 function b64ToBytes(base64: string) {
   const atob = (globalThis as any).atob || atobPolyfill;
   if (!atob) throw new Error("atob polyfill missing (base-64)");
@@ -88,41 +85,33 @@ export default function KycCaptureScreen() {
 
     setBusy(true);
     try {
-      // a) 画像   Base64   Uint8Array（RN/Expo Go対応）
       const base64: string = await FileSystem.readAsStringAsync(imageUri, { encoding: FileSystem.EncodingType.Base64 });
       const bytes = b64ToBytes(base64);
 
-      // b) ユーザーIDと保存パス
       const { data: auth } = await supabase.auth.getUser();
       const uid = auth?.user?.id;
       if (!uid) throw new Error("not authenticated");
       const objectPath = `${uid}/${session_id}.jpg`;
 
-      // c) Storageへアップ（RLS: 事前に storage ポリシーが必要）
       const { error: upErr } = await supabase
         .storage
         .from(KYC_BUCKET)
         .upload(objectPath, bytes, { contentType: "image/jpeg", upsert: true });
       if (upErr) throw upErr;
 
-      // d) 公開URL（保険としてURLも保存。ただし基本は document_path を参照）
       const { data: pub } = supabase.storage.from(KYC_BUCKET).getPublicUrl(objectPath);
       const publicUrl = pub?.publicUrl ?? null;
 
-      // e) kyc_verifications を UPDATE（自分の行のみ / RLS対策で user_id も条件に入れる）
       const updatePayload: Record<string, any> = { document_path: objectPath };
       if (publicUrl) updatePayload.document_url = publicUrl;
-      // 列があれば種別も保存（無ければ無視）
-      // updatePayload.document_type = docType;
 
       const { error: rowErr } = await supabase
         .from("kyc_verifications")
         .update(updatePayload)
         .eq("provider_session_id", session_id)
-        .eq("user_id", uid); // ★ RLS: 申請者のみ更新可
+        .eq("user_id", uid);
       if (rowErr) throw rowErr;
 
-      // f) Webhookへ pending 通知（失敗しても致命的ではない）
       try {
         await fetch(`${functionsOrigin}/kyc-webhook`, {
           method: "POST",
@@ -149,7 +138,6 @@ export default function KycCaptureScreen() {
     <ScrollView style={{ flex: 1, backgroundColor: "#0b1220" }} contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
       <Text style={styles.title}>本人確認（撮影）</Text>
 
-      {/* 書類種別 */}
       <View style={styles.card}>
         <Text style={styles.label}>提出書類の選択</Text>
         <View style={styles.row}>
@@ -159,7 +147,6 @@ export default function KycCaptureScreen() {
         </View>
       </View>
 
-      {/* 撮影／選択 */}
       <View style={styles.card}>
         <Text style={styles.label}>書類を撮影</Text>
         <TouchableOpacity style={styles.shot} onPress={takePhoto} activeOpacity={0.8}>
@@ -180,7 +167,6 @@ export default function KycCaptureScreen() {
         </View>
       </View>
 
-      {/* 送信 */}
       <TouchableOpacity onPress={onSubmit} disabled={busy} style={[styles.primary, busy && { opacity: 0.6 }]}>
         {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryText}>審査を送信する</Text>}
       </TouchableOpacity>

@@ -1,4 +1,3 @@
-// app/(tabs)/me/account-delete.tsx
 import React, { useState } from 'react';
 import {
   View,
@@ -13,14 +12,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { supabase } from '../../../lib/supabase';
 
-// optional deps（無ければスルー）
 let Haptics: any = null; try { Haptics = require('expo-haptics'); } catch {}
 
 export default function AccountDelete() {
   const [busy, setBusy] = useState(false);
   const router = useRouter();
 
-  // くるくる対策：15秒で確実に抜ける
   const withTimeout = <T,>(p: Promise<T>, ms = 15000) =>
     Promise.race<T>([
       p,
@@ -52,18 +49,15 @@ export default function AccountDelete() {
               setBusy(true);
               Haptics?.impactAsync?.(Haptics?.ImpactFeedbackStyle?.Medium);
 
-              // Edge Function 呼び出し（JWTはSupabaseクライアントが自動付与）
               const { error } = await withTimeout(
                 supabase.functions.invoke('account-delete-lite', { body: {} }),
                 15000
               );
               if (error) throw error;
 
-              // 端末側セッション破棄   すぐホームへ
               await supabase.auth.signOut();
               Haptics?.notificationAsync?.(Haptics?.NotificationFeedbackType?.Success);
 
-              // アラートは出さずに即遷移（戻るで復活しないようスタック掃除）
               router.dismissAll();
               router.replace('/(tabs)/home');
             } catch (e) {

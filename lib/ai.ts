@@ -11,7 +11,6 @@ export type AnalyzeResult = {
   reason?: string;
 };
 
-// 開発時の解析サーバーURL（必要なら環境変数で設定）
 const DEV_NGROK_URL = "REDACTED";
 
 function resolveBase() {
@@ -156,7 +155,6 @@ export async function analyzeMealPhoto(
 ): Promise<AnalyzeResult> {
   if (!localUri) throw new Error("image uri is empty");
 
-  //  本番はここで必ず止まる（AI_BASE = "" なので）
   if (!AI_BASE) {
     throw new Error(
       "『写真から自動入力』は現在準備中です。\n次回のアップデートまでお待ちください。"

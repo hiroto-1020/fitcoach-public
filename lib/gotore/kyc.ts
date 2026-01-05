@@ -1,15 +1,12 @@
-﻿// lib/gotore/kyc.ts
 import * as WebBrowser from "expo-web-browser";
 import { Linking } from "react-native";
 import { supabase, SUPABASE_URL } from "../supabase";
 import { startKycSession } from "./api";
 
-/* --- types --- */
 export type KycProvider = "persona" | "sumsub" | "mock";
 export type KycStatus = "approved" | "rejected" | "failed" | "pending";
 export const KYC_BUCKET = "kyc-uploads";
 
-/** KYCバッジ表記 */
 export function toKycBadge(status?: string | null) {
   const s = String(status ?? "unverified");
   if (s === "verified" || s === "approved")
@@ -21,19 +18,16 @@ export function toKycBadge(status?: string | null) {
   return { label: "未確認", color: "#64748b", isVerified: false as const };
 }
 
-/* --- Edge Functions base（モバイル直叩き） --- */
 const FUNCTIONS_BASE: string = (() => {
   try {
-    const host = new URL(SUPABASE_URL).hostname; // xxxxx.supabase.co
+    const host = new URL(SUPABASE_URL).hostname;
     const ref = host.split(".")[0];
-    // Edge Functions の正しいベース: https://<ref>.functions.supabase.co
     return `https://${ref}.functions.supabase.co`;
   } catch {
-    return SUPABASE_URL; // フォールバック（invokeで使わない）
+    return SUPABASE_URL;
   }
 })();
 
-/* --- ポーリング設定 --- */
 const POLL_MS = 1500;
 const POLL_MAX_MS = 120_000;
 
@@ -42,20 +36,16 @@ export async function openKycFlow(
 ): Promise<{ status: KycStatus; person_id: string | null; session_id: string }> {
   const session_id = genId();
   try {
-    // Edge Function 側でセッション作成
     await startKycSession(provider === "mock" ? "persona" : provider, session_id);
   } catch {
-    // 無視（後段でブラウザ起動しつつDBポーリング）
   }
 
   if (provider === "mock") {
-    // アプリ内モック（ディープリンク）
     const url = `FitGear://me/kyc?sid=${encodeURIComponent(session_id)}&provider=persona`;
     try {
       await Linking.openURL(url);
     } catch {}
   } else {
-    // Edge Functions がホストするKYC開始ページ（例：kyc-mock-html）
     const startUrl = `${FUNCTIONS_BASE}/kyc-mock-html?sid=${encodeURIComponent(
       session_id
     )}&provider=${encodeURIComponent(provider)}`;
@@ -69,7 +59,6 @@ export async function openKycFlow(
     }
   }
 
-  // DBを定期ポーリングして結果を待つ（最大 POLL_MAX_MS）
   let last: KycStatus = "pending";
   let person_id: string | null = null;
   const until = Date.now() + POLL_MAX_MS;
@@ -93,14 +82,13 @@ export async function openKycFlow(
   return { status: last, person_id, session_id };
 }
 
-/* --- 手動審査（画像アップロード pending upsert） --- */
 export type KycDocType = "license" | "insurance" | "juminhyo";
 
 export async function submitKycForManualReview(opts: {
   sessionId: string;
   docType: KycDocType;
-  localUri: string; // ImagePicker / Camera の uri
-  provider?: KycProvider; // 省略時 persona
+  localUri: string;
+  provider?: KycProvider;
 }) {
   const { sessionId, docType, localUri, provider = "persona" } = opts;
 
@@ -110,7 +98,6 @@ export async function submitKycForManualReview(opts: {
   if (!user) throw new Error("ログインが必要です。");
   const uid = user.id;
 
-  // 画像をバイト化して Storage に put
   const { ext, contentType } = guessExt(localUri);
   const objectKey = `${uid}/${sessionId}.${ext}`;
   const res = await fetch(localUri);
@@ -126,7 +113,6 @@ export async function submitKycForManualReview(opts: {
   const pub = supabase.storage.from(KYC_BUCKET).getPublicUrl(objectKey);
   const docUrl = pub.data.publicUrl;
 
-  // kyc_verifications に pending で upsert（審査はサーバ側）
   const { error } = await supabase.from("kyc_verifications").upsert(
     {
       user_id: uid,
@@ -145,10 +131,8 @@ export async function submitKycForManualReview(opts: {
   return { objectKey, url: docUrl };
 }
 
-/* --- utils --- */
 function genId(): string {
   try {
-    // @ts-ignore
     if (typeof crypto?.randomUUID === "function") return crypto.randomUUID();
   } catch {}
   return "sess_" + Math.random().toString(36).slice(2) + Date.now().toString(36);

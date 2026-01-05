@@ -96,7 +96,6 @@ export default function PrivacyScreen() {
   );
 }
 
-/* ---- 小物 ---- */
 function Header({ C, title, subtitle }: any) {
   return (
     <View style={{ marginBottom: 10 }}>

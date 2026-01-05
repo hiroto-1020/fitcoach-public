@@ -1,4 +1,3 @@
-// lib/day.ts
 export function todayKey() {
   const d = new Date();
   const y = d.getFullYear();

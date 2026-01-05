@@ -1,4 +1,3 @@
-// app.config.js
 module.exports = ({ config }) => ({
   ...config,
   extra: {

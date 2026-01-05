@@ -1,4 +1,3 @@
-﻿// lib/db.ts
 import { openDatabaseSync } from 'expo-sqlite';
 
 export const db = openDatabaseSync('FitGear.db');

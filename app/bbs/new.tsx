@@ -7,7 +7,6 @@ import { createThread, getLocalDisplayName } from "../../lib/bbs/api";
 let theme: any = null; try { theme = require("../../ui/theme"); } catch {}
 const C = theme?.colors ?? { bg:"#0a0d0f", card:"#12161a", text:"#e6e8eb", sub:"#9aa4b2", primary:"#6ee7b7", border:"#1f242a" };
 
-// 既存 boards を使えなければフォールバック
 async function loadBoards(): Promise<Array<{slug:string;name:string}>> {
   try {
     const mod = await import("../../lib/bbs/boards");
@@ -58,7 +57,6 @@ export default function BbsNewThread() {
       <View style={{ flex:1, padding:16 }}>
         <Text style={{ color:C.text, fontSize:20, fontWeight:"800", marginBottom:12 }}>新規スレ作成</Text>
 
-        {/* タイトル */}
         <View style={{ backgroundColor:C.card, borderColor:C.border, borderWidth:1, borderRadius:10, marginBottom:12 }}>
           <TextInput
             value={title}
@@ -69,7 +67,6 @@ export default function BbsNewThread() {
           />
         </View>
 
-        {/* 本文 */}
         <View style={{ backgroundColor:C.card, borderColor:C.border, borderWidth:1, borderRadius:10, marginBottom:12 }}>
           <TextInput
             value={body}
@@ -81,7 +78,6 @@ export default function BbsNewThread() {
           />
         </View>
 
-        {/* カテゴリ（複数選択チップ） */}
         <Text style={{ color:C.sub, fontSize:12, marginBottom:8 }}>カテゴリ（複数選択可）</Text>
         <View style={{ flexDirection:"row", flexWrap:"wrap", justifyContent:"space-between", marginBottom:16 }}>
           {boards.map(b => {
@@ -104,7 +100,6 @@ export default function BbsNewThread() {
           })}
         </View>
 
-        {/* 作成ボタン */}
         <TouchableOpacity
           disabled={sending || !title.trim() || !body.trim()}
           onPress={onCreate}

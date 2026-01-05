@@ -5,7 +5,6 @@ import { getFirstProfilePhotoUrl, labelGender } from "../../../lib/gotore/profil
 
 type Props = {
   candidate: Candidate & {
-    // height や自己紹介など、無い環境でもビルドが通るように全部オプショナル
     height_cm?: number | null;
     bio?: string | null;
     goal?: string | null;
@@ -43,7 +42,6 @@ export default function CandidateCard({ candidate }: Props) {
         </View>
       )}
 
-      {/*    身長の“直下”に 1 枚目のプロフィール写真 */}
       <View style={{ marginTop: 12 }}>
         {photoUrl ? (
           <Image source={{ uri: photoUrl }} style={styles.photo} resizeMode="cover" />
@@ -54,7 +52,6 @@ export default function CandidateCard({ candidate }: Props) {
         )}
       </View>
 
-      {/* 既存に合わせて、あれば目標/自己紹介を表示（未定義なら何も出さない） */}
       {candidate.goal ? (
         <View style={{ marginTop: 10 }}>
           <Text style={styles.sectionLabel}>目標</Text>
@@ -76,7 +73,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 20,
     padding: 16,
-    backgroundColor: "#0F172A", // 深めのダーク
+    backgroundColor: "#0F172A",
   },
   name: { fontSize: 28, fontWeight: "800", color: "white", marginBottom: 4 },
   meta: { color: "#CBD5E1", marginTop: 2, fontSize: 14 },

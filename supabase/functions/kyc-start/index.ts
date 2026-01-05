@@ -1,5 +1,3 @@
-// supabase/functions/kyc-start/index.ts
-// セッションIDを払い出し、モック画面 (kyc-mock-html) の URL を返す
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,7 +9,6 @@ function uuid() {
 }
 
 Deno.serve(async (req) => {
-  // CORS (preflight)
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -30,7 +27,6 @@ Deno.serve(async (req) => {
   const sid = `sess_${uuid()}`;
   const projectRef = url.hostname.split(".")[0];
 
-  // /functions/v1 を明示し、HTML モックへ誘導
   const start_url =
     `https://${projectRef}.functions.supabase.co/functions/v1/kyc-mock-html?` +
     `sid=${encodeURIComponent(sid)}&provider=${encodeURIComponent(provider)}`;

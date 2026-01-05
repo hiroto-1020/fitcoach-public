@@ -1,12 +1,9 @@
-﻿// lib/openfoodfacts.ts
-// Open Food Facts API ユーティリティ（検索・栄養100g換算・ソート等）
 import "react-native-url-polyfill/auto";
 import type { OFFProduct, OFFSearchResponse } from "../types/off";
 
 const OFF_BASE = "https://world.openfoodfacts.org";
 const USER_AGENT = "FitGear/1.0 (Expo RN) contact: horita.training1020@gmail.com";
 
-// タイムアウト（ミリ秒）
 const OFF_TIMEOUT_MS = 12000;
 
 export type ServerFilter = { countryJP: boolean; langJA: boolean };
@@ -26,7 +23,6 @@ export type SortKey =
   | "protein_desc"
   | "updated_desc";
 
-/* ============== 小ユーティリティ ============== */
 const round1 = (n: number) => Math.round(n * 10) / 10;
 function num(v: any): number | undefined {
   const n = typeof v === "string" ? Number(v) : v;
@@ -59,7 +55,7 @@ function parseServingSizeG(raw?: string | null): number | undefined {
   const mg = s.match(/(\d+(?:\.\d+)?)\s*g/);
   if (mg) return Number(mg[1]);
   const ml = s.match(/(\d+(?:\.\d+)?)\s*m[lL]/);
-  if (ml) return Number(ml[1]); // 飲料はmlをg相当として扱う（比重1前提）
+  if (ml) return Number(ml[1]);
   return undefined;
 }
 function per100FromServing(
@@ -70,7 +66,6 @@ function per100FromServing(
   return round1((100 * valServing) / servingG);
 }
 
-/* ============== 栄養（100g換算） ============== */
 export function getKcal100g(p: OFFProduct): number | undefined {
   const n = (p as any).nutriments || {};
   const kcal100 = num(n["energy-kcal_100g"]) ?? num(n.energy_kcal_100g);
@@ -118,7 +113,6 @@ export function getCarbs100g(p: OFFProduct): number | undefined {
   return clamp0_100(est);
 }
 
-/** kcalと他2つが分かれば、残り1つを推定して補完（100g） */
 export function completeMacros100g(p: OFFProduct): {
   kcal?: number;
   protein?: number;
@@ -147,7 +141,6 @@ export function completeMacros100g(p: OFFProduct): {
   };
 }
 
-/* ============== タイトル/ブランド（日本語優先） ============== */
 export function getPreferredTitle(p: OFFProduct): string {
   const cands = [
     (p as any).product_name_ja,
@@ -167,7 +160,6 @@ export function getPreferredBrand(p: OFFProduct): string {
   return b.split(",")[0]?.trim() || "";
 }
 
-/* ============== 検索URL構築（RNでも動作：URLはpolyfill済） ============== */
 function buildSearchURL(params: {
   q: string;
   page: number;
@@ -227,7 +219,6 @@ function buildSearchURL(params: {
   return url.toString();
 }
 
-/* ============== 共通フェッチ（タイムアウト＆きれいなエラー文言） ============== */
 
 async function fetchOFFJson(
   url: string,
@@ -252,7 +243,6 @@ async function fetchOFFJson(
     });
 
     if (!res.ok) {
-      // HTML 本文はユーザーに見せない（ログだけにする）
       const status = res.status;
 
       if (status === 504) {
@@ -287,7 +277,6 @@ async function fetchOFFJson(
     }
     console.warn("OFF fetch error", e);
     if (e instanceof Error && e.message.includes("Open Food Facts")) {
-      // すでに整形済みの文言ならそのまま
       throw e;
     }
     throw new Error(
@@ -298,14 +287,10 @@ async function fetchOFFJson(
   }
 }
 
-// 既存との互換用ラッパ
 async function fetchJSON(url: string) {
   return fetchOFFJson(url, "search");
 }
 
-/**
- * 検索戦略（JP/JA優先   カテゴリ contains   原材料 contains   JAのみグローバル）
- */
 export async function searchProducts(params: {
   query: string;
   page?: number;
@@ -317,7 +302,6 @@ export async function searchProducts(params: {
   if (!q)
     return { count: 0, page: 1, page_size: pageSize, skip: 0, products: [] };
 
-  // pass1: JP+JA
   const u1 = buildSearchURL({
     q,
     page,
@@ -330,7 +314,6 @@ export async function searchProducts(params: {
   let merged: OFFProduct[] = j1.products || [];
   let count = j1.count || merged.length;
 
-  // pass2: categories contains query（JP+JA）
   const need2 = merged.length < Math.min(12, pageSize);
   if (need2) {
     const u2 = buildSearchURL({
@@ -352,7 +335,6 @@ export async function searchProducts(params: {
     count = Math.max(count, j2.count || merged.length);
   }
 
-  // pass3: ingredients contains query（JP+JA）
   const need3 = merged.length < Math.min(12, pageSize);
   if (need3) {
     const u3 = buildSearchURL({
@@ -374,7 +356,6 @@ export async function searchProducts(params: {
     count = Math.max(count, j3.count || merged.length);
   }
 
-  // pass4: グローバル（JAのみ）
   const need4 = merged.length < Math.min(12, pageSize);
   if (need4) {
     const u4 = buildSearchURL({
@@ -395,7 +376,6 @@ export async function searchProducts(params: {
     count = Math.max(count, j4.count || merged.length);
   }
 
-  // 表示用に product_name / brands を日本語優先に正規化
   const normalized = merged.map((p) => {
     const name = getPreferredTitle(p);
     const brand = getPreferredBrand(p);
@@ -415,7 +395,6 @@ export async function searchProducts(params: {
   };
 }
 
-/* ============== クライアント側フィルタ/ソート ============== */
 export function applyClientFilter(
   products: OFFProduct[],
   filter: ClientFilter
@@ -484,7 +463,6 @@ export function sortProducts(
   return sorted;
 }
 
-/* ============== 単品取得（100g正規化） ============== */
 export type Normalized100g = {
   kcal100?: number;
   p100?: number;

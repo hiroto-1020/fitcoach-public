@@ -1,4 +1,3 @@
-// app/(tabs)/gotore/profile/edit.tsx
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView, Alert,
@@ -8,7 +7,6 @@ import { Stack, useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { supabase } from '../../../../lib/supabase';
 
-// API（統一版）
 import {
   getMyProfileAndGender,
   saveMyProfile,
@@ -20,13 +18,11 @@ import {
 import ReorderablePhotos from "../../../../components/gotore/ReorderablePhotos";
 import type { Gender } from '../../../../lib/gotore/types';
 
-// 画像ピッカー（動的 import）
 let ImagePicker: any = null; try { ImagePicker = require('expo-image-picker'); } catch {}
 
 const PROFILE_BUCKET = 'profile-photos';
 const MAX = 5;
 
-/** 公開URL   object key（Storage削除用） */
 function publicUrlToObjectKey(publicUrl: string): string | null {
   const marker = `/object/public/${PROFILE_BUCKET}/`;
   const idx = publicUrl.indexOf(marker);
@@ -34,7 +30,6 @@ function publicUrlToObjectKey(publicUrl: string): string | null {
   return publicUrl.substring(idx + marker.length);
 }
 
-/** 文字 数値（最初の整数を抽出） */
 const toInt = (v: any) => {
   if (v == null) return null;
   if (typeof v === 'number') return Number.isFinite(v) ? v : null;
@@ -46,7 +41,6 @@ export default function ProfileEdit() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
 
-  // === 入力state ===
   const [gender, setGender] = useState<Gender>('unknown');
   const [nickname, setNickname] = useState('');
   const [homeGym, setHomeGym] = useState('');
@@ -54,12 +48,11 @@ export default function ProfileEdit() {
   const [tags, setTags] = useState<string>('');
   const [bio, setBio] = useState('');
   const [trainingYears, setTrainingYears] = useState<string>('');
-  const [goal, setGoal] = useState('');               // 新カラム
-  const [freqPerWeek, setFreqPerWeek] = useState(''); // 新カラム（数値）
+  const [goal, setGoal] = useState('');
+  const [freqPerWeek, setFreqPerWeek] = useState('');
   const [height, setHeight] = useState<string>('');
   const [photos, setPhotos] = useState<string[]>([]);
 
-  // 読み込み
   useEffect(() => {
     (async () => {
       try {
@@ -73,7 +66,6 @@ export default function ProfileEdit() {
         setBio(profile?.bio ?? '');
         setTrainingYears(profile?.training_years != null ? String(profile.training_years) : '');
 
-        // 正規化後の新カラム（旧goals/availability/training_frequencyはAPI側で吸収）
         setGoal((profile as any)?.goal ?? '');
         setFreqPerWeek(
           (profile as any)?.training_frequency_per_week != null
@@ -90,9 +82,6 @@ export default function ProfileEdit() {
     })();
   }, []);
 
-  /** 写真追加（アップロード 即保存） */
-  // /app/(tabs)/gotore/profile/edit.tsx
-  // 画像追加（アップロード DB保存）：位置調整ON & 正方形クロップ
   const pickAndUpload = useCallback(async () => {
     if (!ImagePicker) {
       Alert.alert('画像機能が未導入', 'expo-image-picker を導入してください。\n\nnpx expo install expo-image-picker');
@@ -106,8 +95,8 @@ export default function ProfileEdit() {
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.9,
-      allowsEditing: true,   // ← 位置調整（クロップ）を有効化
-      aspect: [1, 1],        // ← 正方形トリミング（Androidで有効。iOSはUIで手動調整）
+      allowsEditing: true,
+      aspect: [1, 1],
     });
     if (res.canceled) return;
 
@@ -116,7 +105,7 @@ export default function ProfileEdit() {
       if (!uri) return;
 
       const publicUrl = await uploadProfilePhoto(uri);
-      const next = [...photos, publicUrl].slice(0, MAX); // 末尾に追加（必要なら先頭追加に変更OK）
+      const next = [...photos, publicUrl].slice(0, MAX);
       setPhotos(next);
       await saveProfilePhotos(next);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -126,16 +115,13 @@ export default function ProfileEdit() {
   }, [photos]);
 
 
-  /** 並び替え/削除後に即保存（削除された画像は Storage からも削除） */
   const onPhotosChange = useCallback(async (next: string[]) => {
     const capped = next.slice(0, MAX);
 
-    // 削除されたURLを検出
     const removed = photos.filter(u => !capped.includes(u));
     if (removed.length) {
       const keys = removed.map(publicUrlToObjectKey).filter((k): k is string => !!k);
       if (keys.length) {
-        // Storage からも削除（失敗は握りつぶし）
         await supabase.storage.from(PROFILE_BUCKET).remove(keys).catch(() => {});
       }
     }
@@ -144,7 +130,6 @@ export default function ProfileEdit() {
     try { await saveProfilePhotos(capped); } catch {}
   }, [photos]);
 
-  // 保存（新カラムで保存）
   const onSaveAll = async () => {
     try {
       const payload = {
@@ -155,14 +140,13 @@ export default function ProfileEdit() {
         bio: bio.trim() || null,
         training_years: trainingYears ? toInt(trainingYears) : null,
         height_cm: height ? toInt(height) : null,
-        // 統一：goal / training_frequency_per_week
         goal: goal.trim() || null,
         training_frequency_per_week: freqPerWeek ? toInt(freqPerWeek) : null,
-        photos, // 同時に送ってOK（saveProfilePhotosでも保持）
+        photos,
       } as any;
 
       await saveMyProfile(payload);
-      await updateMyGender(gender); // 性別も保存
+      await updateMyGender(gender);
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert('保存しました', 'プロフィールを更新しました。');
@@ -185,7 +169,6 @@ export default function ProfileEdit() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Stack.Screen options={{ headerShown: true, headerTitle: 'プロフィール編集' }} />
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
-        {/* 性別（ラジオ/セグメント） */}
         <Text style={styles.label}>性別</Text>
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
           {(['male', 'female', 'other'] as Gender[]).map((g) => (
@@ -199,7 +182,6 @@ export default function ProfileEdit() {
               </Text>
             </Pressable>
           ))}
-          {/* 未設定に戻す */}
           <Pressable
             onPress={() => setGender('unknown')}
             style={[styles.segment, gender === 'unknown' && styles.segmentActive]}
@@ -208,7 +190,6 @@ export default function ProfileEdit() {
           </Pressable>
         </View>
 
-        {/* 写真：共通部品（  並び替え／先頭へ／削除／＋追加） */}
         <Text style={styles.label}>写真（最大5枚）</Text>
         <ReorderablePhotos
           photos={photos}
@@ -292,7 +273,6 @@ const styles = StyleSheet.create({
     marginTop: 16, paddingVertical: 12, backgroundColor: '#111',
     borderRadius: 12, alignItems: 'center'
   },
-  // 性別セグメント
   segment: {
     paddingHorizontal: 12,
     paddingVertical: 8,

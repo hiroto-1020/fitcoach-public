@@ -1,4 +1,3 @@
-// app/(tabs)/body/index.tsx
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -184,7 +183,6 @@ export default function BodyScreen() {
   const avgW = showAvg && period === "day" ? rollingAvg(seriesW, 7) : null;
   const summary = useMemo(() => calcSummary(bucket), [bucket]);
 
-  // === グラフを描画しても安全か？（1点でも有効値があればOK）
   const hasChartData = useMemo(
     () =>
       labels.length > 0 &&
@@ -321,13 +319,11 @@ export default function BodyScreen() {
     };
   }, [goal, dayBucket, raw, t]);
 
-  // ===== 保存 =====
   async function handleSave() {
     await vibrate("medium");
     const weightNum = toNumberSafe(w);
     const bfNum = toNumberSafe(bf);
 
-    // スキーマに合わせて体重は必須（weight REAL NOT NULL）
     if (weightNum == null) {
       Alert.alert(
         t("body.error_weight_required_title"),
@@ -671,7 +667,6 @@ export default function BodyScreen() {
         }}
         keyboardDismissMode="on-drag"
       >
-        {/* ヘッダー */}
         <View
           style={{
             marginBottom: spacing.m,
@@ -734,7 +729,6 @@ export default function BodyScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* 期間 & 記録ボタン */}
         <View
           style={{
             flexDirection: "row",
@@ -777,7 +771,6 @@ export default function BodyScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* メトリック切替 & 7日平均 */}
         <View
           style={{
             flexDirection: "row",
@@ -813,7 +806,6 @@ export default function BodyScreen() {
           />
         </View>
 
-        {/* グラフ（データ0件は描画しない） */}
         {hasChartData ? (
           <BodyLineChart
             labels={labels}
@@ -858,17 +850,14 @@ export default function BodyScreen() {
           </View>
         )}
 
-        {/* サマリー */}
         <SummaryCards summary={summary} />
 
-        {/* ETA */}
         <ETACard
           eta={eta}
           C={C}
           title={t("body.eta_title")}
         />
 
-        {/* ストリーク */}
         <View style={{ marginTop: spacing.m }}>
           <Text
             style={{
@@ -908,7 +897,6 @@ export default function BodyScreen() {
           </View>
         </View>
 
-        {/* 直近履歴 */}
         <View
           style={{
             backgroundColor: C.card,
@@ -1048,7 +1036,6 @@ export default function BodyScreen() {
         </View>
       </ScrollView>
 
-      {/* 入力モーダル */}
       <Modal
         visible={modal}
         transparent
@@ -1092,7 +1079,6 @@ export default function BodyScreen() {
                     : t("body.modal_add_title")}
                 </Text>
 
-                {/* 日付 */}
                 <View style={{ marginBottom: spacing.m }}>
                   <Text
                     style={{
@@ -1133,7 +1119,6 @@ export default function BodyScreen() {
                   </View>
                 </View>
 
-                {/* 体重 */}
                 <View style={{ marginBottom: spacing.m }}>
                   <Text
                     style={{
@@ -1181,7 +1166,6 @@ export default function BodyScreen() {
                   </View>
                 </View>
 
-                {/* 体脂肪 */}
                 <View style={{ marginBottom: spacing.m }}>
                   <Text
                     style={{
@@ -1226,7 +1210,6 @@ export default function BodyScreen() {
                   </View>
                 </View>
 
-                {/* ノート */}
                 <View style={{ marginBottom: spacing.l }}>
                   <Text
                     style={{
@@ -1370,7 +1353,6 @@ export default function BodyScreen() {
         )}
       </Modal>
 
-      {/* 目標設定モーダル */}
       <Modal
         visible={goalModal}
         transparent

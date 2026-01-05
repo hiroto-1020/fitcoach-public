@@ -1,4 +1,3 @@
-// app/(tabs)/meals/scan-barcode.tsx
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, Linking, Platform, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
@@ -13,7 +12,6 @@ export default function ScanBarcodeScreen() {
   const lockRef = useRef(false);
 
   useEffect(() => {
-    // まだ状態が未取得なら起動時に問い合わせ
     if (!permission) requestPermission();
   }, [permission, requestPermission]);
 
@@ -42,7 +40,6 @@ export default function ScanBarcodeScreen() {
     [router]
   );
 
-  // 権限状態のレンダリング
   if (!permission) {
     return (
       <View style={styles.center}>
@@ -79,8 +76,6 @@ export default function ScanBarcodeScreen() {
     <View style={{ flex: 1, backgroundColor: "#000" }}>
       <CameraView
         style={{ flex: 1 }}
-        // バーコード検出の設定
-        // SDK 51+ では "ean13" | "ean8" | "upc_e" | "upc_a" | "code128" が使えます
         barcodeScannerSettings={{
           barcodeTypes: ["ean13", "ean8", "upc_a", "upc_e", "code128"],
         }}

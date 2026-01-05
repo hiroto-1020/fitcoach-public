@@ -1,4 +1,3 @@
-// /supabase/functions/bbs-report/index.ts
 import { cors, createAdminClient, resolveDeviceHash, validateBody } from "../_shared/bbs.ts";
 
 Deno.serve(async (req) => {
@@ -12,7 +11,6 @@ Deno.serve(async (req) => {
     if (!["thread", "post"].includes(targetType)) return cors(req, { error: "targetType は 'thread' か 'post'" }, 400);
     if (!targetId) return cors(req, { error: "targetId が必要です" }, 400);
 
-    // 簡易バリデーション（reportは短文でOK）
     const r = (reason ?? "").toString().slice(0, 300);
     const err = validateBody(r, { maxLen: 300, maxLines: 10 });
     if (err) return cors(req, { error: err }, 400);

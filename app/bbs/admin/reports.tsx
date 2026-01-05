@@ -4,7 +4,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 
-//  相対パスは “admin” 配下なので 3 つ戻る
 let theme: any = null; try { theme = require("../../../ui/theme"); } catch {}
 const C = theme?.colors ?? { bg:"#0a0d0f", card:"#12161a", text:"#e6e8eb", sub:"#9aa4b2", primary:"#6ee7b7", border:"#1f242a" };
 import { supabase } from "../../../lib/supabase";
@@ -18,7 +17,6 @@ type ReportItem = {
   status?: "open"|"closed";
 };
 
-// 端末キー（lib/bbs/api.ts と同等の簡易実装）
 async function getDeviceKey() {
   const k = await AsyncStorage.getItem("bbs_device_key");
   if (k) return k;
@@ -64,7 +62,6 @@ export default function Reports() {
         headers: { "x-device-key": xdk },
       });
       if (error) throw new Error(error.message);
-      // 反映：リストから除外
       setItems(prev => prev.filter(r => r.id !== reportId));
     } catch (e:any) {
       Alert.alert("処理エラー", e?.message ?? String(e));
@@ -85,7 +82,6 @@ export default function Reports() {
 
   return (
     <SafeAreaView edges={['top','left','right']} style={{ flex:1, backgroundColor: C.bg }}>
-      {/* ヘッダー */}
       <View style={{ paddingHorizontal:16, paddingTop:8, paddingBottom:8, borderBottomWidth:1, borderBottomColor:C.border }}>
         <View style={{ flexDirection:"row", alignItems:"center", justifyContent:"space-between" }}>
           <Text style={{ color: C.text, fontSize: 18, fontWeight: "800" }}>通報キュー（管理）</Text>
@@ -95,7 +91,6 @@ export default function Reports() {
         </View>
       </View>
 
-      {/* リスト */}
       <FlatList
         data={items}
         keyExtractor={(it) => it.id}

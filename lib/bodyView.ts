@@ -1,4 +1,3 @@
-// lib/bodyView.ts
 import { BodyMetric } from './types';
 import dayjs from './dayjs';
 
@@ -6,40 +5,37 @@ export type Period = 'day' | 'week' | 'month';
 export type Metric = 'weight' | 'bodyFat' | 'both';
 
 export type BucketPoint = {
-  key: string;        // 例: '2025-10-15' / '2025-W42' / '2025-10'
-  label: string;      // 例: '10/15' / '2025週42' / '2025/10'
+  key: string;
+  label: string;
   weightAvg: number|null;
   bodyFatAvg: number|null;
   count: number;
-  dateForSort: string; // ソート用 'YYYY-MM-DD'
+  dateForSort: string;
 };
 
 type Norm = {
-  ts: number;               // ms
-  date: string;             // 'YYYY-MM-DD'
+  ts: number;
+  date: string;
   weight: number|null;
   bodyFat: number|null;
 };
 
-/** DBレコード   表示用の正規化（tsは秒/文字列にも耐性） */
 export function normalize(list: BodyMetric[]): Norm[] {
   return list.map(m => {
     const tsMs = typeof m.ts === 'number'
-      ? (m.ts < 1e12 ? m.ts * 1000 : m.ts) // 秒ならmsに
+      ? (m.ts < 1e12 ? m.ts * 1000 : m.ts)
       : dayjs(m.ts as any).valueOf();
     return {
       ts: tsMs,
       date: dayjs(tsMs).format('YYYY-MM-DD'),
       weight: m.weight ?? null,
-      bodyFat: (m as any).bodyFat ?? null, // types側がoptionalでもOKに
+      bodyFat: (m as any).bodyFat ?? null,
     };
   });
 }
 
-/** 同一日の複数は最新(ts最大)のみ採用 */
 export function pickLatestPerDay(norms: Norm[]): Norm[] {
   const map = new Map<string, Norm>();
-  // ts昇順で回し、同日は最後（最新）で上書き
   norms.sort((a,b)=>a.ts - b.ts).forEach(n => map.set(n.date, n));
   return Array.from(map.values()).sort((a,b)=>a.date.localeCompare(b.date));
 }
@@ -102,7 +98,6 @@ export function bucketByMonth(list: BodyMetric[]): BucketPoint[] {
   return out.sort((a,b)=>a.dateForSort.localeCompare(b.dateForSort));
 }
 
-/** 7点移動平均（nullは除外、全null区間はnull） */
 export function rollingAvg(series: (number|null)[], window=7): (number|null)[] {
   const out: (number|null)[] = [];
   for (let i=0;i<series.length;i++){
@@ -127,10 +122,9 @@ export function weeklyTrend(pts: BucketPoint[]) {
   if (w.length < 8) return null;
   const recent = w.slice(-7), before = w.slice(-14, -7);
   const avg = (a:number[])=> a.reduce((x,y)=>x+y,0)/a.length;
-  return Number((avg(recent)-avg(before)).toFixed(2)); // +なら増
+  return Number((avg(recent)-avg(before)).toFixed(2));
 }
 
-// helpers
 function avg(arr:(number|null|undefined)[]){ 
   const v = arr.filter(a=>a!=null) as number[];
   return v.length ? to1(v.reduce((a,b)=>a+b,0)/v.length) : null;

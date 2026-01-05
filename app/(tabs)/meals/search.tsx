@@ -1,5 +1,3 @@
-// app/(tabs)/meals/search.tsx
-// 食品検索画面
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -35,7 +33,6 @@ import {
 import { listUsage } from "../../../lib/usage";
 import { useTranslation } from "react-i18next";
 
-// ===== 軽量 Meal 表示用 =====
 type MealLite = {
   id: string;
   title?: string;
@@ -52,16 +49,13 @@ type MealLite = {
   usedCount?: number;
 };
 
-// ===== 検索用フィルタ =====
 type ServerFilter = { countryJP: boolean; langJA: boolean };
 type ClientFilter = { imageOnly: boolean; kcalMin?: number; kcalMax?: number; proteinMin?: number };
 const defaultServerFilter: ServerFilter = { countryJP: true, langJA: true };
 const defaultClientFilter: ClientFilter = { imageOnly: true };
 
-// ====== 既存ストレージ（最近/頻出）======
 let storageMod: any = null;
 try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   storageMod = require("../../../lib/storage");
 } catch {}
 async function listRecentMeals(limit = 64): Promise<MealLite[]> {
@@ -77,16 +71,14 @@ async function listFrequentMeals(limit = 64): Promise<MealLite[]> {
   return [];
 }
 
-// ====== AsyncStorage（ 永続化）======
 let AsyncStorage: any = null;
 try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   AsyncStorage = require("@react-native-async-storage/async-storage").default;
 } catch {}
 
 const KS = {
-  FAVORITE_CODES: "favorites_product_codes",      // OFFのcode基準（後方互換）
-  FAVORITE_MEAL_KEYS: "favorites_meal_keys_v2",   // mealKey基準（新基準）
+  FAVORITE_CODES: "favorites_product_codes",
+  FAVORITE_MEAL_KEYS: "favorites_meal_keys_v2",
 } as const;
 
 async function getItem(key: string) {
@@ -104,7 +96,6 @@ async function setItem(key: string, val: string) {
   } catch {}
 }
 
-// ====== 正規化ユーティリティ（mealKey）======
 function normalize(s?: string) {
   return (s || "")
     .toLowerCase()
@@ -122,7 +113,6 @@ function mealKeyFromMeal(m: Partial<MealLite>) {
   return mealKeyFromTitleBrand(m.title, m.brand);
 }
 
-// ======  取得/更新（code & mealKey を同期）======
 async function getFavoriteCodes(): Promise<string[]> {
   try {
     const raw = await getItem(KS.FAVORITE_CODES);
@@ -148,7 +138,6 @@ async function setFavoriteMealKeys(arr: string[]) {
   await setItem(KS.FAVORITE_MEAL_KEYS, JSON.stringify(arr));
 }
 
-// 検索結果（OFF）でトグル：code と mealKey を“同時に”更新
 async function toggleFavoriteForProduct(p: OFFProduct) {
   const code = String(p.code || "");
   const mKey = mealKeyFromProduct(p);
@@ -171,7 +160,6 @@ async function toggleFavoriteForProduct(p: OFFProduct) {
   return { codes: nextCodes, mealKeys: nextKeys };
 }
 
-// ヘッダー（Mealカード）でトグル：mealKey を更新
 async function toggleFavoriteForMealKey(mKey: string) {
   const keys = await getFavoriteMealKeys();
   const has = keys.includes(mKey);
@@ -180,7 +168,6 @@ async function toggleFavoriteForMealKey(mKey: string) {
   return next;
 }
 
-// optional: ワンタップ再記録（未対応環境は new へ）
 async function reLogMealSafe(meal: MealLite) {
   try {
     if (storageMod?.reLogMeal) return await storageMod.reLogMeal(meal);
@@ -190,14 +177,10 @@ async function reLogMealSafe(meal: MealLite) {
   }
 }
 
-/* =========================
-   画面本体
-   ========================= */
 export default function MealsSearchScreen() {
   const router = useRouter();
   const { t } = useTranslation();
 
-  // 検索状態
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [serverFilter] = useState<ServerFilter>(defaultServerFilter);
@@ -206,14 +189,12 @@ export default function MealsSearchScreen() {
   const [page, setPage] = useState(1);
   const [productsRaw, setProductsRaw] = useState<OFFProduct[]>([]);
   const [count, setCount] = useState(0);
-  const [hasSearched, setHasSearched] = useState(false); // ← 追加
+  const [hasSearched, setHasSearched] = useState(false);
 
-  // 状態
   const [favoriteCodes, setFavoriteCodesState] = useState<string[]>([]);
   const [favoriteMealKeys, setFavoriteMealKeysState] = useState<string[]>([]);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
 
-  // ヘッダー表示データ
   const [recentMealsRaw, setRecentMealsRaw] = useState<MealLite[]>([]);
   const [frequentMealsRaw, setFrequentMealsRaw] = useState<MealLite[]>([]);
 
@@ -278,7 +259,6 @@ export default function MealsSearchScreen() {
     };
   }, []);
 
-  // クエリを消したら“未検索”状態に戻す
   useEffect(() => {
     if (query.trim().length === 0) {
       setHasSearched(false);
@@ -288,7 +268,6 @@ export default function MealsSearchScreen() {
     }
   }, [query]);
 
-  // お気に入り絞り込み
   const favMealSet = useMemo(() => new Set(favoriteMealKeys), [favoriteMealKeys]);
   const frequentMeals = useMemo(
     () => (favoritesOnly ? frequentMealsRaw.filter((m) => favMealSet.has(mealKeyFromMeal(m))) : frequentMealsRaw),
@@ -309,10 +288,8 @@ export default function MealsSearchScreen() {
     });
   }, [productsRaw, favoritesOnly, favCodeSet, favMealSet]);
 
-  // 検索後はヘッダーを隠す（“未検索”のときだけ見せる）
   const showHeaderBlocks = !hasSearched;
 
-  // ソートラベル（多言語）
   const sortLabel = (k: SortKey) => {
     switch (k) {
       case "relevance":
@@ -330,7 +307,6 @@ export default function MealsSearchScreen() {
     }
   };
 
-  // 検索実行
   async function performSearch(reset = true) {
     const q = query.trim();
     if (!q) {
@@ -358,21 +334,18 @@ export default function MealsSearchScreen() {
   }
   const onSubmitSearch = () => performSearch(true);
 
-  // ヘッダーカード：トグル
   async function toggleMealFav(meal: MealLite) {
     const mKey = mealKeyFromMeal(meal);
     const nextKeys = await toggleFavoriteForMealKey(mKey);
     setFavoriteMealKeysState(nextKeys);
   }
 
-  // 検索結果：トグル
   async function toggleProductFav(p: OFFProduct) {
     const next = await toggleFavoriteForProduct(p);
     setFavoriteCodesState(next.codes);
     setFavoriteMealKeysState(next.mealKeys);
   }
 
-  // ワンタップ再記録
   async function handleReLog(meal: MealLite) {
     try {
       await reLogMealSafe(meal);
@@ -399,7 +372,6 @@ export default function MealsSearchScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      {/* 検索バー */}
       <View style={styles.hero}>
         <View style={styles.searchWrap}>
           <TextInput
@@ -418,7 +390,6 @@ export default function MealsSearchScreen() {
           />
         </View>
 
-        {/* クイックアクション（等幅・同じ高さ） */}
         <View style={styles.quickRow}>
           <View style={styles.quickCol}>
             <PrimaryButton
@@ -439,7 +410,6 @@ export default function MealsSearchScreen() {
           </View>
         </View>
 
-        {/* トグル（お気に入り／ソート） */}
         <View style={styles.toggleRow}>
           <Pressable
             onPress={() => setFavoritesOnly((v) => !v)}
@@ -483,7 +453,6 @@ export default function MealsSearchScreen() {
         </View>
       </View>
 
-      {/* ヘッダー（未検索時のみ表示） */}
       {(recentMealsRaw.length > 0 || frequentMealsRaw.length > 0) && showHeaderBlocks && (
         <View
           style={{
@@ -543,7 +512,6 @@ export default function MealsSearchScreen() {
         </View>
       )}
 
-      {/* 検索結果 */}
       <View style={{ flex: 1 }}>
         {loading && hasSearched && page === 1 ? (
           <View style={styles.center}>
@@ -611,9 +579,6 @@ export default function MealsSearchScreen() {
   );
 }
 
-/* =========================
-   パーツ
-   ========================= */
 
 function MealMiniCard({
   meal,
@@ -630,7 +595,6 @@ function MealMiniCard({
 
   return (
     <View style={styles.miniCard}>
-      {/*  */}
       <TouchableOpacity
         onPress={onToggleFav}
         style={styles.miniFavBtn}
@@ -704,7 +668,6 @@ function MealMiniCard({
         </TouchableOpacity>
       </Link>
 
-      {/* 再記録 */}
       <TouchableOpacity
         onPress={onReLog}
         activeOpacity={0.9}
@@ -835,9 +798,6 @@ function ProductRow({
   );
 }
 
-/* =========================
-   styles（ボタン幅/高さの統一）
-   ========================= */
 const SHADOW = {
   shadowColor: "#000",
   shadowOpacity: 0.08,
@@ -846,7 +806,7 @@ const SHADOW = {
   elevation: 3,
 };
 
-const ACTION_H = 48; // 主要ボタン高さを統一
+const ACTION_H = 48;
 
 const styles = StyleSheet.create({
   hero: {
@@ -876,7 +836,6 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
   },
 
-  // クイックアクションは等幅（flex:1）＋同じ高さ
   quickRow: {
     flexDirection: "row",
     marginTop: 12,

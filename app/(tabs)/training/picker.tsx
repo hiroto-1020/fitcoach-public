@@ -1,4 +1,3 @@
-// app/(tabs)/training/picker.tsx
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -20,7 +19,6 @@ import {
 } from "../../../lib/training/db";
 import { useTranslation } from "react-i18next";
 
-// ===== パレット（ui/theme 優先 / なければ OS に追従） =====
 type Pal = {
   bg: string;
   card: string;
@@ -102,7 +100,6 @@ export default function Picker() {
     if (d) {
       return { sid: await getOrCreateSession(d), d };
     }
-    // 内部エラー用途なので英語のままでOK
     throw new Error("sessionId and date are missing");
   };
 

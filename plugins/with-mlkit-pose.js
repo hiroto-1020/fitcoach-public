@@ -1,4 +1,3 @@
-// plugins/with-mlkit-pose.js
 const {
   withDangerousMod,
   withAppBuildGradle,
@@ -7,7 +6,6 @@ const {
 } = require('expo/config-plugins');
 
 module.exports = function withMlkitPose(config) {
-  // iOS: Podfile に ML Kit Pose を追加
   config = withDangerousMod(config, [
     'ios',
     async (cfg) => {
@@ -27,7 +25,6 @@ module.exports = function withMlkitPose(config) {
     },
   ]);
 
-  // Android: app/build.gradle に ML Kit 依存を追加
   config = withAppBuildGradle(config, (cfg) => {
     if (!cfg.modResults.contents.includes('com.google.mlkit:pose-detection')) {
       cfg.modResults.contents = cfg.modResults.contents.replace(
@@ -39,7 +36,6 @@ module.exports = function withMlkitPose(config) {
     return cfg;
   });
 
-  // Android: gradle.properties の設定（必要なら）
   config = withGradleProperties(config, (cfg) => {
     const props = cfg.modResults;
     const addProp = (k, v) => {
@@ -50,7 +46,6 @@ module.exports = function withMlkitPose(config) {
     return cfg;
   });
 
-  // iOS: プライバシー用途文言（念のため）
   config = withInfoPlist(config, (cfg) => {
     cfg.modResults.NSCameraUsageDescription =
       cfg.modResults.NSCameraUsageDescription || 'ポーズ推定のためカメラを使用します。';

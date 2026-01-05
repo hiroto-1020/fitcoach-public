@@ -1,5 +1,3 @@
-// app/(tabs)/help/index.tsx
-// 受け口を拡張：?section= / ?topic= / ?filter= / ?q= を解釈し、食事遷移時は “meals” を初期絞り込み
 
 import React, { useMemo, useState } from "react";
 import {
@@ -16,9 +14,6 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-/** =========================
- *  ヘルプ用ローカルテーマ（ライト/ダーク切替）
- * ========================= */
 type ThemeMode = "auto" | "light" | "dark";
 
 const PALETTE_LIGHT = {
@@ -53,9 +48,6 @@ function useHelpTheme(mode: ThemeMode) {
   return isDark ? PALETTE_DARK : PALETTE_LIGHT;
 }
 
-/** =========================
- *  データ型
- * ========================= */
 type FAQ = { q: string; a: string; keywords?: string[]; deepLink?: string };
 type HowTo = { title: string; steps: string[] };
 type HelpSection = {
@@ -70,9 +62,6 @@ type HelpSection = {
   faq: FAQ[];
 };
 
-/** =========================
- *  i18n から HELP_SECTIONS を生成する関数
- * ========================= */
 
 type TFn = (key: string, options?: any) => any;
 
@@ -165,7 +154,6 @@ function createHelpSections(t: TFn): HelpSection[] {
   ];
 }
 
-/** セクションキーのエイリアス（?section= / ?topic= / ?filter= / ?q= の受け口） */
 const SECTION_ALIASES: Record<string, HelpSection["key"]> = {
   bodycomp: "body",
   body: "body",
@@ -178,17 +166,12 @@ const SECTION_ALIASES: Record<string, HelpSection["key"]> = {
   profile: "profile",
 };
 
-/** =========================
- *  画面本体
- * ========================= */
 export default function HelpScreen() {
   const router = useRouter();
   const { t } = useTranslation();
 
-  // 翻訳済みのヘルプセクション一覧
   const HELP_SECTIONS = useMemo(() => createHelpSections(t), [t]);
 
-  // section / topic に加えて filter / q も受ける
   const params = useLocalSearchParams<{
     section?: string;
     topic?: string;
@@ -200,7 +183,6 @@ export default function HelpScreen() {
   const [mode, setMode] = useState<ThemeMode>("light");
   const C = useHelpTheme(mode);
 
-  // URLクエリからセクションキーを決定（どれか一つでもOK）
   const sectionKeyFromQuery: HelpSection["key"] | undefined = useMemo(() => {
     const raw = (params.section || params.topic || params.filter || "")
       .toString()
@@ -208,7 +190,6 @@ export default function HelpScreen() {
       .trim();
     if (raw && SECTION_ALIASES[raw]) return SECTION_ALIASES[raw];
 
-    // fallback: q= で大まかに推定
     const q = (params.q || "").toString().toLowerCase().trim();
     if (q) {
       if (["meals", "meal", "food", "foods"].includes(q) || q.includes("食事")) return "meals";
@@ -218,7 +199,6 @@ export default function HelpScreen() {
     return undefined;
   }, [params.section, params.topic, params.filter, params.q]);
 
-  // セクションで絞り込み（検索が空のときのみ有効）
   const filtered = useMemo(() => {
     const qRaw = query.trim();
     const q = qRaw.toLowerCase();
@@ -229,11 +209,9 @@ export default function HelpScreen() {
 
     if (!q) return HELP_SECTIONS;
 
-    // ① タイトル完全一致（クイックリンク用）
     const exact = HELP_SECTIONS.find((sec) => sec.title.toLowerCase() === q);
     if (exact) return [exact];
 
-    // ② 本文を含めたファジー検索
     return HELP_SECTIONS
       .map((sec) => {
         const haystackSec = (
@@ -272,7 +250,6 @@ export default function HelpScreen() {
     Linking.openURL(`mailto:horita.training1020@gmail.com?subject=${subject}&body=${body}`);
   };
 
-  // チップタップ   クエリを書き換えてセクションで絞り込み
   const applySectionFilter = (key?: HelpSection["key"]) => {
     setQuery("");
     if (!key) {
@@ -292,7 +269,6 @@ export default function HelpScreen() {
       contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 55, paddingBottom: 16 }}
       keyboardShouldPersistTaps="handled"
     >
-      {/* ヘッダー */}
       <View style={styles.headerRow} accessibilityRole="header">
         <Text style={[styles.h1, { color: C.text }]}>{t("help_screen.title")}</Text>
         <ThemeToggle mode={mode} onChange={setMode} C={C} />
@@ -301,7 +277,6 @@ export default function HelpScreen() {
         {t("help_screen.subtitle")}
       </Text>
 
-      {/* 検索 */}
       <View style={[styles.searchWrap]}>
         <TextInput
           placeholder={t("help_screen.search_placeholder")}
@@ -320,7 +295,6 @@ export default function HelpScreen() {
         />
       </View>
 
-      {/* クイックリンク（チップ） */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -359,7 +333,6 @@ export default function HelpScreen() {
         })}
       </ScrollView>
 
-      {/* フィルタ中バナー */}
       {!query && sectionKeyFromQuery && onlySectionTitle ? (
         <View
           style={{
@@ -386,7 +359,6 @@ export default function HelpScreen() {
         </View>
       ) : null}
 
-      {/* お問い合わせ */}
       <Card C={C} style={{ marginBottom: 16 }}>
         <Text style={[styles.cardTitle, { color: C.text }]}>
           {t("help_screen.support_title")}
@@ -402,7 +374,6 @@ export default function HelpScreen() {
         />
       </Card>
 
-      {/* セクション */}
       {filtered.map((sec) => (
         <Card key={sec.key} C={C} style={{ marginBottom: 16 }}>
           <Text style={[styles.sectionTitle, { color: C.text }]}>
@@ -410,7 +381,6 @@ export default function HelpScreen() {
           </Text>
           <Text style={[styles.body, { color: C.muted }]}>{sec.summary}</Text>
 
-          {/* できること */}
           {!!sec.capabilities?.length && (
             <View style={{ marginTop: 12 }}>
               <Text style={[styles.blockTitle, { color: C.text }]}>
@@ -425,7 +395,6 @@ export default function HelpScreen() {
             </View>
           )}
 
-          {/* 使い方 */}
           {!!sec.howto?.length && (
             <View style={{ marginTop: 12 }}>
               <Text style={[styles.blockTitle, { color: C.text }]}>
@@ -442,7 +411,6 @@ export default function HelpScreen() {
             </View>
           )}
 
-          {/* Tips */}
           {!!sec.tips?.length && (
             <View style={{ marginTop: 12 }}>
               <Text style={[styles.blockTitle, { color: C.text }]}>
@@ -457,7 +425,6 @@ export default function HelpScreen() {
             </View>
           )}
 
-          {/* Actions */}
           {!!sec.actions?.length && (
             <View style={styles.actionsRow}>
               {sec.actions.map((a, i) => (
@@ -482,7 +449,6 @@ export default function HelpScreen() {
             </View>
           )}
 
-          {/* FAQ */}
           <View style={{ marginTop: 12 }}>
             <Text style={[styles.blockTitle, { color: C.text }]}>
               {t("help_screen.block_faq")}
@@ -523,9 +489,6 @@ export default function HelpScreen() {
   );
 }
 
-/** =========================
- *  小物コンポーネント
- * ========================= */
 
 function ThemeToggle({
   mode,
@@ -762,9 +725,6 @@ function StepRow({
   );
 }
 
-/** =========================
- *  スタイル
- * ========================= */
 const styles = StyleSheet.create({
   container: { flex: 1 },
   headerRow: {

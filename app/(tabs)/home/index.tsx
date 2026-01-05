@@ -1,11 +1,10 @@
-// app/(tabs)/home/index.tsx
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import {
   View, Text, ScrollView, TouchableOpacity, ActivityIndicator,
   Modal, Platform, TextInput, StyleSheet, KeyboardAvoidingView,
   TouchableWithoutFeedback, Keyboard, InputAccessoryView, Alert
 } from "react-native";
-import dayjs from "../../../lib/dayjs"; // ← カスタム dayjs を使用
+import dayjs from "../../../lib/dayjs";
 import { useRouter, useFocusEffect } from "expo-router";
 import { spacing } from "../../../ui/theme";
 import { Card, SectionTitle, PrimaryButton } from "../../../ui/components";
@@ -16,14 +15,13 @@ import TrainingTodayCard from "./TrainingTodayCard";
 import { useAppPrefs } from "../../../lib/app-prefs";
 import { useTranslation } from "react-i18next";
 
-/* optional deps */
 let Calendars: any = null; try { Calendars = require("react-native-calendars"); } catch {}
 let DateTimePicker: any = null; try { DateTimePicker = require("@react-native-community/datetimepicker").default; } catch {}
 let AsyncStorage: any = null; try { AsyncStorage = require("@react-native-async-storage/async-storage").default; } catch {}
 
 type Meal = {
   id: string;
-  date?: string; // YYYY-MM-DD
+  date?: string;
   mealType?: "breakfast" | "lunch" | "dinner" | "snack";
   title?: string;
   brand?: string;
@@ -44,7 +42,6 @@ const DEFAULT_GOALS: GoalNumbers = { kcal: 2000, p: 120, f: 60, c: 250 };
 
 async function readAllMeals(): Promise<Meal[]> {
   try {
-    // 相対パス修正：このファイル位置からは "../../../lib/storage"
     const mod = require("../../../lib/storage");
     if (typeof mod.getAllMeals === "function") {
       const arr = await mod.getAllMeals(); if (Array.isArray(arr)) return arr;
@@ -65,7 +62,6 @@ async function readAllMeals(): Promise<Meal[]> {
   return [];
 }
 
-/* 目標 */
 const GOAL_KEYS = { KCAL: "goal_kcal", P: "goal_p", F: "goal_f", C: "goal_c" } as const;
 async function loadGoals(): Promise<GoalNumbers> {
   const get = AsyncStorage?.getItem ? AsyncStorage.getItem : async () => null;
@@ -93,7 +89,6 @@ async function saveGoals(next: GoalNumbers) {
   ]);
 }
 
-/* 小物 */
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
 
 function Progress({ value, target, label }: { value: number; target: number; label: string }) {
@@ -132,7 +127,6 @@ function Progress({ value, target, label }: { value: number; target: number; lab
   );
 }
 
-/* カレンダーモーダル */
 function CalendarModal({
   open, value, onClose, onChange,
 }: { open: boolean; value: string; onClose: () => void; onChange: (iso: string) => void }) {
@@ -247,13 +241,11 @@ export default function Home() {
 
   const [advice, setAdvice] = useState<string[]>([]);
 
-  // ▼ クイック追加（今日の体重・体脂肪）
   const [quickOpen, setQuickOpen] = useState(false);
   const [quickWeight, setQuickWeight] = useState<string>("");
   const [quickBodyFat, setQuickBodyFat] = useState<string>("");
   const accId = Platform.OS === "ios" ? "numAccessory" : undefined;
 
-  // ▼ 当日の体組成表示用
   const [bodyToday, setBodyToday] = useState<{ weight: number | null; bodyFat: number | null } | null>(null);
 
   const reloadAll = useCallback(async () => {
@@ -272,7 +264,6 @@ export default function Home() {
     const memo = await loadAdviceMemo(date);
     if (memo) setAdvice([memo]);
 
-    // 体組成（その日の最新）
     const rows = await listBodyMetrics(1000);
     const sameDay = rows
       .filter((r) => dayjs(Number(r.ts)).format("YYYY-MM-DD") === date)
@@ -284,12 +275,10 @@ export default function Home() {
     );
   }, [date]);
 
-  // 日付が変わったら再ロード
   useEffect(() => {
     reloadAll();
   }, [reloadAll]);
 
-  // 画面に戻ってきた時（タブ切替・戻る）でも再ロード
   useFocusEffect(
     useCallback(() => {
       reloadAll();
@@ -301,7 +290,6 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    // 事前ウォームアップ（失敗しても無害）
     warmupAdvice();
   }, []);
 
@@ -317,11 +305,10 @@ export default function Home() {
     return { total: { kcal: round(total.kcal), p: round(total.p), f: round(total.f), c: round(total.c) } };
   }, [meals]);
 
-  // ============ 追加: extraContext に使う値（存在しないものは undefined として宣言） ============
   const latestWeight: number | undefined = bodyToday?.weight ?? undefined;
   const latestBodyFat: number | undefined = bodyToday?.bodyFat ?? undefined;
 
-  const session: any = null; // ← 必要なら実アプリのセッションを渡す
+  const session: any = null;
   const myGender: "male" | "female" | "other" | undefined = undefined;
   const myHeight: number | undefined = undefined;
   const weightGoal: number | undefined = undefined;
@@ -329,7 +316,6 @@ export default function Home() {
   const isTrainingToday: boolean | undefined = undefined;
   const sleepHours7dAvg: number | undefined = undefined;
   const bodyLogStreakDays: number | undefined = undefined;
-  // ===================================================================================================
 
   async function openAdvice() {
     await haptic("light");
@@ -339,7 +325,6 @@ export default function Home() {
       const totals = { kcal: sums.total.kcal, p: sums.total.p, f: sums.total.f, c: sums.total.c };
       const goalsObj = { kcalTarget: goals.kcal, proteinTarget: goals.p, fatTarget: goals.f, carbsTarget: goals.c };
 
-      // 任意栄養（UIで未入力でもOK）
       const fiberTotal  = meals.reduce((s, m) => s + Number((m as any).fiber  || 0), 0);
       const sugarTotal  = meals.reduce((s, m) => s + Number((m as any).sugar  || 0), 0);
       const sodiumTotal = meals.reduce((s, m) => s + Number((m as any).sodium || 0), 0);
@@ -353,7 +338,6 @@ export default function Home() {
 
       const extraContext: any = {
         nutritionExtras: { fiberTotal, sugarTotal, sodiumTotal },
-        // 任意の拡張（未定義でもOK）
         ...(typeof latestWeight   !== "undefined" || typeof latestBodyFat !== "undefined"
           ? {
               latestBody: {
@@ -394,7 +378,6 @@ export default function Home() {
     }
   }
 
-  // ▼ クイック追加：開く（前回値を初期値に）
   async function openQuick() {
     await haptic("light");
     try {
@@ -405,7 +388,6 @@ export default function Home() {
     setQuickOpen(true);
   }
 
-  // ▼ クイック追加：保存
   async function saveQuick() {
     await haptic("medium");
     const w = quickWeight ? Number(quickWeight) : null;
@@ -448,7 +430,6 @@ export default function Home() {
 
   return (
     <>
-      {/* ▼ クイック追加モーダル */}
       <Modal visible={quickOpen} transparent animationType="slide" onRequestClose={() => setQuickOpen(false)}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.overlay}>
@@ -542,14 +523,11 @@ export default function Home() {
         style={{ flex: 1, backgroundColor: C.bg }}
         contentContainerStyle={{ padding: spacing.lg, gap: spacing.lg }}
       >
-        {/* 今日のサマリー（栄養＋体組成） */}
         <Card style={{ padding: spacing.md, backgroundColor: C.card, borderColor: C.border }}>
-          {/* タイトルは一行で上に表示 */}
           <View>
             <SectionTitle>{t("home.summary_title")}</SectionTitle>
           </View>
 
-          {/* タイトルの下にボタンを横並びで配置 */}
           <View
             style={{
               flexDirection: "row",
@@ -557,13 +535,12 @@ export default function Home() {
               alignItems: "center",
               gap: 8,
               marginTop: 8,
-              flexWrap: "wrap", // 画面幅が狭いときは折り返し
+              flexWrap: "wrap",
             }}
           >
             <TouchableOpacity
               onPress={async () => {
                 await haptic("light");
-                // 目標ボタンを押したタイミングで最新の goals からドラフトを再構築
                 setDraftGoal({
                   kcal: goals.kcal != null ? String(goals.kcal) : "",
                   p:   goals.p   != null ? String(goals.p)   : "",
@@ -643,7 +620,6 @@ export default function Home() {
                 </View>
               </View>
 
-              {/* ▼ 本日の体組成表示／未入力ならクイック導線 */}
               <View style={{ alignItems: "center", marginTop: 10 }}>
                 {bodyToday ? (
                   <Text style={{ color: C.text, fontWeight: "900" }}>
@@ -693,14 +669,12 @@ export default function Home() {
           </View>
         </Card>
 
-        {/* ▼ 今日のトレーニング */}
         <Card style={{ padding: 0, backgroundColor: C.card, borderColor: C.border }}>
           <View style={{ padding: spacing.md }}>
             <TrainingTodayCard />
           </View>
         </Card>
 
-        {/* AIアドバイス */}
         <Card style={{ padding: spacing.md, backgroundColor: C.card, borderColor: C.border }}>
           <SectionTitle>{t("home.ai_advice_title")}</SectionTitle>
           <View style={{ height: 8 }} />
@@ -714,7 +688,6 @@ export default function Home() {
         </Card>
       </ScrollView>
 
-      {/* 目標編集モーダル */}
       <Modal visible={openGoal} transparent animationType="fade" onRequestClose={() => setOpenGoal(false)}>
         <View style={styles.overlay}>
           <View style={[styles.modalCard, { backgroundColor: C.card }]}>
@@ -744,7 +717,6 @@ export default function Home() {
             <View style={styles.modalBtnRow}>
               <TouchableOpacity
                 onPress={() => {
-                  // キャンセル時は goals に戻して閉じる
                   setDraftGoal({
                     kcal: goals.kcal != null ? String(goals.kcal) : "",
                     p:   goals.p   != null ? String(goals.p)   : "",
@@ -781,7 +753,6 @@ export default function Home() {
   );
 }
 
-/** 目標入力の1行（文字列で管理しつつ数字だけ許可） */
 type GoalRowProps = {
   label: string;
   value: string | number | null | undefined;
@@ -801,7 +772,6 @@ function GoalRow({ label, value, onChange }: GoalRowProps) {
   }, [value]);
 
   const handleChange = (raw: string) => {
-    // 数字以外の文字をすべて削除   デフォルトキーボードでも実質数字のみ
     const cleaned = raw.replace(/[^\d]/g, "");
     setText(cleaned);
     onChange(cleaned);
@@ -815,14 +785,12 @@ function GoalRow({ label, value, onChange }: GoalRowProps) {
         onChangeText={handleChange}
         placeholder="0"
         placeholderTextColor={ph}
-        // keyboardTypeは指定しない   デフォルトキーボード
         style={[styles.goalInput, { borderColor: C.border, backgroundColor: C.card, color: C.text }]}
       />
     </View>
   );
 }
 
-/** draftGoal   number への安全変換（空や変な文字列は 0 に） */
 function parseGoal(raw: any): number {
   if (raw == null) return 0;
   const s = String(raw).trim();
@@ -832,7 +800,6 @@ function parseGoal(raw: any): number {
   return Math.max(0, Math.round(n));
 }
 
-/* ====== Styles（色は動的に上書き） ====== */
 const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "center", padding: 20 },
   modalCard: { borderRadius: 16, padding: 16 },

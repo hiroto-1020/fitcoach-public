@@ -13,7 +13,6 @@ type Row = {
   user_id: string;
   provider_status: ProviderStatus;
   created_at: string;
-  // ※ DBに無い環境が多いので列は持たない前提。画像はStorageから推測取得。
   profile_nickname?: string | null;
   _img?: string | null;
 };
@@ -28,7 +27,6 @@ const STATUS_BADGE: Record<
   pending:  { label: "審査中", color: "#f59e0b" },
 };
 
-/** processing -> pending に寄せる */
 function normalizeStatus(s: ProviderStatus): "approved" | "rejected" | "failed" | "pending" {
   if (s === "approved" || s === "rejected" || s === "failed") return s;
   return "pending";
@@ -39,7 +37,6 @@ async function fetchNicknames(userIds: string[]): Promise<Record<string, string 
   const remainOf = () => userIds.filter((id) => !(id in result));
   const tables = ["profiles", "gotore_profiles", "user_profiles", "profiles_public"];
 
-  // user_id カラム
   for (const t of tables) {
     const remain = remainOf();
     if (!remain.length) break;
@@ -50,7 +47,6 @@ async function fetchNicknames(userIds: string[]): Promise<Record<string, string 
       }
     } catch {}
   }
-  // id カラム（万一 user_id で持ってない古テーブル用）
   for (const t of tables) {
     const remain = remainOf();
     if (!remain.length) break;
@@ -65,7 +61,6 @@ async function fetchNicknames(userIds: string[]): Promise<Record<string, string 
   return result;
 }
 
-/** 画像URLを Storage から推測して署名URLを作る（ユーザーフォルダの最新1枚） */
 async function resolveImageURL(r: Row): Promise<string | null> {
   try {
     const { data: files, error } = await supabase.storage.from(KYC_BUCKET).list(r.user_id, {
@@ -74,11 +69,9 @@ async function resolveImageURL(r: Row): Promise<string | null> {
     if (error || !files?.length) return null;
 
     const guess = `${r.user_id}/${files[0].name}`;
-    // 署名URL（公開バケットでも署名URLを優先）
     const { data: signed } = await supabase.storage.from(KYC_BUCKET).createSignedUrl(guess, 3600);
     if (signed?.signedUrl) return signed.signedUrl;
 
-    // 念のため public URL も試す
     const { data: pub } = supabase.storage.from(KYC_BUCKET).getPublicUrl(guess);
     return pub?.publicUrl ?? null;
   } catch {
@@ -94,7 +87,6 @@ export default function KycAdminList() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      // ※ document_path / document_url は選択しない（存在しない環境が多いため）
       const { data, error } = await supabase
         .from("kyc_verifications")
         .select("id,user_id,provider_status,created_at")

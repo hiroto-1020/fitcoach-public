@@ -1,4 +1,3 @@
-// app/(tabs)/me/terms.tsx
 import React from "react";
 import { ScrollView, Text, View, StyleSheet } from "react-native";
 import { useThemeColors, shadow } from "../../../ui/theme";
@@ -30,7 +29,6 @@ export default function TermsScreen() {
         </P>
       </Section>
 
-      {/*  ここを強化 */}
       <Section C={C} title="4. 禁止事項">
         <P C={C}>ユーザーは、以下の行為を行ってはなりません。</P>
         <UL C={C} items={[
@@ -40,7 +38,6 @@ export default function TermsScreen() {
           "不正アクセス、解析、リバースエンジニアリング等のセキュリティ侵害行為",
           "本サービスの運営を妨げる行為、虚偽情報の投稿、なりすまし",
 
-          // --- 合トレ関連の追加禁止 ---
           "合トレ機能の目的に反する利用（出会い/恋愛/ナンパ目的、性的なやり取りの勧誘）",
           "風俗・違法サービス等の斡旋/紹介行為、またはそれに準ずる行為（※各種法令に抵触する可能性があるものを含む）",
           "事業・営業・勧誘目的での利用（ネットワークビジネス/MLM、情報商材、宗教/政治活動の勧誘、物販・サービスの宣伝、スカウト/キャスティング等）",
@@ -62,7 +59,6 @@ export default function TermsScreen() {
         </P>
       </Section>
 
-      {/*  ここを強化（免責） */}
       <Section C={C} title="6. 免責">
         <P C={C}>
           当社は、本サービスについて、事実上または法律上の瑕疵（安全性、信頼性、正確性、完全性、有用性、特定目的適合性等）を含め、いかなる保証も行いません。
@@ -72,7 +68,6 @@ export default function TermsScreen() {
         </P>
       </Section>
 
-      {/*  責任制限も明確化 */}
       <Section C={C} title="7. 責任の制限">
         <P C={C}>
           当社は、本サービスの利用に関連してユーザーに生じた損害について、当社の故意または重過失がある場合を除き、直接かつ通常の損害に限り、直近6か月間にユーザーが当社に支払った対価の総額を上限として責任を負うものとします。間接損害、特別損害、結果的損害、逸失利益については責任を負いません。
@@ -97,7 +92,6 @@ export default function TermsScreen() {
         </P>
       </Section>
 
-      {/* 違反対応・通報窓口 */}
       <Section C={C} title="11. 違反の通報・対応">
         <P C={C}>
           規約違反を発見した場合は、アプリ内「サポート/お問い合わせ」からご連絡ください。当社は必要に応じて、投稿削除、機能制限、アカウント停止/退会、関係機関への通報等の措置を講じます。通報の有無/内容に関する個別の回答や結果の開示は行わない場合があります。
@@ -115,7 +109,6 @@ export default function TermsScreen() {
   );
 }
 
-/* ---- 小物 ---- */
 function Header({ C, title, subtitle }: any) {
   return (
     <View style={{ marginBottom: 10 }}>

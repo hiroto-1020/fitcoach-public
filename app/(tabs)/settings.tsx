@@ -1,4 +1,3 @@
-// apps/mobile/app/settings.tsx
 import React, { useEffect, useState } from 'react';
 import { View, Text, Pressable, Alert, ActivityIndicator } from 'react-native';
 import { BuddyMode } from '../../lib/gotore/types';

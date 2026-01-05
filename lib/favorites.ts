@@ -1,12 +1,10 @@
-// lib/favorites.ts
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type FavoriteProduct = {
-  code: string;              // OFF code（JAN等）
-  title: string;             // 表示名
+  code: string;
+  title: string;
   brand?: string;
   image?: string;
-  // 任意メタ（100g栄養のスナップショット）
   kcal100?: number;
   p100?: number;
   f100?: number;
@@ -38,10 +36,10 @@ export async function toggleFavorite(item: FavoriteProduct): Promise<boolean> {
   if (idx >= 0) {
     all.splice(idx, 1);
     await AsyncStorage.setItem(KEY, JSON.stringify(all));
-    return false; // 外れた
+    return false;
   } else {
     all.unshift({ ...item, savedAt: Date.now() });
     await AsyncStorage.setItem(KEY, JSON.stringify(all));
-    return true; // 付いた
+    return true;
   }
 }

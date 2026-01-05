@@ -1,4 +1,3 @@
-// lib/types.ts
 export type Meal = {
   id?: number;
   ts: number;

@@ -1,14 +1,11 @@
-﻿// lib/training/db.ts
 import * as SQLite from "expo-sqlite";
 
-/** ===== DB open (Async API) ===== */
 let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 async function getDb() {
   if (!dbPromise) dbPromise = SQLite.openDatabaseAsync("FitGear.db");
   return dbPromise!;
 }
 
-/** ===== Helpers ===== */
 async function run(sql: string, ...params: any[]) {
   const db = await getDb();
   return db.runAsync(sql, params.length ? params : undefined);
@@ -22,7 +19,6 @@ async function getFirst<T = any>(sql: string, ...params: any[]): Promise<T | nul
   return (await db.getFirstAsync<T>(sql, params.length ? params : undefined)) ?? null;
 }
 
-/** ===== Schema & Seed ===== */
 export async function initTrainingDb() {
   const db = await getDb();
   await db.execAsync(`PRAGMA foreign_keys = ON;`);
@@ -94,31 +90,23 @@ async function seedDefaults() {
   }
 
   const pairs: [string, string][] = [
-    // 胸
     ["ベンチプレス", "胸"],
     ["ダンベルフライ", "胸"],
     ["インクラインダンベルプレス", "胸"],
-    // 背中
     ["デッドリフト", "背中"],
     ["ラットプルダウン", "背中"],
     ["ベントオーバーロウ", "背中"],
-    // 肩
     ["ショルダープレス", "肩"],
     ["サイドレイズ", "肩"],
     ["リアレイズ", "肩"],
-    // 腕
     ["バーベルカール", "腕"],
     ["トライセプスプレスダウン", "腕"],
-    // 脚
     ["スクワット", "脚"],
     ["レッグプレス", "脚"],
-    // お尻
     ["ヒップスラスト", "お尻"],
     ["ブルガリアンスクワット", "お尻"],
-    // 体幹
     ["プランク", "体幹"],
     ["ロシアンツイスト", "体幹"],
-    // 全身
     ["クリーン", "全身"],
     ["スナッチ", "全身"],
   ];
@@ -134,7 +122,6 @@ async function seedDefaults() {
   }
 }
 
-/** ===== Sessions / Dates ===== */
 export async function getOrCreateSession(date: string) {
   const s = await getFirst<{ id: number }>(`SELECT id FROM training_sessions WHERE date=?`, date);
   if (s) return s.id;
@@ -154,7 +141,6 @@ export async function listSessionDatesInMonth(ym: string) {
   );
 }
 
-/** 指定部位に関連する日付（YYYY-MM） */
 export async function listSessionDatesInMonthByBodyPart(ym: string, body_part_id: number) {
   await initTrainingDb();
   return getAll<{ date: string }>(
@@ -178,7 +164,6 @@ export async function listAllSessionDates() {
   return rows.map((r) => r.date);
 }
 
-/** ===== Body Parts / Exercises ===== */
 export async function listBodyParts() {
   return getAll<{ id: number; name: string; sort_order: number }>(
     `SELECT * FROM body_parts ORDER BY sort_order ASC, name ASC;`
@@ -238,7 +223,6 @@ export async function deleteExercise(exercise_id: number): Promise<{ archived: b
   }
 }
 
-/** ===== Sets / Notes ===== */
 export async function listSetsBySession(session_id: number) {
   return getAll<any>(
     `
@@ -269,7 +253,6 @@ export async function addSet(session_id: number, exercise_id: number, weight_kg:
   );
 }
 
-/** 0kg/0回の空セットを削除（セッション指定 or 全体） */
 export async function pruneZeroSets(session_id?: number) {
   await initTrainingDb();
   if (typeof session_id === "number") {
@@ -289,7 +272,6 @@ export async function pruneZeroSets(session_id?: number) {
   }
 }
 
-/** 明細が空のセッションを削除（メンテ用） */
 export async function pruneEmptySessions() {
   await run(`
     DELETE FROM training_sessions
@@ -318,7 +300,6 @@ export async function updateSessionNote(session_id: number, note: string) {
   );
 }
 
-/** ===== Personal Records ===== */
 export async function getMaxWeightRecord() {
   return getFirst<{ weight_kg: number; reps: number; exercise_name: string; date: string }>(`
     SELECT ts.weight_kg AS weight_kg, ts.reps AS reps, e.name AS exercise_name, s.date AS date
@@ -342,7 +323,6 @@ export async function getMaxRepsRecord() {
   `);
 }
 
-/** ===== Session Media ===== */
 export type SessionMedia = {
   id: number;
   session_id: number;
@@ -390,7 +370,6 @@ export async function deleteSessionMedia(id: number) {
   await run(`DELETE FROM training_session_media WHERE id=?`, id);
 }
 
-/** ===== Set CRUD（並び維持版） ===== */
 export async function updateSet(id: number, weight_kg: number, reps: number) {
   await run(`UPDATE training_sets SET weight_kg = ?, reps = ? WHERE id = ?`, Number(weight_kg) || 0, Number(reps) || 0, id);
 }
@@ -400,7 +379,6 @@ export async function updateSetWarmup(id: number, is_warmup: 0 | 1) {
 }
 
 export async function deleteSet(id: number) {
-  // 削除後に set_index を詰める
   const row = await getFirst<{ session_id: number; exercise_id: number; set_index: number }>(
     `SELECT session_id, exercise_id, set_index FROM training_sets WHERE id = ?`,
     id
@@ -425,7 +403,6 @@ export async function insertSetAtIndex(
   reps: number,
   is_warmup: 0 | 1
 ) {
-  // 挿入位置から右を +1 して空きを作る
   await run(
     `UPDATE training_sets
        SET set_index = set_index + 1
@@ -434,7 +411,6 @@ export async function insertSetAtIndex(
     exercise_id,
     set_index
   );
-  // 目的位置へ挿入
   await run(
     `INSERT INTO training_sets(session_id, exercise_id, set_index, weight_kg, reps, is_warmup)
      VALUES(?,?,?,?,?,?)`,

@@ -1,4 +1,3 @@
-//チャット一覧画面
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View, Text, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView,

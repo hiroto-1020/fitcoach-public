@@ -1,4 +1,3 @@
-// app/(tabs)/gotore/index.tsx
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View, Text, Dimensions, Pressable, TouchableOpacity, Modal,
@@ -34,9 +33,6 @@ import { GOTORE_PURCHASE_ENABLED } from '../../../lib/featureFlags';
 
 const { width: W, height: H } = Dimensions.get('window');
 
-/* =========================
-   ヘルパー（性別/モード正規化）
-   ========================= */
 type UIMode = 'any' | 'same_gender';
 
 function Pill({ children }: { children: React.ReactNode }) {
@@ -76,17 +72,15 @@ const sameLabel = (g: Gender) =>
   g === 'male' ? '男同士のみ' :
   g === 'female' ? '女同士のみ' : '同性のみ';
 
-// DB保存値   UI2値（male_only / female_only はどちらも same_gender 扱い）
 function normalizeMode(raw: BuddyMode, _g: Gender): UIMode {
   return raw === 'any' ? 'any' : 'same_gender';
 }
 
-// UI2値   DB保存値（性別に応じて male_only / female_only に割り振り）
 function toRawMode(ui: UIMode, g: Gender): BuddyMode {
   if (ui === 'any') return 'any';
   if (g === 'male') return 'male_only';
   if (g === 'female') return 'female_only';
-  return 'any'; // 性別不明のときは安全側
+  return 'any';
 }
 
 function getCandidateGender(c: Candidate): Gender {
@@ -95,9 +89,6 @@ function getCandidateGender(c: Candidate): Gender {
   return normalizeGender(raw);
 }
 
-/* =========================
-   プロフィールカード
-   ========================= */
 function ProfileCard({ c, height }: { c: Candidate; height: number }) {
   const router = useRouter();
   const p: any = c.profile ?? {};
@@ -195,7 +186,6 @@ function ProfileCard({ c, height }: { c: Candidate; height: number }) {
                 {p.nickname ?? '名無し'}
               </Text>
             </Pressable>
-            {/* VerifiedBadge はお使いのまま */}
           </View>
 
           <Text style={{ color: 'rgba(255,255,255,0.95)', marginTop: 6, fontWeight: '700' }}>
@@ -270,12 +260,8 @@ function ProfileCard({ c, height }: { c: Candidate; height: number }) {
   );
 }
 
-/* =========================
-   メイン
-   ========================= */
 export default function GotoreSwipe() {
 
-  // 🔒 準備中ゲート
   if (!GOTORE_ENABLED) {
     return <ComingSoon />;
   }
@@ -285,7 +271,6 @@ export default function GotoreSwipe() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  // 受信いいねバッジ
   const [inboxCount, setInboxCount] = useState(0);
   useEffect(() => {
     let unsub: undefined | (() => void);
@@ -306,7 +291,6 @@ export default function GotoreSwipe() {
     return () => { if (unsub) unsub(); };
   }, []);
 
-  // ── いいね残数 ─────────────────
   const {
     status: likeStatus,
     timeLeft,
@@ -326,34 +310,28 @@ export default function GotoreSwipe() {
     }
   }, [timeLeft, reloadLikes]);
 
-  // ── 画面状態 ────────────────
   const [loading, setLoading] = useState(true);
   const [fatal, setFatal] = useState<string | null>(null);
   const [notAuthed, setNotAuthed] = useState(false);
   const [regionMissing, setRegionMissing] = useState(false);
 
-  //  ここが変更点：UIモード/自分の性別/自分のID
   const [uiMode, setUiMode] = useState<UIMode>('any');
   const [myGender, setMyGender] = useState<Gender>('unknown');
   const [myUserId, setMyUserId] = useState<string | null>(null);
 
-  // カードデッキ
   const [deck, setDeck] = useState<Candidate[]>([]);
   const indexRef = useRef(0);
   const [top, setTop] = useState<Candidate | null>(null);
   const [next, setNext] = useState<Candidate | null>(null);
 
-  // 絞り込み
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [tagsInput, setTagsInput] = useState('');
   const [gymQuery, setGymQuery] = useState('');
   const [hideLiked, setHideLiked] = useState(true);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
 
-  // 上部バーの高さ（カード位置調整）
   const [likeBarH, setLikeBarH] = useState(0);
 
-  // レイアウト計算
   const CARD_MIN = 400;
   const CARD_H_FACTOR = 0.65;
   const BOTTOM_SPACE = 160;
@@ -374,7 +352,6 @@ export default function GotoreSwipe() {
   const [celebrate, setCelebrate] =
     useState<{ visible: boolean; matchId?: string | null }>({ visible: false });
 
-  // タイムアウトラッパ
   function withTimeout<T>(p: Promise<T>, ms = 10000) {
     return Promise.race<T>([
       p,
@@ -382,7 +359,6 @@ export default function GotoreSwipe() {
     ]);
   }
 
-  // 読み込み
   const load = useCallback(async () => {
     setLoading(true);
     setFatal(null);
@@ -404,7 +380,6 @@ export default function GotoreSwipe() {
         getMyProfileAndGender(),
       ]));
 
-      // 自分の性別を保持   UIモードへ正規化
       const g = normalizeGender(profile?.gender);
       setMyGender(g);
       setUiMode(normalizeMode(settings.buddy_gender_mode as BuddyMode, g));
@@ -433,13 +408,11 @@ export default function GotoreSwipe() {
     }
   }, [currentFilters, uiMode, myGender]);
 
-  // 復帰時
   useFocusEffect(useCallback(() => {
     load();
     reloadLikes?.();
   }, [load, reloadLikes]));
 
-  // モード変更（UI2値   DB保存値へ変換して保存）
   const onChangeUIMode = async (m: UIMode) => {
     if (m === uiMode) return;
     try {
@@ -453,7 +426,6 @@ export default function GotoreSwipe() {
     }
   };
 
-  // KYCで性別が変わったら自動追従（UIラベルと検索結果、保存値も補正）
   useEffect(() => {
     let ch: any;
     (async () => {
@@ -469,7 +441,6 @@ export default function GotoreSwipe() {
         }, async (payload: any) => {
           const g = normalizeGender(payload.new?.gender);
           setMyGender(g);
-          // UIが同性のみなら、保存側も新しい性別に合わせて再保存
           if (uiMode === 'same_gender') {
             try { await updateMyBuddyMode(toRawMode('same_gender', g)); } catch {}
           }
@@ -487,7 +458,6 @@ export default function GotoreSwipe() {
     })(); };
   }, [myUserId, uiMode, load]);
 
-  // ── スワイプ ───────────────
   const tx = useSharedValue(0);
   const ty = useSharedValue(0);
   const rot = useSharedValue(0);
@@ -629,7 +599,6 @@ export default function GotoreSwipe() {
   const tapLike = () => { if (top && !isFlinging.value) consumeAndFlingRight(top.profile.user_id); };
   const tapNope = () => { if (top && !isFlinging.value) consumeAndFlingLeft(); };
 
-  // 未ログイン表示
   if (notAuthed) {
     return (
       <LinearGradient colors={['#0b1220', '#111827']} style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16 }}>
@@ -647,11 +616,9 @@ export default function GotoreSwipe() {
     );
   }
 
-  // ── 画面描画 ───────────────
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <LinearGradient colors={['#0b1220', '#111827']} style={{ flex: 1 }}>
-        {/* 上部：残りいいねバー＋右側に「受信」「条件」 */}
         <View onLayout={e => setLikeBarH(e.nativeEvent.layout.height)} style={{ position: 'relative' }}>
           <LikeStatusBar free={free} paid={paid} total={total} timeLeftMs={timeLeft ?? 0} />
 
@@ -671,7 +638,6 @@ export default function GotoreSwipe() {
           </View>
         </View>
 
-        {/* デッキ（同位置・同スケール） */}
         <View style={{ flex: 1, alignItems: 'center', paddingTop: topPadding }}>
           {regionMissing ? (
             <View style={{ alignItems: 'center', paddingHorizontal: 24 }}>
@@ -714,7 +680,6 @@ export default function GotoreSwipe() {
           )}
         </View>
 
-        {/* 下部アクション */}
         {!regionMissing && top && (
           <View style={{ flexDirection: 'row', gap: 20, justifyContent: 'center', marginBottom: 28 + insets.bottom }}>
             <TouchableOpacity onPress={tapNope} style={[styles.btnNope, total <= 0 && { opacity: 0.5 }]} disabled={total <= 0}>
@@ -726,7 +691,6 @@ export default function GotoreSwipe() {
           </View>
         )}
 
-        {/* マッチ祝 */}
         {celebrate.visible && (
           <View style={{ ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' }}>
             <ConfettiCannon count={120} origin={{ x: W / 2, y: -20 }} fadeOut />
@@ -758,7 +722,6 @@ export default function GotoreSwipe() {
           </View>
         )}
 
-        {/* 条件モーダル */}
         <Modal visible={filtersOpen} transparent animationType="fade" onRequestClose={() => setFiltersOpen(false)}>
           <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.25)' }} onPress={() => setFiltersOpen(false)}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ marginTop: 'auto' }}>
@@ -846,7 +809,6 @@ export default function GotoreSwipe() {
           </Pressable>
         </Modal>
 
-        {/* 購入モーダル */}
         {GOTORE_PURCHASE_ENABLED ? (
           <OutOfLikesModal
             visible={outOfLikes}
@@ -863,7 +825,6 @@ export default function GotoreSwipe() {
           />
         )}
 
-        {/* ロード中オーバーレイ */}
         {loading && (
           <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.25)' }}>
             <ActivityIndicator color="#fff" />
@@ -871,7 +832,6 @@ export default function GotoreSwipe() {
           </View>
         )}
 
-        {/* エラーバナー */}
         {fatal && (
           <View style={{
             position: 'absolute', left: 12, right: 12, bottom: 24,

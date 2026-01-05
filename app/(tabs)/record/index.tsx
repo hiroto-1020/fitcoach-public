@@ -1,4 +1,3 @@
-// app/(tabs)/record/index.tsx — 一日一回・カウントダウン表示・開閉トグル版（多言語対応）
 
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -17,7 +16,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
-/* optional deps（未導入でも動く） */
 let AsyncStorage: any = null;
 try {
   AsyncStorage =
@@ -32,7 +30,6 @@ try {
   LinearGradient = require("expo-linear-gradient").LinearGradient;
 } catch {}
 
-/* theme */
 let theme: any = null;
 try {
   theme = require("../../../ui/theme");
@@ -47,7 +44,6 @@ const colors =
     border: "#1f2b3a",
   };
 
-/* 型 */
 type Fortune = "大吉" | "中吉" | "吉" | "小吉" | "末吉";
 type FortuneKey =
   | "daikichi"
@@ -65,7 +61,6 @@ type MuscleId =
   | "triceps"
   | "core";
 
-/** ストレージに保存するのはシードだけ（言語に依存しない） */
 type OmikujiSeed = {
   dateKey: string;
   muscleId: MuscleId;
@@ -81,7 +76,6 @@ type OmikujiSeed = {
   tempoIdx: number;
 };
 
-/** 画面表示用（毎回 i18n から組み立てる） */
 type OmikujiResult = {
   dateKey: string;
   muscleId: MuscleId;
@@ -99,7 +93,6 @@ type OmikujiResult = {
   luckyTempo: string;
 };
 
-/* ユーティリティ */
 function todayKey() {
   const d = new Date();
   const mm = `${d.getMonth() + 1}`.padStart(2, "0");
@@ -123,7 +116,6 @@ function fmtHMS(ms: number) {
   return `${hh}:${mm}:${ss}`;
 }
 
-/* 運勢スタイル */
 const FORTUNE_STYLE: Record<
   Fortune,
   {
@@ -202,7 +194,6 @@ const FORTUNE_STYLE: Record<
   },
 };
 
-/** Fortune   i18n 側のキー変換 */
 const FORTUNE_KEY_MAP: Record<Fortune, FortuneKey> = {
   大吉: "daikichi",
   中吉: "chuukichi",
@@ -211,7 +202,6 @@ const FORTUNE_KEY_MAP: Record<Fortune, FortuneKey> = {
   末吉: "suekichi",
 };
 
-/* データプール */
 const MUSCLES: { id: MuscleId; icon: keyof typeof Ionicons.glyphMap }[] = [
   { id: "chest",     icon: "barbell-outline" },
   { id: "shoulders", icon: "body-outline" },
@@ -256,7 +246,6 @@ const LUCKY_COLORS = [
   "#9b5de5",
 ];
 
-// ↓ LUCKY_ITEMS / RECOVERY_TIPS などの旧データプールは未使用だが残しておく（必要なら削除可）
 const LUCKY_ITEMS = { /* 省略: 元コードのまま */ };
 const RECOVERY_TIPS = [ /* 省略: 元コードのまま */ ];
 const CHALLENGES = [ /* 省略: 元コードのまま */ ];
@@ -264,7 +253,6 @@ const LUCKY_SETS: Record<MuscleId, string[]> = { /* 省略: 元コードのま�
 
 const TEMPOS = ["3-1-1", "2-1-2", "4-1-1", "2-0-2", "3-0-1", "5-1-0"];
 
-/* RNG */
 function xmur3(str: string) {
   let h = 1779033703 ^ str.length;
   for (let i = 0; i < str.length; i++) {
@@ -307,7 +295,6 @@ function pickIdx(rng: () => number, len: number) {
   return Math.floor(rng() * len);
 }
 
-/** シード ＋ i18n から表示用データを組み立てる（ここで言語が反映される） */
 function buildOmikujiResultFromSeed(
   seed: OmikujiSeed,
   t: (key: string, options?: any) => any
@@ -431,7 +418,6 @@ function buildOmikujiResultFromSeed(
   };
 }
 
-/* 演出 */
 const { width: W, height: H } = Dimensions.get("window");
 
 function ConfettiOverlay({
@@ -666,7 +652,6 @@ function GlitchText({ text, active }: { text: string; active: boolean }) {
   );
 }
 
-/* おみくじカード */
 function MuscleOmikujiCard() {
   const { t } = useTranslation();
   const [seed, setSeed] = useState<OmikujiSeed | null>(null);
@@ -679,7 +664,6 @@ function MuscleOmikujiCard() {
     power: number;
   }>({ show: false, palette: [], power: 1 });
 
-  // 初期ロード（シードのみを読み込む）
   useEffect(() => {
     (async () => {
       try {
@@ -687,7 +671,6 @@ function MuscleOmikujiCard() {
           const raw = await AsyncStorage.getItem(storageKey());
           if (raw) {
             const parsed = JSON.parse(raw);
-            // 新形式のみ採用（旧データは捨てて引き直し可にする）
             if (
               parsed &&
               typeof parsed.dateKey === "string" &&
@@ -706,7 +689,6 @@ function MuscleOmikujiCard() {
     })();
   }, []);
 
-  // カウントダウン & 日付跨ぎリセット
   useEffect(() => {
     const iv = setInterval(() => {
       const left = msUntilMidnight();
@@ -719,7 +701,6 @@ function MuscleOmikujiCard() {
     return () => clearInterval(iv);
   }, []);
 
-  // シードから表示用データを組み立て（言語変更のたびに再評価される）
   const result = seed ? buildOmikujiResultFromSeed(seed, t) : null;
 
   const fortune: Fortune = result?.fortune ?? "吉";
@@ -730,9 +711,8 @@ function MuscleOmikujiCard() {
     `record.omikuji.fortuneLabels.${FORTUNE_KEY_MAP[fortune]}`
   );
 
-  // 一日一回のドロー（シードのみ生成・保存）
   const draw = async () => {
-    if (seed) return; // 既に引いている
+    if (seed) return;
 
     try {
       Haptics?.notificationAsync?.(
@@ -751,8 +731,6 @@ function MuscleOmikujiCard() {
       dateKey: date,
       muscleId,
       fortune: fortuneDrawn,
-      // 各テキスト用のインデックスは大きめの乱数を保存しておき、
-      // 実際の長さで割った余りを使う（言語ごとの配列長が違ってもOK）
       meigenIdx: pickIdx(rng, 9999),
       kotowazaIdx: pickIdx(rng, 9999),
       formIdx: pickIdx(rng, 9999),
@@ -830,9 +808,7 @@ function MuscleOmikujiCard() {
   return (
     <View>
       <CardShell>
-        {/* ヘッダー：開閉トグル／タイマー */}
         <View style={omikujiStyles.cardHeader}>
-          {/* 左側：タイマー   タイトル */}
           <View style={{ flex: 1 }}>
             {result && (
               <View
@@ -872,7 +848,6 @@ function MuscleOmikujiCard() {
             </View>
           </View>
 
-          {/* 右側：開閉トグル */}
           {result && (
             <TouchableOpacity
               onPress={() => setExpanded((v) => !v)}
@@ -898,7 +873,6 @@ function MuscleOmikujiCard() {
           </Text>
         ) : result ? (
           <View style={{ gap: 12 }}>
-            {/* 要約バッジ列 */}
             <View style={omikujiStyles.row}>
               <Badge
                 icon="barbell-outline"
@@ -919,7 +893,6 @@ function MuscleOmikujiCard() {
 
             <Text style={omikujiStyles.message}>{result.message}</Text>
 
-            {/* 開閉対象の詳細 */}
             {expanded && (
               <>
                 <Section title={t("record.omikuji.section_meigen")}>
@@ -1123,7 +1096,6 @@ function Badge({
   );
 }
 
-/* 記録タブ本体 */
 export default function RecordHub() {
   const r = useRouter();
   const { t } = useTranslation();
@@ -1205,7 +1177,6 @@ export default function RecordHub() {
         </View>
 
         <View style={{ paddingHorizontal: 16 }}>
-          {/* 筋肉掲示板リンク（画像バナー） */}
           <View style={{ marginTop: 12 }}>
             <TouchableOpacity
               onPress={() => r.push("/bbs")}
@@ -1236,7 +1207,6 @@ export default function RecordHub() {
   );
 }
 
-/* styles */
 const styles = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: colors.bg },
   row: { flexDirection: "row", gap: 8 },

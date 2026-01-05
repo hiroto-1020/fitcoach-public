@@ -1,5 +1,3 @@
-// app/(tabs)/meals/new.tsx
-// 食事を記録画面（PFC/kcalの手入力対応）
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -30,7 +28,6 @@ import { analyzeMealPhoto } from "../../../lib/ai";
 import { useAppPrefs } from "../../../lib/app-prefs";
 import { useTranslation } from "react-i18next";
 
-// optional deps
 let SliderComp: any = null;
 try {
   SliderComp = require("expo-slider").Slider;
@@ -57,13 +54,10 @@ type PrefillParams = {
   mealType?: MealType;
 };
 
-/* ===== 数字 + 小数点だけ許可する共通ユーティリティ ===== */
 const cleanDecimal = (s: string): string => {
   if (s == null) return "";
-  // 数字とドット以外を削除
   let t = String(s).replace(/[^0-9.]/g, "");
 
-  // ドットが2つ以上ある場合は、最初の1つだけ残す
   const firstDot = t.indexOf(".");
   if (firstDot !== -1) {
     t = t.slice(0, firstDot + 1) + t.slice(firstDot + 1).replace(/\./g, "");
@@ -71,7 +65,6 @@ const cleanDecimal = (s: string): string => {
   return t;
 };
 
-// 文字列   数値（空 or "." だけなら undefined）
 const toNum = (s: string): number | undefined => {
   const t = cleanDecimal(s).trim();
   if (!t || t === ".") return undefined;
@@ -101,7 +94,6 @@ export default function NewMealScreen() {
   const [fat, setFat] = useState<number | undefined>(undefined);
   const [carbs, setCarbs] = useState<number | undefined>(undefined);
 
-  // 表示用のテキスト（ここに "." を残す）
   const [caloriesText, setCaloriesText] = useState<string>("");
   const [proteinText, setProteinText] = useState<string>("");
   const [fatText, setFatText] = useState<string>("");
@@ -112,7 +104,6 @@ export default function NewMealScreen() {
   const [analyzing, setAnalyzing] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
 
-  // スライダーの基準値
   const baseRef = useRef<{
     grams?: number;
     calories?: number;
@@ -122,10 +113,8 @@ export default function NewMealScreen() {
   } | null>(null);
   const [qty, setQty] = useState(1);
 
-  // 日付モーダル
   const [dateModalOpen, setDateModalOpen] = useState(false);
 
-  // 数値入力ハンドラ（TextInput用）
   const handleDecimalInput = (
     raw: string,
     setText: (v: string) => void,
@@ -136,7 +125,6 @@ export default function NewMealScreen() {
     setNumber(toNum(cleaned));
   };
 
-  // ヘッダー
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -164,7 +152,6 @@ export default function NewMealScreen() {
     });
   }, [navigation, router, C.text, haptic, t]);
 
-  // 事前入力
   useEffect(() => {
     const tTitle = (params.prefill_title || "").toString();
     const b = (params.prefill_brand || "").toString();
@@ -197,7 +184,6 @@ export default function NewMealScreen() {
     if (ph) setPhotoUri(ph);
 
     setTimeout(() => snapshotBase("init"), 0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const canSave = useMemo(
@@ -205,7 +191,6 @@ export default function NewMealScreen() {
     [title, calories, protein, fat, carbs]
   );
 
-  // ========== 基準化/リセット ==========
   function snapshotBase(_reason: string = "manual") {
     baseRef.current = { grams, calories, protein, fat, carbs };
     setQty(1);
@@ -227,7 +212,6 @@ export default function NewMealScreen() {
     setQty(1);
   }
 
-  // ========== 画像選択/解析 ==========
   async function pickImage() {
     await haptic("light");
     try {
@@ -312,7 +296,6 @@ export default function NewMealScreen() {
     }
   }
 
-  // ========== 数量/分量スケール ==========
   function setQtyScaled(nextQty: number) {
     if (!baseRef.current) snapshotBase("qty-first");
     const base = baseRef.current!;
@@ -378,7 +361,6 @@ export default function NewMealScreen() {
     setGramsScaled(g);
   }
 
-  // ========== 保存 ==========
   async function onSave() {
     await haptic("medium");
     const meal: Meal = {
@@ -409,7 +391,6 @@ export default function NewMealScreen() {
     );
   }
 
-  // プレビュー帯
   const preview = (
     <View
       style={{
@@ -436,7 +417,6 @@ export default function NewMealScreen() {
 
   return (
     <>
-      {/* ヘルプモーダル */}
       <Modal
         visible={helpOpen}
         transparent
@@ -469,7 +449,6 @@ export default function NewMealScreen() {
         </View>
       </Modal>
 
-      {/* 日付モーダル */}
       <CalendarModal
         open={dateModalOpen}
         value={date}
@@ -488,7 +467,6 @@ export default function NewMealScreen() {
         }}
         keyboardShouldPersistTaps="handled"
       >
-        {/* 基本情報 */}
         <Card
           style={{
             padding: spacing.md,
@@ -637,7 +615,6 @@ export default function NewMealScreen() {
           </View>
         </Card>
 
-        {/* 栄養（手入力） */}
         <Card
           style={{
             padding: spacing.md,
@@ -751,7 +728,6 @@ export default function NewMealScreen() {
           </View>
         </Card>
 
-        {/* 数量・分量 */}
         <Card
           style={{
             padding: spacing.md,
@@ -849,7 +825,6 @@ export default function NewMealScreen() {
           </View>
         </Card>
 
-        {/* 記録先 */}
         <Card
           style={{
             padding: spacing.md,
@@ -945,7 +920,6 @@ export default function NewMealScreen() {
   );
 }
 
-/* ========= サブUI ========= */
 function ti(C: ReturnType<typeof useAppPrefs>["colors"]) {
   return {
     borderWidth: 1,
@@ -959,7 +933,6 @@ function ti(C: ReturnType<typeof useAppPrefs>["colors"]) {
   } as const;
 }
 
-/** 食事区分ラベル（多言語） */
 function labelOfType(
   tType: MealType,
   tFn: (key: string) => string
@@ -1084,7 +1057,6 @@ function StepBtn({
   );
 }
 
-/** カレンダー/ネイティブ/テキスト フォールバック付きモーダル（テーマ追従） */
 function CalendarModal({
   open,
   value,
@@ -1092,7 +1064,7 @@ function CalendarModal({
   onChange,
 }: {
   open: boolean;
-  value: string; // YYYY-MM-DD
+  value: string;
   onClose: () => void;
   onChange: (isoDate: string) => void;
 }) {
@@ -1221,7 +1193,6 @@ function CalendarModal({
   );
 }
 
-/* ===== Styles ===== */
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,

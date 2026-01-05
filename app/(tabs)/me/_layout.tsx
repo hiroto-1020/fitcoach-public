@@ -1,4 +1,3 @@
-// app/(tabs)/me/_layout.tsx
 import React from "react";
 import { Stack } from "expo-router";
 import { useThemeColors } from "../../../ui/theme";
@@ -13,7 +12,6 @@ export default function MeLayout() {
       screenOptions={{
         headerTitleAlign: "center",
         headerBackTitle: t("me.back"),
-        // ▼ テーマ連動
         headerStyle: { backgroundColor: C.card },
         headerTintColor: C.text,
         headerTitleStyle: { color: C.text },
@@ -37,7 +35,6 @@ export default function MeLayout() {
         name="notifications"
         options={{ title: t("me.notifications") }}
       />
-      {/* “アプリ設定”は名称が紛らわしいのでファイル名は app-settings にしています */}
       <Stack.Screen
         name="app-settings"
         options={{ title: t("me.appSettings") }}

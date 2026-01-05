@@ -1,4 +1,3 @@
-// app/(tabs)/meals/favorites.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -73,7 +72,6 @@ export default function FavoritesScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
-      {/* 検索ボックス */}
       <View style={styles.searchRow}>
         <TextInput
           placeholder="お気に入り内を検索（商品名・ブランド）"
@@ -102,9 +100,7 @@ export default function FavoritesScreen() {
             const active = !!selected[item.code];
             return (
               <View style={[styles.card, active && { backgroundColor: "#f8fafc" }]}>
-                {/* セレクト */}
                 <Pressable onPress={() => toggleSelect(item)} style={[styles.checkBox, active && styles.checkBoxOn]} />
-                {/* サムネ */}
                 {item.image ? (
                   <Image source={{ uri: item.image }} style={styles.thumb} />
                 ) : (
@@ -112,7 +108,6 @@ export default function FavoritesScreen() {
                     <Text style={{ color: "#666" }}>No Image</Text>
                   </View>
                 )}
-                {/* 本文（タップで単品取り込みへ） */}
                 <Pressable
                   style={{ flex: 1 }}
                   onPress={() =>
@@ -139,11 +134,10 @@ export default function FavoritesScreen() {
                     <Text style={styles.badge}>P/100g: {item.p100 ?? "-"}</Text>
                   </View>
                 </Pressable>
-                {/* トグル */}
                 <Pressable
                   onPress={async () => {
                     await toggleFavorite(item);
-                    setItems(prev => prev.filter(p => p.code !== item.code)); // 即時反映
+                    setItems(prev => prev.filter(p => p.code !== item.code));
                     setSelected(prev => {
                       const next = { ...prev }; delete next[item.code]; return next;
                     });
@@ -166,7 +160,6 @@ export default function FavoritesScreen() {
         />
       )}
 
-      {/* 選択バー */}
       {selectedCount > 0 && (
         <View style={styles.bulkBar}>
           <Text style={{ color: colors.text, fontWeight: "700" }}>選択：{selectedCount}件</Text>

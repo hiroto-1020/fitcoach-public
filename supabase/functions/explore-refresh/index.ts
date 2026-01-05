@@ -1,10 +1,7 @@
-// supabase/functions/explore-refresh/index.ts
-// Explore feed refresher — 新着優先 + 直近N日で収集 + 日本語優先 + 急上昇(任意)
 
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-/** ───────────────────────── env helper ───────────────────────── */
 const env = (...names: string[]) => {
   for (const n of names) {
     const v = Deno.env.get(n);
@@ -13,16 +10,14 @@ const env = (...names: string[]) => {
   return undefined;
 };
 
-/** ─────────────────── 必須/任意の設定値 ─────────────────── */
 const YT_KEY           = env("YT_KEY", "YOUTUBE_API_KEY");
 const SUPABASE_URL     = env("SUPABASE_URL", "PROJECT_URL");
 const SERVICE_ROLE_KEY = env("SERVICE_ROLE_KEY", "SUPABASE_SERVICE_ROLE_KEY", "SERVICE_KEY", "SERVICE_ROLE");
 
-// 任意（調整可能）
 const FEATURE_TRENDING     = (env("FEATURE_TRENDING") ?? "false").toLowerCase() === "true";
-const REFRESH_COOLDOWN_MIN = Number(env("REFRESH_COOLDOWN_MIN") ?? "180"); // 3h
-const YT_LIMIT             = Number(env("YT_LIMIT") ?? "50");              // 1カテゴリの取得件数（デフォ50）
-const YT_DAYS_BACK         = Number(env("YT_DAYS_BACK") ?? "7");           // 直近N日分のみ
+const REFRESH_COOLDOWN_MIN = Number(env("REFRESH_COOLDOWN_MIN") ?? "180");
+const YT_LIMIT             = Number(env("YT_LIMIT") ?? "50");
+const YT_DAYS_BACK         = Number(env("YT_DAYS_BACK") ?? "7");
 const YT_REGION            = env("YT_REGION") ?? "JP";
 const YT_LANG              = env("YT_LANG") ?? "ja";
 
@@ -33,10 +28,8 @@ if (!YT_KEY) {
   console.warn("[explore-refresh] YT_KEY is not set. Only `yt_diag` will work.");
 }
 
-/** ─────────────────── Supabase (service role) ─────────────────── */
 const supa = createClient(SUPABASE_URL!, SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
 
-/** ─────────────────────── meta helpers ─────────────────────── */
 type MetaRow = { k: string; v: Record<string, unknown> };
 
 async function getLastRefresh(): Promise<Date | null> {
@@ -56,7 +49,6 @@ async function setLastRefresh(): Promise<void> {
   if (error) throw new Error(`meta_write_failed:${error.message}`);
 }
 
-/** ───────────────────── YouTube helpers ───────────────────── */
 async function yt(path: "search" | "videos", params: Record<string, string>) {
   if (!YT_KEY) throw new Error("yt_key_missing");
   const url = new URL(`https://www.googleapis.com/youtube/v3/${path}`);
@@ -80,15 +72,13 @@ const SEARCH_QUERY: Record<Cat, string> = {
     "筋トレ BGM OR workout music OR 作業用BGM OR ランニング 音楽 OR HIIT 音楽 OR playlist OR mix",
 };
 
-// 並び順に "date" を追加（新着優先）
 type Order = "viewCount" | "relevance" | "date";
 const CATEGORY_PARAMS: Record<Cat, { order: Order; videoDuration?: "short" | "medium" | "long"; videoCategoryId?: string }> = {
-  workout:    { order: "date",      videoDuration: "medium", videoCategoryId: "17" }, // Sports
-  motivation: { order: "date",      videoDuration: "medium", videoCategoryId: "27" }, // Education
-  music:      { order: "viewCount", videoDuration: "long",   videoCategoryId: "10" }, // Music（安定枠）
+  workout:    { order: "date",      videoDuration: "medium", videoCategoryId: "17" },
+  motivation: { order: "date",      videoDuration: "medium", videoCategoryId: "27" },
+  music:      { order: "viewCount", videoDuration: "long",   videoCategoryId: "10" },
 };
 
-// クライアント側と同じフィルタ
 const F = {
   workout: {
     mustAny: ["筋トレ","ワークアウト","トレーニング","ベンチ","スクワット","デッド","HIIT","自重","ダンベル","腹筋","胸","背中","肩","脚","二の腕","体幹"],
@@ -128,7 +118,6 @@ async function fetchCategory(cat: Cat) {
   const hint = CATEGORY_PARAMS[cat];
   const since = new Date(Date.now() - YT_DAYS_BACK * 24 * 60 * 60 * 1000).toISOString();
 
-  // 検索（新着優先 + 直近N日）
   const s = await yt("search", {
     part: "snippet",
     type: "video",
@@ -145,14 +134,12 @@ async function fetchCategory(cat: Cat) {
   });
   let items = (s?.items ?? []) as any[];
 
-  // 厳格フィルタ
   items = items.filter((it) => {
     const title = it?.snippet?.title ?? "";
     const ch    = it?.snippet?.channelTitle ?? "";
     return passesByRule((F as any)[cat], title, ch);
   });
 
-  // 急上昇を先頭に（任意）
   if (FEATURE_TRENDING) {
     try {
       const v = await yt("videos", {
@@ -177,10 +164,8 @@ async function fetchCategory(cat: Cat) {
     }
   }
 
-  // 日本語優先
   items = prioritizeJapanese(items);
 
-  // DB 行へ変換（explore_feed のカラムに合わせる）
   return items.map((it: any) => ({
     category: cat,
     video_id: (it?.id?.videoId ?? it?.id) as string,
@@ -195,26 +180,19 @@ async function fetchCategory(cat: Cat) {
   }));
 }
 
-/** ─────────────────────── DB upsert ───────────────────────
- *  前提: explore_feed に UNIQUE(category, video_id)
- *  v_explore_feed 側で video_id yt_id, thumb_url thumb_high に別名を付けている
- */
 async function upsertFeed(rows: any[]) {
   if (!rows.length) return;
   const { error } = await supa.from("explore_feed").upsert(rows, { onConflict: "category,video_id" });
   if (error) throw new Error(`upsert_failed:${error.message}`);
 }
 
-/** ─────────────────────── small utils ─────────────────────── */
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
 
-/** ─────────────────────────── main ─────────────────────────── */
 serve(async (req) => {
   try {
     const { mode = "full" } = await (async () => { try { return await req.json(); } catch { return {}; } })();
 
-    // 診断
     if (mode === "yt_diag") {
       const out: any = { ok: true, key_tail: (YT_KEY ?? "").slice(-6) };
       try {
@@ -238,7 +216,6 @@ serve(async (req) => {
       return json({ ok: true, msg: "alive", key_tail: (YT_KEY ?? "").slice(-6) });
     }
 
-    // クールダウン
     const last = await getLastRefresh();
     if (last) {
       const mins = Math.floor((Date.now() - last.getTime()) / 60000);
@@ -247,7 +224,6 @@ serve(async (req) => {
       }
     }
 
-    // 取得
     const cats: Cat[] = ["workout", "motivation", "music"];
     const all: any[] = [];
     for (const c of cats) {
@@ -257,14 +233,12 @@ serve(async (req) => {
       } catch (e) {
         const msg = String(e);
         if (msg.includes("quotaExceeded")) {
-          // クォータ超過   DB変更なしで既存キャッシュを使わせる
           return json({ ok: false, quotaExceeded: true, note: "served-from-cache" }, 200);
         }
         throw e;
       }
     }
 
-    // 保存
     await upsertFeed(all);
     await setLastRefresh();
 

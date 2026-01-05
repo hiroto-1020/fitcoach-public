@@ -1,4 +1,3 @@
-// lib/gotore/regions.ts
 export type Pref = { code: string; label: string };
 
 export const JP_PREFECTURES: Pref[] = [
@@ -51,7 +50,6 @@ export const JP_PREFECTURES: Pref[] = [
   { code: "pref-47", label: "沖縄県" },
 ];
 
-// キー：バリエーション（reverseGeocode の administrativeArea で来る文字など）   label
 const PREF_NAME_MAP: Record<string, string> = {
   "東京都": "東京都", "tokyo": "東京都",
   "大阪府": "大阪府", "osaka": "大阪府",

@@ -2,7 +2,6 @@
 import { Image as RNImage } from "react-native";
 import Svg, { Image as SvgImage } from "react-native-svg";
 
-// PNGロゴをSVG <image> で埋め込んで拡大縮小しても綺麗に見せる
 const MARK = require("../../image/FitGear.png");
 
 export default function FitcoachMark({ size = 200 }: { size?: number }) {

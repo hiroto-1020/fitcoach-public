@@ -1,10 +1,8 @@
-// app/(tabs)/meals/_layout.tsx
 import React from "react";
 import { Text, TouchableOpacity } from "react-native";
 import { Stack, Link } from "expo-router";
 import { colors } from "../../../ui/theme";
 
-// 透明度付きカラー（#RRGGBBのみ対応）
 function withAlpha(hex: string, a: number) {
   const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
   if (!m) return hex;
@@ -52,9 +50,7 @@ export default function MealsLayout() {
         }}
       />
 
-      {/* 通常の新規（写真解析あり）は new に残す */}
       <Stack.Screen name="new" options={{ title: "食事を記録" }} />
-      {/*  追加：商品からの新規 */}
       <Stack.Screen name="new-from-product" options={{ title: "商品から作成" }} />
       <Stack.Screen name="[id]/index" options={{ title: "食事の詳細" }} />
       <Stack.Screen name="[id]/edit" options={{ title: "食事を編集" }} />

@@ -2,7 +2,7 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
-    "types": ["expo-router/types"],   // ルーターの型補完
+    "types": ["expo-router/types"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]

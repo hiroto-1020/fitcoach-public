@@ -1,4 +1,3 @@
-// components/help/BodyHelpModal.tsx
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { spacing, radius } from '../../ui/theme.body';
@@ -9,7 +8,6 @@ type Props = { visible: boolean; onClose: () => void };
 export default function BodyHelpModal({ visible, onClose }: Props) {
   const { colors: C } = useAppPrefs();
 
-  // 内部コンポーネントは C を閉じ込めて使う
   const H2 = ({ children }: { children: React.ReactNode }) => (
     <Text
       style={{
@@ -54,7 +52,6 @@ export default function BodyHelpModal({ visible, onClose }: Props) {
             borderColor: C.border,
           }}
         >
-          {/* Header */}
           <View
             style={{
               flexDirection: 'row',
@@ -71,7 +68,6 @@ export default function BodyHelpModal({ visible, onClose }: Props) {
             </TouchableOpacity>
           </View>
 
-          {/* Content */}
           <ScrollView
             contentContainerStyle={{
               paddingHorizontal: spacing.l,

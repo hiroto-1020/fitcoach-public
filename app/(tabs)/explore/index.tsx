@@ -1,4 +1,3 @@
-// Explore：カテゴリ（筋トレ/モチベ/音楽/ニュース/お気に入り/ALL）＋検索（キャッシュ内）＋YouTube再生＋ニュースRSS＋お気に入り連続再生
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet,
@@ -16,25 +15,20 @@ import { XMLParser } from "fast-xml-parser";
 import { useTranslation } from "react-i18next";
 import { fetchExploreCache, fetchExploreMeta, type ExploreClientItem } from "../../../lib/explore/api";
 
-// Supabase（クライアント）
 import { supabase } from "../../../lib/supabase";
 
-// AsyncStorage（無ければメモリfallback）
 let AsyncStorage: any = null; try { AsyncStorage = require("@react-native-async-storage/async-storage").default; } catch {}
 const FAV_KEY = "fitcoach.video.favs.v1";
 let memoryFavs: any[] = [];
 
-// Theme
 let theme: any = null; try { theme = require("../../../ui/theme"); } catch {}
 const colors = theme?.colors ?? { bg:"#0b0e11", card:"#11151a", text:"#e6ebf0", sub:"#9aa5b1", primary:"#5ac8fa", border:"#1f2630" };
 const spacing = theme?.spacing ?? { xs:6, sm:10, md:14, lg:18, xl:24 };
 
-// 型
 type Category = "workout" | "motivation" | "music" | "news" | "fav" | "all";
 type CacheItem = ExploreClientItem;
 type NewsItem = { title: string; link: string };
 
-// カテゴリラベル用キー
 const CATEGORY_LABEL_KEY: Record<Category, string> = {
   workout: "explore.categories.workout",
   motivation: "explore.categories.motivation",
@@ -44,7 +38,6 @@ const CATEGORY_LABEL_KEY: Record<Category, string> = {
   all: "explore.categories.all",
 };
 
-// GoogleニュースRSS
 function buildNewsUrl(q: string) {
   const url = new URL("https://news.google.com/rss/search");
   url.searchParams.set("hl","ja"); url.searchParams.set("gl","JP"); url.searchParams.set("ceid","JP:ja");
@@ -62,7 +55,6 @@ async function fetchGoogleNews(q: string): Promise<NewsItem[]> {
   return arr;
 }
 
-// Utils
 function withAlpha(hex: string, a: number) {
   let h = hex.replace(/^#/, ""); if (h.length===3) h = h.split("").map(c=>c+c).join("");
   const r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
@@ -74,7 +66,6 @@ async function saveFavs(list: CacheItem[]) { try { if (AsyncStorage) await Async
 const normalize = (s:string) => (s || "").toLowerCase();
 const includesQ = (t:string, q:string) => normalize(t).includes(normalize(q));
 
-// Component
 export default function ExploreTab() {
   const { t } = useTranslation();
 
@@ -118,7 +109,7 @@ export default function ExploreTab() {
 
   const onSelectCategory = useCallback(async(c:Category)=>{ await Haptics.selectionAsync(); setCategory(prev=>prev===c?"all":c); },[]);
 
-  const TOP_PER_CAT = 60; // カテゴリごとの上限
+  const TOP_PER_CAT = 60;
 
   const readCache = useCallback(async (c: Exclude<Category,"news"|"fav">) => {
     return await fetchExploreCache({
@@ -128,10 +119,9 @@ export default function ExploreTab() {
     });
   }, [search]);
 
-  // 最終更新/件数の読み込み（ヘッダ表示用など） ※meta/state は元の実装に合わせて利用
   const loadMeta = useCallback(async () => {
     const meta = await fetchExploreMeta();
-    setMeta(meta);               // ここは元ファイルの meta ステートに合わせてください
+    setMeta(meta);
   }, []);
 
   const fetchFirst = useCallback(async()=>{
@@ -143,7 +133,6 @@ export default function ExploreTab() {
       } else if (category==="fav") {
         const arr = await loadFavs(); setFavs(arr); setItems(arr);
       } else if (category==="all") {
-        // 3カテゴリを結合（キャッシュのみ）
         const [w,m,mu] = await Promise.all([readCache("workout"), readCache("motivation"), readCache("music")]);
         let arr = [...w, ...m, ...mu];
         if (debounced) {
@@ -152,7 +141,6 @@ export default function ExploreTab() {
         }
         setItems(arr);
       } else {
-        // 単一カテゴリ
         let arr = await readCache(category);
         if (debounced) {
           const q = debounced;
@@ -231,7 +219,6 @@ export default function ExploreTab() {
 
   return (
     <SafeAreaView style={[styles.container,{ backgroundColor: colors.bg }]}>
-      {/* カテゴリ */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -270,7 +257,6 @@ export default function ExploreTab() {
         )}
       </ScrollView>
 
-      {/* 検索（キャッシュ内） */}
       <View style={styles.searchWrap}>
         <TextInput
           value={search}
@@ -288,7 +274,6 @@ export default function ExploreTab() {
         />
       </View>
 
-      {/* エンプティ＆エラー */}
       {!online && (
         <EmptyState
           title={t("explore.offline_title")}
@@ -306,7 +291,6 @@ export default function ExploreTab() {
         />
       )}
 
-      {/* リスト */}
       {online && (
         <FlatList
           data={
@@ -347,7 +331,6 @@ export default function ExploreTab() {
         />
       )}
 
-      {/* 再生モーダル */}
       <Modal
         visible={!!playingId}
         animationType="slide"
@@ -465,7 +448,6 @@ function EmptyState({
   );
 }
 
-// Styles
 const styles = StyleSheet.create({
   container: { flex:1, backgroundColor: colors.bg },
 

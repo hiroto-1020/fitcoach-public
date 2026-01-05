@@ -1,4 +1,3 @@
-// app/(tabs)/meals/[id]/edit.tsx
 import { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Image, Alert } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";

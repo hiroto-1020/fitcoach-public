@@ -1,11 +1,10 @@
-// ui/components/GenderOncePicker.tsx
 import React, { useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { setGenderOnce, MyProfileLite, Gender } from '../../lib/gotore/api';
 
 type Props = {
   profile: MyProfileLite;
-  onChanged?: (g: Gender) => void;   // 反映後に親へ通知
+  onChanged?: (g: Gender) => void;
 };
 
 const OPTIONS: Gender[] = ['male','female','nonbinary'];
@@ -18,7 +17,7 @@ export default function GenderOncePicker({ profile, onChanged }: Props) {
     if (kyc_status === 'approved' || gender_locked_at) return 'locked';
     if (kyc_status === 'pending') return 'pending';
     if (kyc_status === 'rejected') return 'rejected';
-    return 'not_started'; // 初回
+    return 'not_started';
   }, [profile]);
 
   const disabled = state === 'locked' || state === 'pending';

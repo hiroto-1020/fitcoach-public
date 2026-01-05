@@ -1,5 +1,3 @@
-// app/(tabs)/gotore/_layout.tsx
-//合トレの上部に出るボタン
 import React from "react";
 import { Stack, usePathname, useRouter } from "expo-router";
 import { View, Text, Pressable } from "react-native";
@@ -47,7 +45,7 @@ function HeaderPurchaseButton() {
         paddingVertical: 8,
         paddingHorizontal: 14,
         borderRadius: 999,
-        backgroundColor: "#22c55e", // 単層の緑ピル
+        backgroundColor: "#22c55e",
         borderWidth: 0,
       }}
     >
@@ -63,7 +61,6 @@ export default function GotoreLayout() {
       screenOptions={{
         headerTitle: () => <TopSwitch />,
         headerBackTitleVisible: false,
-        // 右側の余白だけ（背景は付けない）
         headerRight: () => <HeaderPurchaseButton />,
         headerRightContainerStyle: { paddingRight: 10 },
       }}

@@ -1,4 +1,3 @@
-// app/(tabs)/meals/bulk-from-products.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, View, TextInput, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -12,7 +11,7 @@ import { fetchNormalized100gByCode } from "../../../lib/openfoodfacts";
 import type { Meal, MealType } from "../../../lib/meals";
 import { saveMeal } from "../../../lib/storage";
 import { generateId } from "../../../lib/id";
-import { recordUsage } from "../../../lib/usage"; // ★追加
+import { recordUsage } from "../../../lib/usage";
 
 type ItemState = SelectedProduct & {
   grams: number;
@@ -30,7 +29,6 @@ export default function BulkFromProductsScreen() {
   const [items, setItems] = useState<ItemState[]>([]);
   const [busy, setBusy] = useState(true);
 
-  // 保存先（合算 個別保存にするため、ここで日付/区分を決める）
   const [date, setDate] = useState(dayjs().format("YYYY-MM-DD"));
   const [mealType, setMealType] = useState<MealType>("snack");
 
@@ -43,7 +41,6 @@ export default function BulkFromProductsScreen() {
       if (mounted) setItems(init);
       setBusy(false);
 
-      // 欠損がある要素は詳細APIで補正
       for (const [idx, it] of init.entries()) {
         const needs = [it.kcal100, it.p100, it.f100, it.c100].some((v) => v == null || v === 0);
         if (needs && it.code) {
@@ -98,7 +95,6 @@ export default function BulkFromProductsScreen() {
   const allLoaded = items.every((i) => !i.loading);
 
   async function saveIndividually() {
-    // 各アイテムを独立した Meal として保存
     for (const it of items) {
       const meal: Meal = {
         id: generateId("meal"),
@@ -117,7 +113,6 @@ export default function BulkFromProductsScreen() {
       };
       await saveMeal(meal);
 
-      //  使用履歴に記録（codeあり）
       await recordUsage({
         code: it.code,
         title: meal.title || "（名称不明）",
@@ -138,7 +133,6 @@ export default function BulkFromProductsScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
       <ScrollView contentContainerStyle={{ padding: spacing.lg, gap: spacing.lg }}>
-        {/* 保存先情報 */}
         <Card style={{ padding: spacing.md }}>
           <SectionTitle>記録先</SectionTitle>
           <Text style={{ color: colors.subtext, marginTop: spacing.sm }}>日付（YYYY-MM-DD）</Text>
@@ -172,7 +166,6 @@ export default function BulkFromProductsScreen() {
           </View>
         </Card>
 
-        {/* 合計 */}
         <Card style={{ padding: spacing.md }}>
           <SectionTitle>合計（{items.length}品）</SectionTitle>
           {!allLoaded && (
@@ -189,7 +182,6 @@ export default function BulkFromProductsScreen() {
           </View>
         </Card>
 
-        {/* 各アイテム */}
         {busy ? (
           <Text style={{ color: colors.subtext }}>読み込み中…</Text>
         ) : items.length === 0 ? (
@@ -231,7 +223,6 @@ export default function BulkFromProductsScreen() {
                 </View>
               </View>
 
-              {/* g スライダー */}
               <View style={{ marginTop: spacing.md }}>
                 <Text style={{ color: colors.text, fontWeight: "800", fontSize: 16 }}>
                   {it.grams} g
@@ -251,7 +242,6 @@ export default function BulkFromProductsScreen() {
                 />
               </View>
 
-              {/* 計算結果 */}
               <View style={{ flexDirection: "row", gap: spacing.md, marginTop: spacing.sm }}>
                 <NutSmall label="kcal" value={`${Math.round(calc(it.kcal100, it.grams))}`} />
                 <NutSmall label="P" value={`${calc(it.p100, it.grams)} g`} />
@@ -262,7 +252,6 @@ export default function BulkFromProductsScreen() {
           ))
         )}
 
-        {/* アクション：合算ではなく個別保存 */}
         <PrimaryButton title={`保存（${items.length}件）`} onPress={saveIndividually} />
         <PrimaryButton
           title="選択をクリアして検索に戻る"

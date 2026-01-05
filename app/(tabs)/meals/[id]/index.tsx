@@ -1,4 +1,3 @@
-// app/(tabs)/meals/[id]/index.tsx
 import React, { useEffect, useState } from "react";
 import { View, Text, Image, Alert, TouchableOpacity, ScrollView } from "react-native";
 import { useLocalSearchParams, Link, useRouter } from "expo-router";
@@ -63,7 +62,7 @@ export default function MealDetailScreen() {
             await deleteMeal(meal.id);
             Alert.alert(t("meals.detail.deletedTitle"), undefined, [
               {
-                text: "OK", // OK は共通表記としてそのまま使用
+                text: "OK",
                 onPress: () => router.replace("/(tabs)/meals"),
               },
             ]);
@@ -149,12 +148,10 @@ export default function MealDetailScreen() {
       </Card>
 
       <View style={{ flexDirection: "row", gap: 12 }}>
-        {/* 編集へ */}
         <Link asChild href={`/(tabs)/meals/${meal.id}/edit`}>
           <PrimaryButton title={t("meals.detail.editButton")} />
         </Link>
 
-        {/* 削除 */}
         <TouchableOpacity
           onPress={onDelete}
           style={{
@@ -194,7 +191,6 @@ function Fact({ label, value }: { label: string; value: string }) {
   );
 }
 
-// mealType   i18n キー
 function mealTypeKey(t?: string) {
   return t === "breakfast"
     ? "meals.detail.mealTypeBreakfast"

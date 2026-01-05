@@ -11,9 +11,7 @@ Deno.serve(async (req) => {
   if (!user?.user) return new Response("unauthorized", { status: 401 });
   const uid = user.user.id;
 
-  // 既存：マッチ済みかの確認…（省略）
 
-  // 追加：本人確認の有無と、該当マッチでの送信通数を確認
   const { data: prof } = await admin.from("profiles").select("verified_status").eq("user_id", uid).maybeSingle();
   const verified = prof?.verified_status === "verified";
 
@@ -23,7 +21,6 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: "kyc_required_after_first" }), { status: 403, headers: { "content-type": "application/json" } });
   }
 
-  // 通常送信
   const { error } = await admin.from("messages").insert({ match_id, sender_id: uid, body });
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { "content-type": "application/json" } });
 

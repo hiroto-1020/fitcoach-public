@@ -19,7 +19,6 @@ Deno.serve(async (req) => {
       image?: { path?: string; w?: number; h?: number } | null;
     };
 
-    // 直近投稿クールダウン（5秒）
     const last = await lastPostAtByDevice(sb, deviceHash);
     const now  = nowUtc();
     if (last && diffSeconds(now, last) < 5) {
@@ -27,7 +26,6 @@ Deno.serve(async (req) => {
       return cors(req, { error: "rate_limited", retry_after_ms: ms }, 429);
     }
 
-    // スレ確認
     const th = await sb.from("bbs_threads")
       .select("id,is_archived")
       .eq("id", threadId)
@@ -35,7 +33,6 @@ Deno.serve(async (req) => {
     if (th.error || !th.data)  return cors(req, { error: "thread_not_found" }, 404);
     if (th.data.is_archived)   return cors(req, { error: "archived_thread" }, 400);
 
-    // 本文 or 画像のどちらか必須
     const hasText  = !!String(body ?? "").trim();
     const hasImage = !!image?.path;
     if (!hasText && !hasImage) {
@@ -46,7 +43,6 @@ Deno.serve(async (req) => {
       if (bErr) return cors(req, { error: bErr }, 400);
     }
 
-    // 次の連番 no
     const mx = await sb.from("bbs_posts")
       .select("no")
       .eq("thread_id", threadId)
@@ -54,12 +50,10 @@ Deno.serve(async (req) => {
       .limit(1);
     const no = ((mx.data?.[0]?.no as number | undefined) ?? 0) + 1;
 
-    // 表示名・擬似ID
     const name = (displayName && String(displayName).trim()) || "名無しの筋トレ民";
     const salt = Deno.env.get("BBS_SALT")!;
     const pseudonym = await makePseudonym(salt, deviceHash, threadId, now);
 
-    // 画像項目
     let image_path: string | null = null;
     let image_url : string | null = null;
     let image_w   : number | null = null;
@@ -73,7 +67,6 @@ Deno.serve(async (req) => {
       image_h = image?.h ?? null;
     }
 
-    // 投稿作成（本文が無ければ空文字で保存）
     const ins = await sb.from("bbs_posts").insert({
       thread_id: threadId,
       no,
@@ -89,7 +82,6 @@ Deno.serve(async (req) => {
 
     if (ins.error) return cors(req, { error: ins.error.message }, 500);
 
-    // 返信数 / BUMP 更新
     const cnt = await sb.from("bbs_posts")
       .select("id", { count: "exact", head: true })
       .eq("thread_id", threadId);

@@ -35,7 +35,6 @@ Deno.serve(async (req) => {
       return cors(req, { ok: true, state: "open" }, 200);
     }
     if (action === "delete") {
-      // 物理削除（投稿 スレの順で）
       await sb.from("bbs_posts").delete().eq("thread_id", threadId);
       const { error } = await sb.from("bbs_threads").delete().eq("id", threadId);
       if (error) throw error;

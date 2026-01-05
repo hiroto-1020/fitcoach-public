@@ -8,7 +8,7 @@ serve(async (req) => {
     const dev = req.headers.get("x-device-key") ?? "";
     if (!adminKeys.includes(dev)) return new Response("forbidden", { status: 403 });
 
-    const { reportId, action } = await req.json(); // 'dismiss' | 'delete_post' | 'archive_thread'
+    const { reportId, action } = await req.json();
     const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     const { data: rep, error: e1 } = await sb.from("bbs_reports").select("*").eq("id", reportId).single();

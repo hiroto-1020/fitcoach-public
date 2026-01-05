@@ -1,5 +1,3 @@
-// app/(tabs)/training/index.tsx
-// テーマ連動（ui/theme があればそれを優先）+ フォールバックで useColorScheme + 多言語対応
 
 import React, {
   useEffect,
@@ -33,7 +31,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTranslation } from "react-i18next";
 
-// ------- テーマ取得（ui/theme のフックを最優先） -------
 type Pal = {
   bg: string;
   card: string;
@@ -75,9 +72,6 @@ function usePalette(): Pal {
   return scheme === "dark" ? dark : light;
 }
 
-/** =========================
- *  カレンダーのロケール設定
- * ========================= */
 LocaleConfig.locales["ja"] = {
   monthNames: [
     "1月",
@@ -204,7 +198,6 @@ LocaleConfig.locales["ko"] = {
   today: "오늘",
 };
 
-// defaultLocale はコンポーネント内で i18n に合わせて設定する
 
 type Row = {
   id: number;
@@ -245,7 +238,6 @@ export default function TrainingHome() {
   const { t, i18n } = useTranslation();
   const today = dayjs().format("YYYY-MM-DD");
 
-  // i18n 言語に応じてカレンダーのロケールを切り替え
   useEffect(() => {
     const lang = i18n.language || "ja";
     if (lang.startsWith("ja")) {
@@ -262,16 +254,13 @@ export default function TrainingHome() {
   const [monthMarks, setMonthMarks] = useState<Record<string, any>>({});
   const [selectedDate, setSelectedDate] = useState<string>(today);
 
-  // フィルタ：部位
   const [parts, setParts] = useState<BodyPart[]>([]);
   const [selectedPartId, setSelectedPartId] = useState<number | null>(null);
 
-  // 選択日の詳細
   const [loadingDay, setLoadingDay] = useState(false);
   const [dayRows, setDayRows] = useState<Row[]>([]);
   const [dayNote, setDayNote] = useState("");
 
-  // PR / 連続 / 総日数
   const [prWeight, setPrWeight] =
     useState<{
       weight_kg: number;
@@ -589,7 +578,6 @@ export default function TrainingHome() {
                 </Text>
               ) : (
                 <>
-                  {/* サマリーカード */}
                   <View
                     style={{
                       flexDirection: "row",
@@ -710,7 +698,6 @@ export default function TrainingHome() {
           )}
         </View>
 
-        {/* 最高記録 */}
         <View
           style={{
             paddingHorizontal: 12,
@@ -820,7 +807,6 @@ export default function TrainingHome() {
         </View>
       </ScrollView>
 
-      {/* 右下のFAB */}
       <TouchableOpacity
         onPress={() =>
           router.push({
@@ -933,7 +919,6 @@ function DayExercises({ rows }: { rows: Row[] }) {
                       `${fmt(s.weight_kg)} ${g.unit} × ${fmt(
                         s.reps
                       )} ${
-                        // 「回」は日本語寄りなので i18n 化する
                         t("training.set_unit_reps")
                       }`
                   )
@@ -959,7 +944,6 @@ function DayExercises({ rows }: { rows: Row[] }) {
   );
 }
 
-/** フィルタバー */
 function FilterBar({
   parts,
   selectedId,
@@ -1065,7 +1049,6 @@ function Chip({
   );
 }
 
-/** PRカード（そのまま豪華） */
 function PRCardDeluxe({
   colors,
   icon,

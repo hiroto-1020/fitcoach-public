@@ -57,7 +57,6 @@ const en = {
     alert_saved_message:
       "It will also appear in the body composition tab.",
 
-    // ▼ Training today card
     training_today: {
       title: "Today's Training",
       pr_badge: "🎉 New PR",

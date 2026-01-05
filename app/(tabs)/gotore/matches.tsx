@@ -1,4 +1,3 @@
-//マッチ一覧画面
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, RefreshControl,
@@ -114,9 +113,6 @@ export default function MatchesScreen() {
   );
 }
 
-/* ──────────────────────────────────────────────────────────────
-   見た目：カードUI（未読で光るリング、プレス時に少し縮む）
-   ────────────────────────────────────────────────────────────── */
 function MatchCard({ item, onPress }: { item: MatchRow; onPress: () => void }) {
   const [photo, setPhoto] = useState<string | null>(null);
 
@@ -163,12 +159,10 @@ function MatchCard({ item, onPress }: { item: MatchRow; onPress: () => void }) {
           style={{ padding: 14, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}
         >
           <View style={{ flexDirection:'row', alignItems:'center' }}>
-            {/* アバター（未読なら外周がうっすら発光） */}
             <View style={{ marginRight: 12 }}>
               <Avatar photo={photo} name={item.other_nickname} glow={unread} />
             </View>
 
-            {/* テキスト部 */}
             <View style={{ flex: 1, paddingRight: 8 }}>
               <View style={{ flexDirection:'row', alignItems:'center' }}>
                 <Text
@@ -178,7 +172,6 @@ function MatchCard({ item, onPress }: { item: MatchRow; onPress: () => void }) {
                   {item.other_nickname ?? '名無し'}
                 </Text>
 
-                {/* 未読バッジ */}
                 {unread && (
                   <View style={{
                     marginLeft: 8, paddingHorizontal:8, height:22, borderRadius:11,
@@ -201,7 +194,6 @@ function MatchCard({ item, onPress }: { item: MatchRow; onPress: () => void }) {
               </Text>
             </View>
 
-            {/* ＞ アイコン（テキストでOK） */}
             <Text style={{ color:'#cbd5e1', fontSize:20, marginLeft: 4 }}>›</Text>
           </View>
         </LinearGradient>
@@ -210,9 +202,6 @@ function MatchCard({ item, onPress }: { item: MatchRow; onPress: () => void }) {
   );
 }
 
-/* ──────────────────────────────────────────────────────────────
-   アバター（グラデ枠＋フォールバックのイニシャル）
-   ────────────────────────────────────────────────────────────── */
 function Avatar({ photo, name, glow }: { photo: string | null; name?: string | null; glow?: boolean }) {
   const initials = (name ?? '').trim()
     .replace(/\s+/g, ' ')
@@ -242,9 +231,6 @@ function Avatar({ photo, name, glow }: { photo: string | null; name?: string | n
   );
 }
 
-/* ──────────────────────────────────────────────────────────────
-   ユーティリティ
-   ────────────────────────────────────────────────────────────── */
 function formatTime(iso: string) {
   const d = new Date(iso);
   const y = d.getFullYear();

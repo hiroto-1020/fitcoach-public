@@ -1,4 +1,3 @@
-﻿// app/(tabs)/me/about.tsx
 import React, { useMemo, useState } from "react";
 import {
   Alert,
@@ -14,7 +13,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppPrefs } from "../../../lib/app-prefs";
 import { useTranslation } from "react-i18next";
 
-// optional requires（未導入でも落ちない）
 let Constants: any = null; try { Constants = require("expo-constants").default; } catch {}
 let Application: any = null; try { Application = require("expo-application"); } catch {}
 let Device: any = null; try { Device = require("expo-device"); } catch {}
@@ -25,7 +23,6 @@ export default function AboutScreen() {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
 
-  // バージョン文字列（括弧と順序を整理して安全化）
   const appVersion: string =
     (Constants?.expoConfig?.version as string | undefined) ??
     (Application?.nativeApplicationVersion as string | undefined) ??
@@ -44,7 +41,6 @@ export default function AboutScreen() {
     (Constants?.expoConfig?.android?.package as string | undefined) ??
     "com.example.app";
 
-  // Updates 情報（SDK差異を吸収）
   const updateInfo = useMemo(() => {
     const ch =
       (Updates as any)?.channel ??
@@ -104,7 +100,6 @@ export default function AboutScreen() {
 
   function openStore() {
     if (Platform.OS === "ios") {
-      // ここに App Store の実ストアURLを設定（未設定でも落ちない）
       Linking.openURL("https://apps.apple.com/").catch(() => {});
     } else {
       Linking.openURL(

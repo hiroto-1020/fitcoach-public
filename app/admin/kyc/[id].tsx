@@ -51,7 +51,6 @@ function urlToPath(url?: string | null): string | null {
 }
 
 async function resolveImageURL(r: Row): Promise<string | null> {
-  // そのまま外部URLならそれを採用
   if (r.document_url && /^https?:\/\//i.test(r.document_url) && !/\/object\/public\//.test(r.document_url)) {
     return r.document_url;
   }
@@ -65,7 +64,6 @@ async function resolveImageURL(r: Row): Promise<string | null> {
       return supabase.storage.from(KYC_BUCKET).getPublicUrl(path).data.publicUrl;
     } catch { return null; }
   }
-  // パスが無ければ user_id フォルダの最新を推測
   try {
     const { data: files } = await supabase.storage.from(KYC_BUCKET).list(r.user_id, { sortBy: { column: "created_at", order: "desc" } });
     if (files && files.length) {
@@ -86,7 +84,6 @@ function fmtTime(iso: string) {
 }
 
 export default function KycAdminDetail() {
-  // id は string | string[] の可能性があるので安全に取り出す
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const kycId = Array.isArray(params.id) ? params.id?.[0] : params.id || "";
 
@@ -126,18 +123,14 @@ export default function KycAdminDetail() {
 
   useEffect(() => { load(); }, [load]);
 
-  //  承認/棄却は管理用RPCのみを叩く（テーブルを直接 update しない）
-  // 先頭付近に supabase の import がある前提
-// import { supabase } from "../../../lib/supabase";
 
-// onSet 内だけ入れ替え（他は今のままでOK）
 const onSet = useCallback(
   async (status: "approved" | "rejected") => {
     if (!row) return;
     setBusy(true);
     try {
-      await adminSetKycResult(row.id, status);  // ← これだけ
-      await load();                              // ← 再取得してUI反映
+      await adminSetKycResult(row.id, status);
+      await load();
       Alert.alert(status === "approved" ? "承認しました" : "棄却しました");
     } catch (e: any) {
       Alert.alert("更新エラー", String(e?.message ?? e));

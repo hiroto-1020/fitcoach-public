@@ -1,9 +1,7 @@
-// ui/SessionMedia.tsx — 保存先を動的に検出＆フォールバック
 import React, { useEffect, useState } from "react";
 import { View, Text, Alert, Image, Modal, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-// optional require（無くても画面は落ちない）
 let ImagePicker: any = null;   try { ImagePicker = require("expo-image-picker"); } catch {}
 let MediaLibrary: any = null;  try { MediaLibrary = require("expo-media-library"); } catch {}
 let FileSystem: any = null;    try { FileSystem = require("expo-file-system/legacy"); } catch {}
@@ -17,7 +15,6 @@ import {
   SessionMedia as SessionMediaRow,
 } from "../lib/training/db";
 
-/* ---------------- 保存先ユーティリティ ---------------- */
 
 async function probeWrite(base: string) {
   const p = base + `.__wtest_${Date.now()}`;
@@ -34,7 +31,6 @@ async function getWritableBase(): Promise<string> {
   throw new Error("保存ディレクトリが取得できません");
 }
 
-/** training_media/ を作れたらそこへ。失敗したら base 直下に保存する */
 async function ensureDirOrFallback(): Promise<{ dir: string; base: string }> {
   const base = await getWritableBase();
   const dir = base + "training_media/";
@@ -43,7 +39,6 @@ async function ensureDirOrFallback(): Promise<{ dir: string; base: string }> {
     if (!info.exists) await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
     return { dir, base };
   } catch {
-    // サブフォルダ作成に失敗   ベースに直接保存（書き込み可なのは確認済）
     return { dir: base, base };
   }
 }
@@ -54,7 +49,6 @@ function guessExt(uri: string, kind: "image" | "video") {
   return dot >= 0 ? q.slice(dot + 1).toLowerCase() : (kind === "video" ? "mp4" : "jpg");
 }
 
-/** iOS の ph:// を file:// に解決（可能なら MediaLibrary 経由） */
 async function resolveToFileUri(asset: any): Promise<{ uri: string; kind: "image" | "video" }> {
   const kind = (asset?.type === "video" ? "video" : "image") as "image" | "video";
   if (asset?.uri?.startsWith?.("file://")) return { uri: asset.uri, kind };
@@ -64,7 +58,6 @@ async function resolveToFileUri(asset: any): Promise<{ uri: string; kind: "image
       if (info?.localUri?.startsWith?.("file://")) return { uri: info.localUri, kind };
     } catch {}
   }
-  // 最後の手段：キャッシュへコピー
   if (FileSystem?.cacheDirectory && asset?.uri) {
     const ext = asset.fileExtension || guessExt(asset.uri, kind);
     const tmp = FileSystem.cacheDirectory + `picked-${Date.now()}.${ext}`;
@@ -74,7 +67,6 @@ async function resolveToFileUri(asset: any): Promise<{ uri: string; kind: "image
   throw new Error("ローカルファイルに変換できませんでした");
 }
 
-/* ---------------- 画面本体 ---------------- */
 
 export default function SessionMedia({ sessionId }: { sessionId: number }) {
   const [items, setItems] = useState<SessionMediaRow[]>([]);

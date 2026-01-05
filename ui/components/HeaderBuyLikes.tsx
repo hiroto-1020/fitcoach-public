@@ -5,7 +5,6 @@ import { useRouter } from 'expo-router';
 export default function HeaderBuyLikes() {
   const router = useRouter();
   return (
-    // 親は完全に透明（ 二重に見える原因を断つ）
     <View style={{ backgroundColor: 'transparent' }}>
       <TouchableOpacity
         onPress={() => router.push('/(tabs)/gotore/purchase')}
@@ -25,9 +24,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 36,
     paddingHorizontal: 14,
-    backgroundColor: '#22c55e',   // ← ここ“だけ”に背景を持たせる
+    backgroundColor: '#22c55e',
     borderRadius: 999,
-    borderWidth: 0,               // ← 枠線は付けない（白フチに見える）
+    borderWidth: 0,
     shadowColor: '#000',
     shadowOpacity: 0.18,
     shadowRadius: 8,

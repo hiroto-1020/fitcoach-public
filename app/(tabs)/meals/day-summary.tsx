@@ -1,4 +1,3 @@
-// app/(tabs)/meals/day-summary.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Modal, Platform, TextInput } from "react-native";
 import dayjs from "dayjs";
@@ -6,19 +5,17 @@ import { useRouter } from "expo-router";
 import { colors, spacing } from "../../../ui/theme";
 import { Card, SectionTitle, PrimaryButton } from "../../../ui/components";
 
-// optional calendar/datetime
 let Calendars: any = null;
 try { Calendars = require("react-native-calendars"); } catch {}
 let DateTimePicker: any = null;
 try { DateTimePicker = require("@react-native-community/datetimepicker").default; } catch {}
 
-// ---- 既存データ読取（ストレージ依存に左右されにくいフォールバック） ----
 let AsyncStorage: any = null;
 try { AsyncStorage = require("@react-native-async-storage/async-storage").default; } catch {}
 
 type Meal = {
   id: string;
-  date?: string;      // YYYY-MM-DD
+  date?: string;
   mealType?: "breakfast"|"lunch"|"dinner"|"snack";
   title?: string;
   brand?: string;
@@ -33,7 +30,6 @@ type Meal = {
 const MEALS_KEYS = ["MEALS_V2","meals_v2","meals_v1","meals"];
 
 async function readAllMeals(): Promise<Meal[]> {
-  // lib/storage に getAllMeals などがあれば使う
   try {
     const mod = require("../../../lib/storage");
     if (typeof mod.getAllMeals === "function") {
@@ -45,7 +41,6 @@ async function readAllMeals(): Promise<Meal[]> {
       if (Array.isArray(arr)) return arr;
     }
   } catch {}
-  // 直接キーを総当たり
   if (!AsyncStorage) return [];
   for (const k of MEALS_KEYS) {
     try {
@@ -91,7 +86,6 @@ export default function DaySummaryScreen() {
       const bucket = byType[m.mealType||"snack"];
       bucket.kcal += k; bucket.p += p; bucket.f += f; bucket.c += c;
     }
-    // 四捨五入
     const round = (x:number)=>Math.round(x);
     const rtotal = { kcal: round(total.kcal), p: round(total.p), f: round(total.f), c: round(total.c) };
     const rtype: any = {};
@@ -103,7 +97,6 @@ export default function DaySummaryScreen() {
 
   return (
     <>
-      {/* カレンダーモーダル */}
       <CalendarModal
         open={openCal}
         value={date}
@@ -139,7 +132,6 @@ export default function DaySummaryScreen() {
             </View>
           ) : (
             <>
-              {/* 合計バッジ */}
               <View style={{ alignItems:"center", marginTop:12 }}>
                 <View style={{
                   width: 220, height: 220, borderRadius: 9999,
@@ -154,7 +146,6 @@ export default function DaySummaryScreen() {
                 </View>
               </View>
 
-              {/* 食事区分ごとの小計 */}
               <View style={{ marginTop:16, gap:10 }}>
                 {(["breakfast","lunch","dinner","snack"] as const).map(t=>(
                   <View key={t} style={{ borderWidth:1, borderColor: colors.border, backgroundColor:"#fff", borderRadius:14, padding:12 }}>
@@ -166,15 +157,12 @@ export default function DaySummaryScreen() {
                 ))}
               </View>
 
-              {/* 記録へショートカット */}
               <View style={{ marginTop:16 }}>
                 <PrimaryButton title="この日の記録一覧（検索）を開く" onPress={()=>{
-                  // 検索画面で date param を使ってその日のものを優先表示するなどの拡張もOK
                   router.push({ pathname: "/(tabs)/meals/search", params: { date } });
                 }} />
               </View>
 
-              {/* データが無いときのヒント */}
               {meals.length === 0 && (
                 <Text style={{ color: colors.muted, marginTop:10, textAlign:"center" }}>
                   この日は記録がありません。上の「食事を記録」から追加してください。
@@ -199,7 +187,6 @@ function chipText(primary=false) {
   return { color: primary ? "#1d4ed8" : colors.text, fontWeight:"900" } as const;
 }
 
-/* カレンダーモーダル（new.tsx のと同じ実装） */
 function CalendarModal({ open, value, onClose, onChange }:{
   open:boolean; value:string; onClose:()=>void; onChange:(iso:string)=>void;
 }) {

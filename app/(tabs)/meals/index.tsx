@@ -1,5 +1,3 @@
-// app/(tabs)/meals/index.tsx
-// 食事タブファースト画面（ヘッダーにヘルプ導線／カレンダーで「今日」を強調）
 
 import React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -19,18 +17,15 @@ import { listMealsInMonth } from "../../../lib/storage";
 import type { Meal, MealType } from "../../../lib/meals";
 
 import { Card, SectionTitle, PrimaryButton } from "../../../ui/components";
-//  テーマを徹底適用（色は C 経由に統一）
 import { colors as C, spacing, radius } from "../../../ui/theme";
 import { loadAdviceMemo } from "../../../lib/advice";
 import { useTranslation } from "react-i18next";
 
-/* optional: react-native-svg（未導入でも壊れない） */
 let RNSVG: any = null;
 try {
   RNSVG = require("react-native-svg");
 } catch {}
 
-/** hex にアルファを足す (#RRGGBB だけ対応) */
 function withAlpha(hex: string, a: number) {
   const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
   if (!m) return hex;
@@ -45,12 +40,11 @@ export default function MealsCalendar() {
   const { t } = useTranslation();
   const today = dayjs();
   const [year, setYear] = useState(today.year());
-  const [month0, setMonth0] = useState(today.month()); // 0-based
+  const [month0, setMonth0] = useState(today.month());
   const [selected, setSelected] = useState(today.format("YYYY-MM-DD"));
   const [meals, setMeals] = useState<Meal[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // AIメモ
   const [adviceMemo, setAdviceMemo] = useState("");
 
   const load = useCallback(async () => {
@@ -59,7 +53,6 @@ export default function MealsCalendar() {
       const data = await listMealsInMonth(year, month0);
       setMeals(data);
 
-      // 月が切り替わった場合、選択日の整合性を取る
       const monthAnchor = dayjs(new Date(year, month0, 1));
       const fallback = monthAnchor.format("YYYY-MM-DD");
       if (!dayjs(selected).isSame(monthAnchor, "month")) {
@@ -76,7 +69,6 @@ export default function MealsCalendar() {
     }, [load])
   );
 
-  // 選択日が変わったらAIメモを読み込み
   useEffect(() => {
     let on = true;
     (async () => {
@@ -103,7 +95,6 @@ export default function MealsCalendar() {
   const selectedMeals = mealsByDate[selected] ?? [];
   const daySummary = summarize(selectedMeals);
 
-  // ■ 月グラフ用データ（当月の合計kcal/日）
   const monthISO = dayjs(new Date(year, month0, 1)).format("YYYY-MM");
   const monthData = useMemo(() => {
     const dayCount = dayjs(monthISO + "-01").daysInMonth();
@@ -162,7 +153,6 @@ export default function MealsCalendar() {
       keyExtractor={(i) => i.key}
       renderItem={() => (
         <View style={{ gap: spacing.lg }}>
-          {/* ヘッダー（ヘルプ導線） */}
           <View
             style={{
               flexDirection: "row",
@@ -186,7 +176,6 @@ export default function MealsCalendar() {
             </TouchableOpacity>
           </View>
 
-          {/* 月切り替え */}
           <View
             style={{
               flexDirection: "row",
@@ -211,7 +200,6 @@ export default function MealsCalendar() {
             </TouchableOpacity>
           </View>
 
-          {/* 商品検索への導線 */}
           <Card style={{ padding: spacing.md }}>
             <SectionTitle>{t("meals.productSection.title")}</SectionTitle>
             <View style={{ height: spacing.sm }} />
@@ -229,7 +217,6 @@ export default function MealsCalendar() {
             </Text>
           </Card>
 
-          {/* 曜日ヘッダー */}
           <View
             style={{
               flexDirection: "row",
@@ -251,7 +238,6 @@ export default function MealsCalendar() {
             ))}
           </View>
 
-          {/* 月グリッド（6週 × 7列） */}
           <View
             style={{
               flexDirection: "row",
@@ -351,10 +337,8 @@ export default function MealsCalendar() {
             })}
           </View>
 
-          {/* ▼ カレンダー直下：月のカロリー推移グラフ */}
           <CaloriesTrend monthISO={monthISO} data={monthData} goalKcal={0} />
 
-          {/* 選択日のサマリー */}
           <Card>
             <SectionTitle
             >
@@ -379,7 +363,6 @@ export default function MealsCalendar() {
               <SummaryBox label="C" value={fmtGram(daySummary.c)} />
             </View>
 
-            {/* 区分別 */}
             <View style={{ height: spacing.md }} />
             {(
               ["breakfast", "lunch", "dinner", "snack"] as MealType[]
@@ -409,7 +392,6 @@ export default function MealsCalendar() {
               );
             })}
 
-            {/* クイック追加 */}
             <View style={{ height: spacing.lg }} />
             <View style={{ flexDirection: "row", gap: 0 }}>
               {(
@@ -430,7 +412,6 @@ export default function MealsCalendar() {
             </View>
           </Card>
 
-          {/* AIからの本日のアドバイス */}
           <Card>
             <SectionTitle>
               {t("meals.aiAdvice.title")}
@@ -456,7 +437,6 @@ export default function MealsCalendar() {
             </View>
           </Card>
 
-          {/* 選択日の一覧 */}
           <Card>
             <SectionTitle>
               {t("meals.recordsTitle", {
@@ -492,7 +472,6 @@ export default function MealsCalendar() {
                         gap: spacing.md,
                       }}
                     >
-                      {/* サムネ（任意） */}
                       <View
                         style={{
                           width: 48,
@@ -526,7 +505,6 @@ export default function MealsCalendar() {
                         )}
                       </View>
 
-                      {/* 主要情報 */}
                       <View style={{ flex: 1 }}>
                         <Text
                           style={{
@@ -578,13 +556,12 @@ export default function MealsCalendar() {
   );
 }
 
-/* ===== 折れ線グラフ（タップで日フォーカス移動） ===== */
 function CaloriesTrend({
   monthISO,
   data,
   goalKcal,
 }: {
-  monthISO: string; // "YYYY-MM"
+  monthISO: string;
   data: { day: number; kcal: number }[];
   goalKcal: number;
 }) {
@@ -597,28 +574,23 @@ function CaloriesTrend({
     PAD_T = 20,
     PAD_B = 28;
   const H = 200;
-  const STEP = 28; // 1日あたりの横幅
+  const STEP = 28;
   const W = Math.max(screenW, STEP * dayCount + PAD_L + PAD_R);
 
-  // SVG & ScrollView 参照
   const scRef =
     useRef<import("react-native").ScrollView | null>(null);
   const didInitScroll = useRef(false);
 
-  // 今日
   const todayISO = dayjs().format("YYYY-MM-DD");
   const isThisMonth = todayISO.startsWith(monthISO);
   const todayDay = isThisMonth ? Number(todayISO.slice(8, 10)) : null;
 
-  // フォーカス
   const [focusedDay, setFocusedDay] = useState<number | null>(
     todayDay
   );
 
-  // 座標スケール
   const xScale = (day: number) => PAD_L + (day - 1) * STEP;
 
-  // 初期：今日を中央へ
   useEffect(() => {
     if (!isThisMonth || !todayDay || didInitScroll.current) return;
     const tId = setTimeout(() => {
@@ -636,7 +608,6 @@ function CaloriesTrend({
     return () => clearTimeout(tId);
   }, [isThisMonth, todayDay, screenW]);
 
-  // フォーカス変更時：中央へ
   useEffect(() => {
     if (!focusedDay) return;
     const target = Math.max(
@@ -706,10 +677,8 @@ function CaloriesTrend({
         contentContainerStyle={{ paddingHorizontal: 8 }}
       >
         <Svg width={W} height={H}>
-          {/* 背景（テーマ追従） */}
           <Rect x={0} y={0} width={W} height={H} fill={C.card} />
 
-          {/* フォーカス日の縦帯 */}
           {focusedDay && (
             <Rect
               x={xScale(focusedDay) - STEP / 2}
@@ -720,7 +689,6 @@ function CaloriesTrend({
             />
           )}
 
-          {/* 目標ライン */}
           {goalKcal > 0 && (
             <>
               <Line
@@ -744,7 +712,6 @@ function CaloriesTrend({
             </>
           )}
 
-          {/* ガイド横線 */}
           {[0.25, 0.5, 0.75].map((p, i) => {
             const yVal = yScale(maxVal * p);
             return (
@@ -760,7 +727,6 @@ function CaloriesTrend({
             );
           })}
 
-          {/* 折れ線 */}
           {!allZero && (
             <Path
               d={path}
@@ -770,7 +736,6 @@ function CaloriesTrend({
             />
           )}
 
-          {/* ドット + kcalラベル（今日の点は赤） */}
           {data.map((d, i) => {
             const isToday = todayDay === d.day;
             const isFocused = focusedDay === d.day;
@@ -804,7 +769,6 @@ function CaloriesTrend({
             );
           })}
 
-          {/* X軸（M/D 表記） */}
           {Array.from({ length: dayCount }, (_, i) => i + 1).map(
             (day) => {
               if (!showTick(day)) return null;
@@ -838,7 +802,6 @@ function CaloriesTrend({
             }
           )}
 
-          {/* 透明タップ領域 */}
           {Array.from({ length: dayCount }, (_, i) => i + 1).map(
             (day) => (
               <Rect
@@ -867,10 +830,9 @@ function CaloriesTrend({
   );
 }
 
-/* ---------- Helpers ---------- */
 function buildMonthMatrix(year: number, month0: number): DayCell[] {
   const first = dayjs(new Date(year, month0, 1)).startOf("day");
-  const firstWeekday = first.day(); // 0=日, 6=土
+  const firstWeekday = first.day();
   const gridStart = first.subtract(firstWeekday, "day");
 
   const cells: DayCell[] = [];
@@ -921,7 +883,6 @@ function fmtGram(n: number) {
   return n ? `${n}g` : "—";
 }
 
-/** 食事区分ラベル（多言語） */
 function labelOfType(mealType: MealType, tFn: (key: string) => string) {
   switch (mealType) {
     case "breakfast":
@@ -936,7 +897,6 @@ function labelOfType(mealType: MealType, tFn: (key: string) => string) {
   }
 }
 
-/* ✅ SummaryBox */
 function SummaryBox({
   label,
   value,
