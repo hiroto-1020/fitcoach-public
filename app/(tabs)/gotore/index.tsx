@@ -76,12 +76,12 @@ const sameLabel = (g: Gender) =>
   g === 'male' ? '男同士のみ' :
   g === 'female' ? '女同士のみ' : '同性のみ';
 
-// DB保存値 → UI2値（male_only / female_only はどちらも same_gender 扱い）
+// DB保存値   UI2値（male_only / female_only はどちらも same_gender 扱い）
 function normalizeMode(raw: BuddyMode, _g: Gender): UIMode {
   return raw === 'any' ? 'any' : 'same_gender';
 }
 
-// UI2値 → DB保存値（性別に応じて male_only / female_only に割り振り）
+// UI2値   DB保存値（性別に応じて male_only / female_only に割り振り）
 function toRawMode(ui: UIMode, g: Gender): BuddyMode {
   if (ui === 'any') return 'any';
   if (g === 'male') return 'male_only';
@@ -332,7 +332,7 @@ export default function GotoreSwipe() {
   const [notAuthed, setNotAuthed] = useState(false);
   const [regionMissing, setRegionMissing] = useState(false);
 
-  // ★ ここが変更点：UIモード/自分の性別/自分のID
+  //  ここが変更点：UIモード/自分の性別/自分のID
   const [uiMode, setUiMode] = useState<UIMode>('any');
   const [myGender, setMyGender] = useState<Gender>('unknown');
   const [myUserId, setMyUserId] = useState<string | null>(null);
@@ -404,7 +404,7 @@ export default function GotoreSwipe() {
         getMyProfileAndGender(),
       ]));
 
-      // 自分の性別を保持 → UIモードへ正規化
+      // 自分の性別を保持   UIモードへ正規化
       const g = normalizeGender(profile?.gender);
       setMyGender(g);
       setUiMode(normalizeMode(settings.buddy_gender_mode as BuddyMode, g));
@@ -439,7 +439,7 @@ export default function GotoreSwipe() {
     reloadLikes?.();
   }, [load, reloadLikes]));
 
-  // モード変更（UI2値 → DB保存値へ変換して保存）
+  // モード変更（UI2値   DB保存値へ変換して保存）
   const onChangeUIMode = async (m: UIMode) => {
     if (m === uiMode) return;
     try {

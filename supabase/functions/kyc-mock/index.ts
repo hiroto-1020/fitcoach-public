@@ -53,7 +53,7 @@ async function send(status){
 </script>
 </body></html>`;
 
-  // ★ 文字列ではなく Response で返す（ここが重要）
+  //  文字列ではなく Response で返す（）
   return new Response(html, {
     headers: {
       "content-type": "text/html; charset=utf-8",

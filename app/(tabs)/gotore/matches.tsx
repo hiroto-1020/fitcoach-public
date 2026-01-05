@@ -1,4 +1,3 @@
-// app/(tabs)/gotore/matches.tsx — グラデ＆未読グロー＆アバター対応の完全版
 //マッチ一覧画面
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {

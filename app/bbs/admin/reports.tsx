@@ -1,11 +1,10 @@
-// C:\Users\horit\fitcoach\app\bbs\admin\reports.tsx — 管理用 通報キュー（一覧/処理）完全版
 import React, { useEffect, useState, useCallback } from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator, FlatList, RefreshControl, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 
-// ★ 相対パスは “admin” 配下なので 3 つ戻る
+//  相対パスは “admin” 配下なので 3 つ戻る
 let theme: any = null; try { theme = require("../../../ui/theme"); } catch {}
 const C = theme?.colors ?? { bg:"#0a0d0f", card:"#12161a", text:"#e6e8eb", sub:"#9aa4b2", primary:"#6ee7b7", border:"#1f242a" };
 import { supabase } from "../../../lib/supabase";

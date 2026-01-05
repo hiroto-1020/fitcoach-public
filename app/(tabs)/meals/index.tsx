@@ -19,7 +19,7 @@ import { listMealsInMonth } from "../../../lib/storage";
 import type { Meal, MealType } from "../../../lib/meals";
 
 import { Card, SectionTitle, PrimaryButton } from "../../../ui/components";
-// ★ テーマを徹底適用（色は C 経由に統一）
+//  テーマを徹底適用（色は C 経由に統一）
 import { colors as C, spacing, radius } from "../../../ui/theme";
 import { loadAdviceMemo } from "../../../lib/advice";
 import { useTranslation } from "react-i18next";

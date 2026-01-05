@@ -89,7 +89,7 @@ export default function NewFromProductScreen() {
     };
     await saveMeal(meal);
 
-    // ★ 使用履歴に記録（code不明なのでtitleベース）
+    //  使用履歴に記録（code不明なのでtitleベース）
     await recordUsage({
       title: meal.title || "（名称不明）",
       brand: meal.brand,

@@ -197,7 +197,7 @@ async function fetchCategory(cat: Cat) {
 
 /** ─────────────────────── DB upsert ───────────────────────
  *  前提: explore_feed に UNIQUE(category, video_id)
- *  v_explore_feed 側で video_id→yt_id, thumb_url→thumb_high に別名を付けている
+ *  v_explore_feed 側で video_id yt_id, thumb_url thumb_high に別名を付けている
  */
 async function upsertFeed(rows: any[]) {
   if (!rows.length) return;
@@ -257,7 +257,7 @@ serve(async (req) => {
       } catch (e) {
         const msg = String(e);
         if (msg.includes("quotaExceeded")) {
-          // クォータ超過 → DB変更なしで既存キャッシュを使わせる
+          // クォータ超過   DB変更なしで既存キャッシュを使わせる
           return json({ ok: false, quotaExceeded: true, note: "served-from-cache" }, 200);
         }
         throw e;

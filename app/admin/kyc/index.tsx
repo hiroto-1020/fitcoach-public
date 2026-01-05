@@ -1,4 +1,3 @@
-// app/admin/kyc/index.tsx — KYC管理画面（一覧）完全版
 import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Alert } from "react-native";
 import { useRouter } from "expo-router";

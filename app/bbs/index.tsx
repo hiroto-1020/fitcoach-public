@@ -1,4 +1,3 @@
-// C:\Users\horit\fitcoach\app\bbs\index.tsx
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View, Text, TouchableOpacity, ActivityIndicator,

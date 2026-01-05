@@ -1,4 +1,3 @@
-// C:\Users\horit\fitcoach\app\(tabs)\me\notifications.tsx
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
@@ -952,7 +951,7 @@ function formatHHmm(h: number, m: number): string {
 }
 
 function sanitizeHHmm(s: string): string {
-  // 入力を HH:mm っぽく補正（数字以外除去→コロン挿入）
+  // 入力を HH:mm っぽく補正（数字以外除去 コロン挿入）
   const only = s.replace(/[^\d]/g, "").slice(0, 4);
   if (only.length <= 2) return only;
   const hh = only.slice(0, 2);

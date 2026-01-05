@@ -126,7 +126,7 @@ export default function KycAdminDetail() {
 
   useEffect(() => { load(); }, [load]);
 
-  // ★ 承認/棄却は管理用RPCのみを叩く（テーブルを直接 update しない）
+  //  承認/棄却は管理用RPCのみを叩く（テーブルを直接 update しない）
   // 先頭付近に supabase の import がある前提
 // import { supabase } from "../../../lib/supabase";
 

@@ -1,4 +1,3 @@
-//C:\Users\horit\fitcoach\supabase\functions\bbs-admin-reports-handle\index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.46.1";
 

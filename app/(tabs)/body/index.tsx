@@ -1,5 +1,4 @@
 // app/(tabs)/body/index.tsx
-// 体組成タブ — データ0件ガード付き完全版（多言語対応）
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {

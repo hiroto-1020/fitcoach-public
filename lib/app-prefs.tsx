@@ -12,7 +12,7 @@ export type ThemeMode = "auto" | "light" | "dark";
 type Scheme = "light" | "dark";
 export type Colors = { bg: string; card: string; text: string; sub: string; border: string; primary: string };
 
-// ★ 新キー（v2）
+//  新キー（v2）
 const APP_KEY_V2 = "me.appPrefs.v2";
 // 旧キー（存在すれば移行元として参照）
 const APP_KEY_V1 = "me.appPrefs";
@@ -41,7 +41,7 @@ function palette(s: Scheme): Colors {
 }
 
 export function AppPrefsProvider({ children }: { children: React.ReactNode }) {
-  // ★ 初期は「light」固定（描画直後からライトに見える）
+  //  初期は「light」固定（描画直後からライトに見える）
   const [themeMode, setThemeModeState] = useState<ThemeMode>("light");
   const [hapticsEnabled, setHapticsState] = useState<boolean>(true);
   const [ready, setReady] = useState(false);
@@ -60,7 +60,7 @@ export function AppPrefsProvider({ children }: { children: React.ReactNode }) {
           if (rawV2) {
             loaded = { ...(JSON.parse(rawV2) as StoreShape) };
           } else {
-            // v2 が無い → v1 を見て移行（テーマは必ず light に統一、haptics は引き継ぎ）
+            // v2 が無い   v1 を見て移行（テーマは必ず light に統一、haptics は引き継ぎ）
             const rawV1 = await AsyncStorage.getItem(APP_KEY_V1);
             if (rawV1) {
               const v1 = JSON.parse(rawV1) as Partial<StoreShape> | null;
@@ -71,7 +71,7 @@ export function AppPrefsProvider({ children }: { children: React.ReactNode }) {
               };
               await AsyncStorage.setItem(APP_KEY_V2, JSON.stringify(loaded));
             } else {
-              // どちらも無い → 新規としてライト/触覚ONを書き込む
+              // どちらも無い   新規としてライト/触覚ONを書き込む
               loaded = { theme: "light", haptics: true, __schema: "v2" };
               await AsyncStorage.setItem(APP_KEY_V2, JSON.stringify(loaded));
             }

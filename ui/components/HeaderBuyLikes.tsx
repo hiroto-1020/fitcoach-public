@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 export default function HeaderBuyLikes() {
   const router = useRouter();
   return (
-    // 親は完全に透明（←二重に見える原因を断つ）
+    // 親は完全に透明（ 二重に見える原因を断つ）
     <View style={{ backgroundColor: 'transparent' }}>
       <TouchableOpacity
         onPress={() => router.push('/(tabs)/gotore/purchase')}

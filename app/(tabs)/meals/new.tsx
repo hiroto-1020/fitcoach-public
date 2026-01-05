@@ -71,7 +71,7 @@ const cleanDecimal = (s: string): string => {
   return t;
 };
 
-// 文字列 → 数値（空 or "." だけなら undefined）
+// 文字列   数値（空 or "." だけなら undefined）
 const toNum = (s: string): number | undefined => {
   const t = cleanDecimal(s).trim();
   if (!t || t === ".") return undefined;

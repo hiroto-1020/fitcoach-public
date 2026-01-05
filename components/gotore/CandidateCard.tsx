@@ -43,7 +43,7 @@ export default function CandidateCard({ candidate }: Props) {
         </View>
       )}
 
-      {/* ←← 身長の“直下”に 1 枚目のプロフィール写真 */}
+      {/*    身長の“直下”に 1 枚目のプロフィール写真 */}
       <View style={{ marginTop: 12 }}>
         {photoUrl ? (
           <Image source={{ uri: photoUrl }} style={styles.photo} resizeMode="cover" />

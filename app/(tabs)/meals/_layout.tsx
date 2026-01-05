@@ -54,7 +54,7 @@ export default function MealsLayout() {
 
       {/* 通常の新規（写真解析あり）は new に残す */}
       <Stack.Screen name="new" options={{ title: "食事を記録" }} />
-      {/* ★ 追加：商品からの新規 */}
+      {/*  追加：商品からの新規 */}
       <Stack.Screen name="new-from-product" options={{ title: "商品から作成" }} />
       <Stack.Screen name="[id]/index" options={{ title: "食事の詳細" }} />
       <Stack.Screen name="[id]/edit" options={{ title: "食事を編集" }} />

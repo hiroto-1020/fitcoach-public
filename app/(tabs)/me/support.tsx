@@ -1,5 +1,4 @@
-﻿// C:\Users\horit\fitcoach\app\(tabs)\me\support.tsx
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+﻿import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Linking,

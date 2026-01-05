@@ -272,7 +272,7 @@ export default function HelpScreen() {
     Linking.openURL(`mailto:horita.training1020@gmail.com?subject=${subject}&body=${body}`);
   };
 
-  // チップタップ → クエリを書き換えてセクションで絞り込み
+  // チップタップ   クエリを書き換えてセクションで絞り込み
   const applySectionFilter = (key?: HelpSection["key"]) => {
     setQuery("");
     if (!key) {

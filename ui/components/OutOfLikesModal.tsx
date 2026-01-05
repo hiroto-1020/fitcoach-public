@@ -1,4 +1,3 @@
-// ui/components/OutOfLikesModal.tsx （完全版）
 import React, { useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
 import { initRevenueCat, purchaseLikesPack, canUsePurchases } from '../../lib/revenuecat';
@@ -6,7 +5,7 @@ import { initRevenueCat, purchaseLikesPack, canUsePurchases } from '../../lib/re
 type Props = {
   visible: boolean;
   onClose: () => void;
-  /** ← 購入成功後に呼ぶ（親でreloadを渡す） */
+  /**   購入成功後に呼ぶ（親でreloadを渡す） */
   onPurchased?: () => void | Promise<void>;
 };
 
@@ -26,7 +25,7 @@ export function OutOfLikesModal({ visible, onClose, onPurchased }: Props) {
         setBusy(null);
         return;
       }
-      // ★ 成功 → 親に通知して残数再取得
+      //  成功   親に通知して残数再取得
       if (onPurchased) await onPurchased();
       Alert.alert('購入完了', `いいねを +${pack} 付与しました`);
       onClose();

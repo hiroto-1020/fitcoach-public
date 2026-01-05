@@ -64,7 +64,7 @@ async function toUrl(path: string): Promise<string | null> {
 
 /**
  * 1枚目として表示する写真URLを返す。
- * 優先度: profiles.photos[0] → profile_photos(order_index/created_at) → Storage最新更新
+ * 優先度: profiles.photos[0]   profile_photos(order_index/created_at)   Storage最新更新
  * 返却時に `?v=timestamp` を付与してキャッシュを回避。
  */
 export async function getFirstProfilePhotoUrl(userId: string): Promise<string | null> {

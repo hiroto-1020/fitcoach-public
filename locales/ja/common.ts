@@ -1,4 +1,3 @@
-//C:\Users\horit\fitcoach\locales\ja\common.ts
 const ja = {
   app: {
     name: "FitGear",
@@ -442,7 +441,7 @@ const ja = {
       },
 
       // 運勢ごとのリードメッセージ
-      // → t("record.omikuji.fortuneMessages.daikichi", { muscleName, focus })
+      //   t("record.omikuji.fortuneMessages.daikichi", { muscleName, focus })
       fortuneMessages: {
         daikichi: "今日は{{focus}}が冴える超・快晴。{{muscleName}}は「質×少量」でキレを出そう！",
         chuukichi: "フォームが光る日。{{muscleName}}はコントロール重視で丁寧に。",

@@ -26,7 +26,7 @@ export async function listRecentMeals(limit: number = 10): Promise<Meal[]> {
     }
   }
 
-  // フラット化 → 重複除去（id）→ 日付降順
+  // フラット化   重複除去（id）  日付降順
   const all = buckets.flat();
 
   const seen = new Set<string>();

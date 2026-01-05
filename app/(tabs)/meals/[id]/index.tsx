@@ -194,7 +194,7 @@ function Fact({ label, value }: { label: string; value: string }) {
   );
 }
 
-// mealType → i18n キー
+// mealType   i18n キー
 function mealTypeKey(t?: string) {
   return t === "breakfast"
     ? "meals.detail.mealTypeBreakfast"

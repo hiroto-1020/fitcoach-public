@@ -59,7 +59,7 @@ export default function AccountDelete() {
               );
               if (error) throw error;
 
-              // 端末側セッション破棄 → すぐホームへ
+              // 端末側セッション破棄   すぐホームへ
               await supabase.auth.signOut();
               Haptics?.notificationAsync?.(Haptics?.NotificationFeedbackType?.Success);
 

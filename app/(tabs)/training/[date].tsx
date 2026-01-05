@@ -666,7 +666,7 @@ export default function DayScreen() {
     await refresh();
   };
 
-  // ★ここがキモ：フォーカスした入力が見える位置まで自動スクロール
+  // ：フォーカスした入力が見える位置まで自動スクロール
   const ensureVisible = useCallback(
     (y: number, h: number) => {
       const winH = Dimensions.get(

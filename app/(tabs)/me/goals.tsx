@@ -1,4 +1,3 @@
-// C:\Users\horit\fitcoach\app\(tabs)\me\goals.tsx
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
@@ -135,7 +134,7 @@ export default function GoalsScreen() {
 
     const anyError = Object.values(errors).some(Boolean);
 
-    // マクロ→概算kcal
+    // マクロ 概算kcal
     const macroKcal = (pNum ?? 0) * 4 + (fNum ?? 0) * 9 + (cNum ?? 0) * 4;
 
     // kcalとのズレ（参考）
@@ -568,7 +567,7 @@ function sanitizeDecimal(s: string): string {
   if (first >= 0) {
     v = v.slice(0, first + 1) + v.slice(first + 1).replace(/\./g, "");
   }
-  // 先頭の不要0を抑制（"00"→"0"）
+  // 先頭の不要0を抑制（"00" "0"）
   if (/^0\d/.test(v)) {
     v = v.replace(/^0+/, "0");
   }

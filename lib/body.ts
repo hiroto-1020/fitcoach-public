@@ -1,4 +1,3 @@
-// lib/body.ts  ← 完全版（編集/削除対応を強化・安全化）
 import { BodyMetric } from './types';
 import { run } from './db';
 

@@ -9,7 +9,7 @@ export type NutritionGuess = {
 };
 
 export async function analyzeFoodFromImage(_uri: string): Promise<NutritionGuess> {
-  // ここでは簡易推論（固定パターン）。実運用では画像→カロリー/PFCの推定APIに差し替え。
+  // ここでは簡易推論（固定パターン）。実運用では画像 カロリー/PFCの推定APIに差し替え。
   // 例: 料理っぽい平均値（だいたい1食ぶん）
   return {
     title: '鶏むねサラダ（推定）',

@@ -48,12 +48,12 @@ if (!SUPABASE_URL || !/^https?:\/\//i.test(SUPABASE_URL) || !SUPABASE_ANON_KEY) 
       '',
       '1) .env.* に設定',
       '   EXPO_PUBLIC_SUPABASE_URL="https://xxxx.supabase.co"',
-      '   EXPO_PUBLIC_SUPABASE_ANON_KEY="eyJhbGciOi..."',
+      '   EXPO_PUBLIC_SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY"',
       '',
       '2) app.json / app.config.* の expo.extra に設定',
       '   { "expo": { "extra": {',
       '       "EXPO_PUBLIC_SUPABASE_URL": "https://xxxx.supabase.co",',
-      '       "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOi..."',
+      '       "EXPO_PUBLIC_SUPABASE_ANON_KEY": "YOUR_SUPABASE_ANON_KEY"',
       '   }}}',
     ].join('\n')
   );

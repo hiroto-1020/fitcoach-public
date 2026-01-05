@@ -30,7 +30,7 @@ export default function BulkFromProductsScreen() {
   const [items, setItems] = useState<ItemState[]>([]);
   const [busy, setBusy] = useState(true);
 
-  // 保存先（合算→個別保存にするため、ここで日付/区分を決める）
+  // 保存先（合算 個別保存にするため、ここで日付/区分を決める）
   const [date, setDate] = useState(dayjs().format("YYYY-MM-DD"));
   const [mealType, setMealType] = useState<MealType>("snack");
 
@@ -117,7 +117,7 @@ export default function BulkFromProductsScreen() {
       };
       await saveMeal(meal);
 
-      // ★ 使用履歴に記録（codeあり）
+      //  使用履歴に記録（codeあり）
       await recordUsage({
         code: it.code,
         title: meal.title || "（名称不明）",

@@ -89,7 +89,7 @@ export function useOffSearch(pageSize = 24): SearchState {
   const fetchData = useCallback(async () => {
     const q = (debouncedQuery || "").trim();
 
-    // ★ クエリ空ならAPI叩かず リストを空に
+    //  クエリ空ならAPI叩かず リストを空に
     if (q.length === 0) {
       abortRef.current?.abort();
       setLoading(false);

@@ -43,7 +43,7 @@ async function ensureDirOrFallback(): Promise<{ dir: string; base: string }> {
     if (!info.exists) await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
     return { dir, base };
   } catch {
-    // サブフォルダ作成に失敗 → ベースに直接保存（書き込み可なのは確認済）
+    // サブフォルダ作成に失敗   ベースに直接保存（書き込み可なのは確認済）
     return { dir: base, base };
   }
 }

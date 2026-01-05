@@ -10,7 +10,7 @@ import { LikeStatusBar } from "../../../ui/components/LikeStatusBar";
 import { useLikeStatus } from "../../../hooks/useLikeStatus";
 import { canUsePurchases, initRevenueCat, purchaseLikesPack } from "../../../lib/revenuecat";
 
-// ← フラグ（lib/featureFlags.ts に定義済み想定）
+//   フラグ（lib/featureFlags.ts に定義済み想定）
 import { GOTORE_PURCHASE_ENABLED } from "../../../lib/featureFlags";
 
 export default function PurchaseLikesScreen() {

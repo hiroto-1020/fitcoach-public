@@ -11,17 +11,14 @@ export type AnalyzeResult = {
   reason?: string;
 };
 
-// 開発用：手元で使う ngrok URL（※本番では一切使われない）
-const DEV_NGROK_URL = "https://ascensive-diastolic-donn.ngrok-free.dev";
+// 開発時の解析サーバーURL（必要なら環境変数で設定）
+const DEV_NGROK_URL = "REDACTED";
 
-// ---- 接続先解決 ----
 function resolveBase() {
-  // ★ 本番ビルド（__DEV__ = false）のときは常に機能オフ
   if (!__DEV__) {
     return "";
   }
 
-  // 開発中だけ env / extra / ngrok を見る
   const extra = (Constants.expoConfig?.extra as any)?.ANALYZER_URL;
   const envUrl = process.env.EXPO_PUBLIC_AI_ANALYZER_URL;
 
@@ -31,7 +28,6 @@ function resolveBase() {
 
   let base = raw.replace(/\/+$/, "");
 
-  // ローカルIP/localhost → ngrok に差し替え（開発中のみ）
   const isPrivate =
     /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(base) ||
     /^https?:\/\/10\.\d+\.\d+\.\d+(:\d+)?$/i.test(base) ||
@@ -45,8 +41,6 @@ function resolveBase() {
   return base;
 }
 export const AI_BASE = resolveBase();
-
-// ↓↓↓ ここから下はそのまま（さっきのファイルと同じでOK） ↓↓↓
 
 const TIMEOUT_MS = 60000;
 function withTimeout<T>(p: Promise<T>, ms = TIMEOUT_MS) {
@@ -162,7 +156,7 @@ export async function analyzeMealPhoto(
 ): Promise<AnalyzeResult> {
   if (!localUri) throw new Error("image uri is empty");
 
-  // ★ 本番はここで必ず止まる（AI_BASE = "" なので）
+  //  本番はここで必ず止まる（AI_BASE = "" なので）
   if (!AI_BASE) {
     throw new Error(
       "『写真から自動入力』は現在準備中です。\n次回のアップデートまでお待ちください。"

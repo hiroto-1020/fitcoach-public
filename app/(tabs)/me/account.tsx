@@ -1,5 +1,4 @@
 // app/(tabs)/me/account.tsx
-// STEP5：2画面へ組み込み 完全版（GenderOncePicker 不使用・KYC防御・Rejected時に性別を未回答へ反映）
 //
 // ・「端末内プロフィール（アカウント設定）」＋「合トレ用プロフィール」を一画面で編集
 // ・自己紹介/年数/写真/身長/目標/頻度 を“完全一致”カラムに保存
@@ -125,7 +124,7 @@ type LocalProfile = {
 
 type VerifiedStatus = "unverified" | "pending" | "verified" | "rejected" | "failed";
 
-/** 公開URL → object key（Storage削除用） */
+/** 公開URL   object key（Storage削除用） */
 function publicUrlToObjectKey(publicUrl: string): string | null {
   const marker = `/object/public/${PROFILE_BUCKET}/`;
   const idx = publicUrl.indexOf(marker);
@@ -457,7 +456,7 @@ export default function AccountScreen() {
       setKycStatus(normalized);
       setKycPersonId(personId);
 
-      // ★ 否認 or 未確認時はサーバの最新プロフィールを取り直してUIへ反映
+      //  否認 or 未確認時はサーバの最新プロフィールを取り直してUIへ反映
       if (normalized === "rejected" || normalized === "unverified") {
         try {
           const { gender: g } = await getMyProfileAndGender();
@@ -580,7 +579,7 @@ export default function AccountScreen() {
         training_frequency_per_week: freqNum,
       });
 
-      // ★ 性別は set_gender_once（saveMyGender→throwで制御）
+      //  性別は set_gender_once（saveMyGender throwで制御）
       await saveMyGender(gender);
 
       haptic("light");
@@ -719,7 +718,7 @@ export default function AccountScreen() {
     }
   }, [t]);
 
-  /* ===== 合トレ写真：追加（Storage → DB） ===== */
+  /* ===== 合トレ写真：追加（Storage   DB） ===== */
   const pickServerPhoto = useCallback(
     async () => {
       if (!ImagePicker) {
@@ -769,7 +768,7 @@ export default function AccountScreen() {
     [photos, haptic, t],
   );
 
-  /* ===== 合トレ写真：並び替え/削除 → 即保存 & Storage同期 ===== */
+  /* ===== 合トレ写真：並び替え/削除   即保存 & Storage同期 ===== */
   const onPhotosChange = useCallback(
     async (next: string[]) => {
       const capped = next.slice(0, MAX);

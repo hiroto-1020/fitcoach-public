@@ -1,5 +1,4 @@
-﻿// C:\Users\horit\fitcoach\app\_layout.tsx
-// ルートレイアウト（スプラッシュ含む）
+﻿// ルートレイアウト（スプラッシュ含む）
 
 import "react-native-gesture-handler";
 import "react-native-reanimated";
@@ -116,13 +115,12 @@ export default function RootLayout() {
 
           <View style={{ flex: 1 }}>
             <AppErrorBoundary>
-              {/* ★ ここが重要：ルートは必ず (tabs) グループにする */}
+              {/*  ：ルートは必ず (tabs) グループにする */}
               <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen
                   name="(tabs)"
                   options={{ headerShown: false }}
                 />
-                {/* not-found 画面がある場合 */}
                 <Stack.Screen
                   name="+not-found"
                   options={{ headerShown: false }}

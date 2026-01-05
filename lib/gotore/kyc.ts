@@ -93,7 +93,7 @@ export async function openKycFlow(
   return { status: last, person_id, session_id };
 }
 
-/* --- 手動審査（画像アップロード→pending upsert） --- */
+/* --- 手動審査（画像アップロード pending upsert） --- */
 export type KycDocType = "license" | "insurance" | "juminhyo";
 
 export async function submitKycForManualReview(opts: {

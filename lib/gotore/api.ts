@@ -1,4 +1,3 @@
-// lib/gotore/api.ts — 完全版（UPDATE限定・検証カラム不触・性別ロックRPC）
 
 import { Alert } from 'react-native';
 import { BuddyMode, Candidate, Gender, Profile, SettingsRow, UserRow } from './types';
@@ -1452,7 +1451,7 @@ export async function adminSetKycResult(
   kycId: string,
   status: "approved" | "rejected"
 ) {
-  // ← 関数のパラメータ名と**同じ**名前にする（p_kyc_id / p_status）
+  //   関数のパラメータ名と**同じ**名前にする（p_kyc_id / p_status）
   const { error } = await supabase.rpc("admin_set_kyc_result", {
     p_kyc_id: kycId,
     p_status: status,

@@ -54,7 +54,7 @@ export async function createPost(params: {
     headers: { "x-device-key": xdk },
   });
   if (res.error) {
-    // ← ここで JSON 本文の error を優先的に表示
+    //   ここで JSON 本文の error を優先的に表示
     const msg = (res.data as any)?.error || res.error.message;
     throw new Error(msg);
   }

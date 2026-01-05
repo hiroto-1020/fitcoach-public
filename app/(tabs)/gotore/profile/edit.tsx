@@ -26,7 +26,7 @@ let ImagePicker: any = null; try { ImagePicker = require('expo-image-picker'); }
 const PROFILE_BUCKET = 'profile-photos';
 const MAX = 5;
 
-/** 公開URL → object key（Storage削除用） */
+/** 公開URL   object key（Storage削除用） */
 function publicUrlToObjectKey(publicUrl: string): string | null {
   const marker = `/object/public/${PROFILE_BUCKET}/`;
   const idx = publicUrl.indexOf(marker);
@@ -34,7 +34,7 @@ function publicUrlToObjectKey(publicUrl: string): string | null {
   return publicUrl.substring(idx + marker.length);
 }
 
-/** 文字→数値（最初の整数を抽出） */
+/** 文字 数値（最初の整数を抽出） */
 const toInt = (v: any) => {
   if (v == null) return null;
   if (typeof v === 'number') return Number.isFinite(v) ? v : null;
@@ -90,9 +90,9 @@ export default function ProfileEdit() {
     })();
   }, []);
 
-  /** 写真追加（アップロード→即保存） */
+  /** 写真追加（アップロード 即保存） */
   // /app/(tabs)/gotore/profile/edit.tsx
-  // 画像追加（アップロード→DB保存）：位置調整ON & 正方形クロップ
+  // 画像追加（アップロード DB保存）：位置調整ON & 正方形クロップ
   const pickAndUpload = useCallback(async () => {
     if (!ImagePicker) {
       Alert.alert('画像機能が未導入', 'expo-image-picker を導入してください。\n\nnpx expo install expo-image-picker');
@@ -155,7 +155,7 @@ export default function ProfileEdit() {
         bio: bio.trim() || null,
         training_years: trainingYears ? toInt(trainingYears) : null,
         height_cm: height ? toInt(height) : null,
-        // ★統一：goal / training_frequency_per_week
+        // 統一：goal / training_frequency_per_week
         goal: goal.trim() || null,
         training_frequency_per_week: freqPerWeek ? toInt(freqPerWeek) : null,
         photos, // 同時に送ってOK（saveProfilePhotosでも保持）
@@ -208,7 +208,7 @@ export default function ProfileEdit() {
           </Pressable>
         </View>
 
-        {/* 写真：共通部品（←→並び替え／先頭へ／削除／＋追加） */}
+        {/* 写真：共通部品（  並び替え／先頭へ／削除／＋追加） */}
         <Text style={styles.label}>写真（最大5枚）</Text>
         <ReorderablePhotos
           photos={photos}

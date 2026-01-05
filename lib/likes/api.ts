@@ -32,7 +32,7 @@ async function getCurrentUserId(): Promise<string> {
   return data.user.id;
 }
 
-/** 今日の行がなければ作る → 現在の残数を返す */
+/** 今日の行がなければ作る   現在の残数を返す */
 export async function fetchLikeStatus(): Promise<LikeStatus> {
   const userId = await getCurrentUserId();
   const todayStr = getLocalDateString();
@@ -104,7 +104,7 @@ export async function tryConsumeLike(): Promise<{
   let freeUsed = counter?.free_used ?? 0;
   const paidRemaining = wallet?.paid_remaining ?? 0;
 
-  // 優先：無料 → 次に購入
+  // 優先：無料   次に購入
   if (freeUsed < DAILY_FREE_LIMIT) {
     const { error } = await supabase
       .from("like_counters")

@@ -1,4 +1,3 @@
-// C:\Users\horit\fitcoach\app\bbs\[id].tsx
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import {
   View, Text, TouchableOpacity, ActivityIndicator, FlatList,
@@ -24,7 +23,7 @@ try { FileSystem = require("expo-file-system/legacy"); } catch {
   try { FileSystem = require("expo-file-system"); } catch {}
 }
 
-// RN用 Base64→Uint8Array
+// RN用 Base64 Uint8Array
 function base64ToBytes(b64: string) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
   let bufferLength = b64.length * 0.75, len = b64.length, i = 0, p = 0;

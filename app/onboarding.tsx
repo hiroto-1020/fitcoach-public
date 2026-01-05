@@ -20,7 +20,7 @@ export default function Onboarding() {
       }
       // users（性別）を確保
       await ensureMyUserRow(gender);
-      // settings（行確保）→ モード更新
+      // settings（行確保）  モード更新
       await ensureMySettingsRow();
       await updateMyBuddyMode(mode);
       // プロフィールを合トレ募集ON

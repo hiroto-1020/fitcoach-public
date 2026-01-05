@@ -1,4 +1,3 @@
-// lib/storage.ts  ← 完全版（既存の食事系API + 共通JSONヘルパー + default export）
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Meal } from "./meals";
 
@@ -154,7 +153,7 @@ export async function setItem(key: string, value: string) {
   return AsyncStorage.setItem(key, value);
 }
 
-// ★ 追加：JSON汎用ヘルパー（今回のエラー対策）
+//  追加：JSON汎用ヘルパー（今回のエラー対策）
 export async function getJSON<T>(key: string, fallback: T): Promise<T> {
   const raw = await AsyncStorage.getItem(key);
   if (!raw) return fallback;

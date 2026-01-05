@@ -54,7 +54,7 @@ function getImagesMediaType(): any | undefined {
   return undefined;
 }
 
-/** ライブラリから選ぶ → 軽量化 → アプリ内に保存してパス返す */
+/** ライブラリから選ぶ   軽量化   アプリ内に保存してパス返す */
 export async function pickImageAndCopy(): Promise<string | null> {
   const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!perm.granted) {
@@ -74,7 +74,7 @@ export async function pickImageAndCopy(): Promise<string | null> {
   return processAndCopy(result.assets[0].uri);
 }
 
-/** カメラで撮る → 軽量化 → アプリ内に保存してパス返す */
+/** カメラで撮る   軽量化   アプリ内に保存してパス返す */
 export async function takePhotoAndCopy(): Promise<string | null> {
   const perm = await ImagePicker.requestCameraPermissionsAsync();
   if (!perm.granted) {

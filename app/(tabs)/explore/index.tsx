@@ -1,5 +1,4 @@
 // Explore：カテゴリ（筋トレ/モチベ/音楽/ニュース/お気に入り/ALL）＋検索（キャッシュ内）＋YouTube再生＋ニュースRSS＋お気に入り連続再生
-// C:\Users\horit\fitcoach\app\(tabs)\explore\index.tsx
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet,

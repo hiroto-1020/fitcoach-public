@@ -1,4 +1,3 @@
-//C:\Users\horit\fitcoach\lib\advice.ts
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import { AI_BASE, warmupAnalyzer } from "./ai";
@@ -128,7 +127,7 @@ export function buildAdvicePayload(base:{
   };
 }
 
-// ── 本体：/advice へ投げる（topicsUsed を保存→次回の重複回避に） ───────────
+// ── 本体：/advice へ投げる（topicsUsed を保存 次回の重複回避に） ───────────
 export async function requestAdvice(params: {
   totals: { kcal: number; p: number; f: number; c: number };
   goals:  { kcalTarget: number; proteinTarget: number; fatTarget: number; carbsTarget: number };
@@ -140,7 +139,7 @@ export async function requestAdvice(params: {
   const endpoint = (params.endpoint || ADVICE_ENDPOINT).replace(/\/+$/, "");
   warmupAdvice().catch(() => {});
 
-  // 直近テーマを読み込み → payload.context.recentTopics に反映
+  // 直近テーマを読み込み   payload.context.recentTopics に反映
   const recent = await loadRecentTopics();
   const payload = buildAdvicePayload(
     { totals: params.totals, goals: params.goals, meals: params.meals },

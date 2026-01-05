@@ -169,7 +169,7 @@ export default function UserDetail() {
 
         setRow(p);
 
-        // 写真の決定ロジック：photos → Storage フォールバック → avatar_url
+        // 写真の決定ロジック：photos   Storage フォールバック   avatar_url
         let urls: string[] = Array.isArray(p?.photos)
           ? p!.photos!.filter(Boolean)
           : [];

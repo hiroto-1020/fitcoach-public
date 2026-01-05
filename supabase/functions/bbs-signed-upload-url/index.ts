@@ -52,7 +52,7 @@ serve(async (req) => {
 
     const { data, error } = await sb.storage.from("bbs").createSignedUploadUrl(path);
     if (error) {
-      // ここが重要：ログに詳細を出す
+      // ：ログに詳細を出す
       console.error("createSignedUploadUrl error:", error);
       return cors({ error: String(error?.message ?? error) }, 500);
     }

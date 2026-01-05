@@ -1,4 +1,3 @@
-//C:\Users\horit\fitcoach\locales\en\common.ts
 const en = {
   app: {
     name: "FitGear",

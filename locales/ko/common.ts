@@ -1,4 +1,3 @@
-// C:\Users\horit\fitcoach\locales\ko\common.ts
 const ko = {
   app: {
     name: "FitGear",

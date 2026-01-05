@@ -1,4 +1,3 @@
-// C:\Users\horit\fitcoach\app\(tabs)\me\app-settings.tsx
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import {
   View,

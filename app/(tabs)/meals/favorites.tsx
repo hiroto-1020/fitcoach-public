@@ -139,7 +139,7 @@ export default function FavoritesScreen() {
                     <Text style={styles.badge}>P/100g: {item.p100 ?? "-"}</Text>
                   </View>
                 </Pressable>
-                {/* ★トグル */}
+                {/* トグル */}
                 <Pressable
                   onPress={async () => {
                     await toggleFavorite(item);

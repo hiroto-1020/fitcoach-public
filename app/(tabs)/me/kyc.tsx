@@ -21,7 +21,7 @@ const functionsOrigin = (() => {
 
 type DocType = "license" | "insurance" | "juminhyo";
 
-// Base64 → Uint8Array（RNでatobが無い環境に配慮）
+// Base64   Uint8Array（RNでatobが無い環境に配慮）
 function b64ToBytes(base64: string) {
   const atob = (globalThis as any).atob || atobPolyfill;
   if (!atob) throw new Error("atob polyfill missing (base-64)");
@@ -88,7 +88,7 @@ export default function KycCaptureScreen() {
 
     setBusy(true);
     try {
-      // a) 画像 → Base64 → Uint8Array（RN/Expo Go対応）
+      // a) 画像   Base64   Uint8Array（RN/Expo Go対応）
       const base64: string = await FileSystem.readAsStringAsync(imageUri, { encoding: FileSystem.EncodingType.Base64 });
       const bytes = b64ToBytes(base64);
 

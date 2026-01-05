@@ -49,7 +49,7 @@ export default forwardRef<RestTimerHandle, Props>(
     }, [endAt, fired]);
 
     async function begin(sec: number) {
-      // ★ 開始はこの関数だけ。UIの秒数ボタン/開始ボタン以外からは呼ばない。
+      //  開始はこの関数だけ。UIの秒数ボタン/開始ボタン以外からは呼ばない。
       await cancel(); // 既存をリセット
       const target = Date.now() + Math.max(1, Math.floor(sec)) * 1000;
       setEndAt(target);

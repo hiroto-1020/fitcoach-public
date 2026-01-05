@@ -1,4 +1,3 @@
-// app/(tabs)/gotore/chat/index.tsx — グラデ＆未読グロー＆アバター付き完全版
 //チャット一覧画面
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {

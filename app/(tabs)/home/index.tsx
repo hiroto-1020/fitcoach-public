@@ -801,7 +801,7 @@ function GoalRow({ label, value, onChange }: GoalRowProps) {
   }, [value]);
 
   const handleChange = (raw: string) => {
-    // 数字以外の文字をすべて削除 → デフォルトキーボードでも実質数字のみ
+    // 数字以外の文字をすべて削除   デフォルトキーボードでも実質数字のみ
     const cleaned = raw.replace(/[^\d]/g, "");
     setText(cleaned);
     onChange(cleaned);
@@ -815,14 +815,14 @@ function GoalRow({ label, value, onChange }: GoalRowProps) {
         onChangeText={handleChange}
         placeholder="0"
         placeholderTextColor={ph}
-        // keyboardTypeは指定しない → デフォルトキーボード
+        // keyboardTypeは指定しない   デフォルトキーボード
         style={[styles.goalInput, { borderColor: C.border, backgroundColor: C.card, color: C.text }]}
       />
     </View>
   );
 }
 
-/** draftGoal → number への安全変換（空や変な文字列は 0 に） */
+/** draftGoal   number への安全変換（空や変な文字列は 0 に） */
 function parseGoal(raw: any): number {
   if (raw == null) return 0;
   const s = String(raw).trim();

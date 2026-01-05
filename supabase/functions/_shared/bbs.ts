@@ -37,7 +37,7 @@ export async function hmacHex(secret: string, message: string) {
   return [...new Uint8Array(sig)].map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-/** hex → Base32（Crockford系） */
+/** hex   Base32（Crockford系） */
 export function hexToBase32(hex: string) {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
   let bits = "";

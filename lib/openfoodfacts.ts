@@ -304,7 +304,7 @@ async function fetchJSON(url: string) {
 }
 
 /**
- * 検索戦略（JP/JA優先 → カテゴリ contains → 原材料 contains → JAのみグローバル）
+ * 検索戦略（JP/JA優先   カテゴリ contains   原材料 contains   JAのみグローバル）
  */
 export async function searchProducts(params: {
   query: string;

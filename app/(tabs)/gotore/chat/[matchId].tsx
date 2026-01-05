@@ -1,4 +1,3 @@
-// app/(tabs)/gotore/chat/[matchId].tsx — グラデ背景・発光バブル・アバター付き完全版
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View, Text, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView,

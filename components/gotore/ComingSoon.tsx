@@ -31,7 +31,6 @@ type Props = {
 
 /** =========================
  *  デフォルト背景（ローカル画像）
- *  プロジェクト直下: C:\Users\horit\fitcoach\image\Image_fx (82) (1).jpg
  *  ComingSoon.tsx からの相対パス: ../../image/～ 
  * ========================= */
 const DEFAULT_BG = require("../../image/Image_fx (82) (1).jpg");

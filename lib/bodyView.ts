@@ -21,7 +21,7 @@ type Norm = {
   bodyFat: number|null;
 };
 
-/** DBレコード → 表示用の正規化（tsは秒/文字列にも耐性） */
+/** DBレコード   表示用の正規化（tsは秒/文字列にも耐性） */
 export function normalize(list: BodyMetric[]): Norm[] {
   return list.map(m => {
     const tsMs = typeof m.ts === 'number'

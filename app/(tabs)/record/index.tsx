@@ -202,7 +202,7 @@ const FORTUNE_STYLE: Record<
   },
 };
 
-/** Fortune → i18n 側のキー変換 */
+/** Fortune   i18n 側のキー変換 */
 const FORTUNE_KEY_MAP: Record<Fortune, FortuneKey> = {
   大吉: "daikichi",
   中吉: "chuukichi",
@@ -832,7 +832,7 @@ function MuscleOmikujiCard() {
       <CardShell>
         {/* ヘッダー：開閉トグル／タイマー */}
         <View style={omikujiStyles.cardHeader}>
-          {/* 左側：タイマー → タイトル */}
+          {/* 左側：タイマー   タイトル */}
           <View style={{ flex: 1 }}>
             {result && (
               <View

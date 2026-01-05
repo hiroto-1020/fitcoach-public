@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
 
   if (!sid) return json({ error: "missing_session_id" }, { status: 400 });
 
-  // === 1) pending 行を session_id で UPDATE（ここが重要） ===
+  // === 1) pending 行を session_id で UPDATE（） ===
   const { data: rows, error: updErr } = await admin
     .from("kyc_verifications")
     .update({

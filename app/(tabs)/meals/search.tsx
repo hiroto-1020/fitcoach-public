@@ -77,7 +77,7 @@ async function listFrequentMeals(limit = 64): Promise<MealLite[]> {
   return [];
 }
 
-// ====== AsyncStorage（★ 永続化）======
+// ====== AsyncStorage（ 永続化）======
 let AsyncStorage: any = null;
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -122,7 +122,7 @@ function mealKeyFromMeal(m: Partial<MealLite>) {
   return mealKeyFromTitleBrand(m.title, m.brand);
 }
 
-// ====== ★ 取得/更新（code & mealKey を同期）======
+// ======  取得/更新（code & mealKey を同期）======
 async function getFavoriteCodes(): Promise<string[]> {
   try {
     const raw = await getItem(KS.FAVORITE_CODES);
@@ -148,7 +148,7 @@ async function setFavoriteMealKeys(arr: string[]) {
   await setItem(KS.FAVORITE_MEAL_KEYS, JSON.stringify(arr));
 }
 
-// 検索結果（OFF）で★トグル：code と mealKey を“同時に”更新
+// 検索結果（OFF）でトグル：code と mealKey を“同時に”更新
 async function toggleFavoriteForProduct(p: OFFProduct) {
   const code = String(p.code || "");
   const mKey = mealKeyFromProduct(p);
@@ -171,7 +171,7 @@ async function toggleFavoriteForProduct(p: OFFProduct) {
   return { codes: nextCodes, mealKeys: nextKeys };
 }
 
-// ヘッダー（Mealカード）で★トグル：mealKey を更新
+// ヘッダー（Mealカード）でトグル：mealKey を更新
 async function toggleFavoriteForMealKey(mKey: string) {
   const keys = await getFavoriteMealKeys();
   const has = keys.includes(mKey);
@@ -208,7 +208,7 @@ export default function MealsSearchScreen() {
   const [count, setCount] = useState(0);
   const [hasSearched, setHasSearched] = useState(false); // ← 追加
 
-  // ★状態
+  // 状態
   const [favoriteCodes, setFavoriteCodesState] = useState<string[]>([]);
   const [favoriteMealKeys, setFavoriteMealKeysState] = useState<string[]>([]);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
@@ -288,7 +288,7 @@ export default function MealsSearchScreen() {
     }
   }, [query]);
 
-  // ★お気に入り絞り込み
+  // お気に入り絞り込み
   const favMealSet = useMemo(() => new Set(favoriteMealKeys), [favoriteMealKeys]);
   const frequentMeals = useMemo(
     () => (favoritesOnly ? frequentMealsRaw.filter((m) => favMealSet.has(mealKeyFromMeal(m))) : frequentMealsRaw),
@@ -358,14 +358,14 @@ export default function MealsSearchScreen() {
   }
   const onSubmitSearch = () => performSearch(true);
 
-  // ヘッダーカード：★トグル
+  // ヘッダーカード：トグル
   async function toggleMealFav(meal: MealLite) {
     const mKey = mealKeyFromMeal(meal);
     const nextKeys = await toggleFavoriteForMealKey(mKey);
     setFavoriteMealKeysState(nextKeys);
   }
 
-  // 検索結果：★トグル
+  // 検索結果：トグル
   async function toggleProductFav(p: OFFProduct) {
     const next = await toggleFavoriteForProduct(p);
     setFavoriteCodesState(next.codes);
@@ -439,7 +439,7 @@ export default function MealsSearchScreen() {
           </View>
         </View>
 
-        {/* トグル（★お気に入り／ソート） */}
+        {/* トグル（お気に入り／ソート） */}
         <View style={styles.toggleRow}>
           <Pressable
             onPress={() => setFavoritesOnly((v) => !v)}
@@ -630,7 +630,7 @@ function MealMiniCard({
 
   return (
     <View style={styles.miniCard}>
-      {/* ★ */}
+      {/*  */}
       <TouchableOpacity
         onPress={onToggleFav}
         style={styles.miniFavBtn}

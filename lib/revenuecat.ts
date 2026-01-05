@@ -8,8 +8,7 @@ import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 import { supabase } from './supabase';
 
-/** ← あなたのキーに差し替え */
-const RC_TEST    = 'test_QyBkVQJBqOfyNbYdfNrdMqOTVhy';
+const RC_TEST    = 'REDACTED';
 const RC_IOS     = 'appl_XXXXXXXXXXXX';
 const RC_ANDROID = 'goog_XXXXXXXXXXXX';
 
@@ -31,7 +30,6 @@ export async function initRevenueCat() {
     const apiKey = pickSdkKey();
     if (!apiKey) return;
 
-    // ※ web で落ちるためデバッグ系は呼ばない
     await Purchases.configure({ apiKey });
     configured = true;
 
